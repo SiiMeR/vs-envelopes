@@ -1,0 +1,13 @@
+{
+    "type": "code",
+    "modid": "envelops",
+    "name": "Envelopes",
+    "authors": [
+        "SiiMeR"
+    ],
+    "description": "Adds envelopes to the game, sealable with wax",
+    "version": "1.0.0",
+    "dependencies": {
+        "game": ""
+    }
+}
