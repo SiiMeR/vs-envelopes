@@ -1,8 +1,8 @@
-﻿using Vintagestory.GameContent;
+﻿using Vintagestory.API.Common;
 
-namespace Letters;
+namespace Envelopes;
 
-public class ItemSealableEnvelope: ItemRandomLore
+public class ItemSealableEnvelope: Item
 {
     
 }

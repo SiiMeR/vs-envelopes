@@ -1,6 +1,6 @@
 ﻿using Vintagestory.API.Common;
 
-namespace Letters;
+namespace Envelopes;
 
 public class EnvelopesModSystem : ModSystem
 {

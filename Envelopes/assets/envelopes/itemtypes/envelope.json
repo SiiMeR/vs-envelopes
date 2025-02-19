@@ -18,8 +18,7 @@
     }
   },
   variantgroups: [
-    { code: "type", states: ["normal"] },
-    { code: "color", states: ["blue"] }
+    { code: "state", states: ["unsealed", "sealed", "opened"] },
   ],
   shape: { base: "item/envelope" },
   creativeinventory: { "general": ["*"], "items": ["*"] },

@@ -4,7 +4,7 @@
         <TargetFramework>net7.0</TargetFramework>
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
         <OutputPath>bin\$(Configuration)\Mods\mod</OutputPath>
-        <RootNamespace>Letters</RootNamespace>
+        <RootNamespace>Envelopes</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
