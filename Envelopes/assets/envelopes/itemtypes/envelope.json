@@ -20,7 +20,7 @@
   variantgroups: [
     { code: "state", states: ["unsealed", "sealed", "opened"] },
   ],
-  shape: { base: "item/envelope" },
+  shape: { base: "item/envelope-{state}" },
   creativeinventory: { "general": ["*"], "items": ["*"] },
   guiTransform: {
     translation: { x: -0, y: 0, z: 0 },

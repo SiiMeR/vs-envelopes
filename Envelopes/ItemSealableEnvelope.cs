@@ -4,5 +4,4 @@ namespace Envelopes;
 
 public class ItemSealableEnvelope: Item
 {
-    
 }
