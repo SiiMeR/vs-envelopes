@@ -1,11 +1,24 @@
-{
-  ingredientPattern: "P,E",
-  ingredients: {
-    "P": { type: "item", code: "game:paper-parchment" },
-    "E": { type: "item", code: "envelope-empty" }
+[
+  {
+    ingredientPattern: "P,E",
+    ingredients: {
+      "P": { type: "item", code: "game:paper-parchment" },
+      "E": { type: "item", code: "envelope-empty" }
+    },
+    width: 1,
+    height: 2,
+    shapeless: true,
+    output: { type: "item", code: "envelope-unsealed", quantity: 1  }
   },
-  width: 1,
-  height: 2,
-  shapeless: true,
-  output: { type: "item", code: "envelope-unsealed", quantity: 1  }
-}
+  {
+    ingredientPattern: "P,E",
+    ingredients: {
+      "P": { type: "item", code: "game:paper-parchment" },
+      "E": { type: "item", code: "envelope-opened" }
+    },
+    width: 1,
+    height: 2,
+    shapeless: true,
+    output: { type: "item", code: "envelope-opened", quantity: 1  }
+  }
+]

@@ -16,10 +16,12 @@ public class ItemSealableEnvelope : Item
     
     private string GenerateEnvelopeId() => Guid.NewGuid().ToString("n");
 
-    public string GetModDataPath()
+    public static string GetModDataPath()
     {
-        string localPath = Path.Combine("ModData", api.World.SavegameIdentifier, EnvelopesModSystem.ModId);
-        return api.GetOrCreateDataPath(localPath);
+        var globalApi = EnvelopesModSystem.Api;
+
+        string localPath = Path.Combine("ModData", globalApi.World.SavegameIdentifier, EnvelopesModSystem.ModId);
+        return globalApi.GetOrCreateDataPath(localPath);
     }
     
     
@@ -46,34 +48,41 @@ public class ItemSealableEnvelope : Item
         Console.WriteLine("Sealed");
     }
 
-    private void OpenEnvelope(ItemSlot slot, IPlayer opener, string nextCode)
+    public static void OpenEnvelope(ItemSlot slot, IPlayer opener, string nextCode)
     {
+        var globalApi = EnvelopesModSystem.Api;
         var contentsId = slot.Itemstack.Attributes.GetString("ContentsId");
         if (string.IsNullOrEmpty(contentsId))
         {
-            api.Logger.Error("No ContentsId on closed envelope.");
+            globalApi.Logger.Error("No ContentsId on closed envelope.");
             return;
         }
+
+        if (globalApi.World.Side == EnumAppSide.Client)
+        {
+            EnvelopesModSystem.ClientNetworkChannel.SendPacket(new OpenEnvelopePacket{ ContentsId = contentsId});
+        }
+    
         
         var modDataPath = GetModDataPath();
         var filePath = Path.Combine(modDataPath, contentsId);
         if (!File.Exists(filePath))
         {
-            api.Logger.Error("Envelope contents don't exist on disk.");
+            globalApi.Logger.Error("Envelope contents don't exist on disk.");
             return;
         }
         
         using var stream = File.OpenRead(filePath);
         using var binaryReader = new BinaryReader(stream);
         
-        var paper = new ItemStack(api.World.GetItem(new AssetLocation("game:paper-parchment")));
+        var paper = new ItemStack(globalApi.World.GetItem(new AssetLocation("game:paper-parchment")));
         paper.Attributes.FromBytes(binaryReader);
 
         
-        var nextItem = new ItemStack(api.World.GetItem(new AssetLocation(nextCode)));
+        var nextItem = new ItemStack(globalApi.World.GetItem(new AssetLocation(nextCode)));
         if (!opener.InventoryManager.TryGiveItemstack(nextItem, true))
         {
-            api.World.SpawnItemEntity(nextItem, opener.Entity.SidedPos.XYZ);
+            globalApi.World.SpawnItemEntity(nextItem, opener.Entity.SidedPos.XYZ);
         }
         
         slot.Itemstack = paper;
@@ -83,15 +92,18 @@ public class ItemSealableEnvelope : Item
     public override bool ConsumeCraftingIngredients(ItemSlot[] slots, ItemSlot outputSlot, GridRecipe matchingRecipe)
     {
         var code = outputSlot.Itemstack.Collectible.Code.Path;
+        var letterSlot = slots.FirstOrDefault(slot => !slot.Empty && slot.Itemstack.Collectible.Code.Path.Contains("parchment"));
 
         switch (code)
         {
             case "envelope-unsealed":
-                var letterSlot = slots.First(slot => !slot.Empty && slot.Itemstack.Collectible.Code.Path.Contains("parchment"));
                 PutLetterIntoEnvelope(letterSlot, outputSlot);
                 break;
             case "envelope-sealed":
                 SealEnvelope();
+                break;
+            case "envelope-opened":
+                PutLetterIntoEnvelope(letterSlot, outputSlot);
                 break;
         }
 
@@ -117,37 +129,40 @@ public class ItemSealableEnvelope : Item
         var code = slot.Itemstack.Collectible.Code.Path;
         var nextCode = code == "envelope-sealed" ? "envelopes:envelope-opened" : "envelopes:envelope-empty";
 
-        if (code is "envelope-sealed")
+        switch (code)
         {
-            if (api.Side == EnumAppSide.Client)
+            case "envelope-sealed":
             {
-                _currentConfirmationDialog = new GuiDialogConfirm(api as ICoreClientAPI, Lang.Get("open-envelope-confirmation"),
-                    (ok) =>
-                    {
-                        if (!ok)
-                            return;
-                        _currentConfirmationDialog.TryClose();
-                        OpenEnvelope(slot, player.Player, nextCode);
-                        var preventSubsequent = EnumHandHandling.Handled;
-                        (slot.Itemstack.Collectible as ItemBook)?.OnHeldInteractStart(slot, byEntity, blockSel, entitySel, true, ref preventSubsequent);
-                    });
-                _currentConfirmationDialog.TryOpen();
-            }
+                if (api.Side == EnumAppSide.Client)
+                {
+                    _currentConfirmationDialog = new GuiDialogConfirm(api as ICoreClientAPI, Lang.Get(
+                            $"{EnvelopesModSystem.ModId}:open-envelope-confirmation"),
+                        (ok) =>
+                        {
+                            if (!ok)
+                                return;
+                            _currentConfirmationDialog.TryClose();
+                            OpenEnvelope(slot, player.Player, nextCode);
+
+                            var preventSubsequent = EnumHandHandling.Handled;
+                            (slot.Itemstack.Collectible as ItemBook)?.OnHeldInteractStart(slot, byEntity, blockSel, entitySel, true, ref preventSubsequent);
+                        });
+                    _currentConfirmationDialog.TryOpen();
+                }
             
-            handling = EnumHandHandling.Handled;
-            return;
-        }
-        
-        if (code is "envelope-unsealed")
-        {
-            OpenEnvelope(slot, player.Player, nextCode);
-            handling = EnumHandHandling.Handled;
-            (slot.Itemstack.Collectible as ItemBook)?.OnHeldInteractStart(slot, byEntity, blockSel, entitySel, true, ref handling);
+                handling = EnumHandHandling.Handled;
+                return;
+            }
+            case "envelope-unsealed":
+                OpenEnvelope(slot, player.Player, nextCode);
+                handling = EnumHandHandling.Handled;
+                (slot.Itemstack.Collectible as ItemBook)?.OnHeldInteractStart(slot, byEntity, blockSel, entitySel, true, ref handling);
 
-            return;
+                return;
+            default:
+                base.OnHeldInteractStart(slot, byEntity, blockSel, entitySel, firstEvent, ref handling);
+                break;
         }
-
-        base.OnHeldInteractStart(slot, byEntity, blockSel, entitySel, firstEvent, ref handling);
     }
     
     public override WorldInteraction[] GetHeldInteractionHelp(ItemSlot inSlot)
@@ -158,7 +173,7 @@ public class ItemSealableEnvelope : Item
         {
             worldInteractions.Add(new WorldInteraction
             {
-                ActionLangCode = "open-envelope",
+                ActionLangCode = $"{EnvelopesModSystem.ModId}:open-envelope",
                 MouseButton = EnumMouseButton.Right,
             });
         }
