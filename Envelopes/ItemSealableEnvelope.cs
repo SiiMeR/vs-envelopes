@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
@@ -43,9 +44,16 @@ public class ItemSealableEnvelope : Item
         outputSlot.MarkDirty();
     }
 
-    private void SealEnvelope()
+    private void SealEnvelope(ItemSlot inputSlot)
     {
-        Console.WriteLine("Sealed");
+        var contentsId = inputSlot?.Itemstack?.Attributes?.GetString("ContentsId");
+        if (string.IsNullOrEmpty(contentsId))
+        {
+            api.Logger.Debug("Trying to seal an empty envelope.");
+            return;
+        }
+        
+        EnvelopesModSystem.ClientNetworkChannel.SendPacket(new SealEnvelopePacket{ ContentsId = contentsId});
     }
 
     public static void OpenEnvelope(ItemSlot slot, IPlayer opener, string nextCode)
@@ -100,7 +108,11 @@ public class ItemSealableEnvelope : Item
                 PutLetterIntoEnvelope(letterSlot, outputSlot);
                 break;
             case "envelope-sealed":
-                SealEnvelope();
+                if (api.Side == EnumAppSide.Client)
+                {
+                    var envelopeSlot = slots.FirstOrDefault(slot => !slot.Empty && slot.Itemstack.Collectible.Code.Path.Contains("envelope-unsealed"));
+                    SealEnvelope(envelopeSlot);
+                }
                 break;
             case "envelope-opened":
                 PutLetterIntoEnvelope(letterSlot, outputSlot);
@@ -191,5 +203,23 @@ public class ItemSealableEnvelope : Item
         }
 
         return worldInteractions.ToArray().Append(base.GetHeldInteractionHelp(inSlot));
+    }
+
+    public override void GetHeldItemInfo(ItemSlot inSlot, StringBuilder dsc, IWorldAccessor world, bool withDebugInfo)
+    {
+        var contentsId = inSlot?.Itemstack?.Attributes?.GetString("ContentsId");
+        if (!string.IsNullOrEmpty(contentsId))
+        {
+            dsc.AppendLine(Lang.Get($"{EnvelopesModSystem.ModId}:envelope-hascontents"));
+        }
+
+        var sealerId = inSlot?.Itemstack?.Attributes?.GetString("SealerId");
+        if (!string.IsNullOrEmpty(sealerId))
+        {
+            var sealerName = world.PlayerByUid(sealerId).PlayerName;
+            dsc.AppendLine($"{Lang.Get($"{EnvelopesModSystem.ModId}:envelope-sealedby")}: {sealerName}");
+        }
+        
+        base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);
     }
 }

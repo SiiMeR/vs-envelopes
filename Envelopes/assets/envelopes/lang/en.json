@@ -4,5 +4,7 @@
     "item-envelope-sealed": "Wax-sealed envelope",
     "item-envelope-opened": "Wax-sealed envelope (opened)",
     "open-envelope": "Open envelope",
-    "open-envelope-confirmation": "Are you sure you wish to unseal this envelope?"
+    "open-envelope-confirmation": "Are you sure you wish to unseal this envelope?",
+    "envelope-hascontents": "The envelope contains a letter.",
+    "envelope-sealedby": "Sealed by"
 }
