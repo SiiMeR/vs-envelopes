@@ -6,5 +6,6 @@
     "open-envelope": "Open envelope",
     "open-envelope-confirmation": "Are you sure you wish to unseal this envelope?",
     "envelope-hascontents": "The envelope contains a letter.",
+    "envelope-sealbroken": "The seal has been broken.",
     "envelope-sealedby": "Sealed by"
 }

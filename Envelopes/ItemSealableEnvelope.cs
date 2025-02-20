@@ -88,6 +88,13 @@ public class ItemSealableEnvelope : Item
 
         
         var nextItem = new ItemStack(globalApi.World.GetItem(new AssetLocation(nextCode)));
+
+        var sealerId = slot?.Itemstack?.Attributes?.GetString("SealerId");
+        if (!string.IsNullOrEmpty(sealerId))
+        {
+            nextItem.Attributes?.SetString("SealerId",sealerId);
+        }
+        
         if (!opener.InventoryManager.TryGiveItemstack(nextItem, true))
         {
             globalApi.World.SpawnItemEntity(nextItem, opener.Entity.SidedPos.XYZ);
@@ -211,6 +218,11 @@ public class ItemSealableEnvelope : Item
         if (!string.IsNullOrEmpty(contentsId))
         {
             dsc.AppendLine(Lang.Get($"{EnvelopesModSystem.ModId}:envelope-hascontents"));
+        }
+
+        if (inSlot?.Itemstack?.Item?.Code?.Path?.Contains("envelope-opened") ?? false)
+        {
+            dsc.AppendLine(Lang.Get($"{EnvelopesModSystem.ModId}:envelope-sealbroken"));
         }
 
         var sealerId = inSlot?.Itemstack?.Attributes?.GetString("SealerId");
