@@ -42,7 +42,10 @@ public class EnvelopesModSystem : ModSystem
             var contentsId = slot?.Itemstack?.Attributes?.GetString("ContentsId");
             if (contentsId != null && contentsId == packet.ContentsId)
             {
-                ItemSealableEnvelope.OpenEnvelope(slot, fromplayer, "envelopes:envelope-opened");
+                Api.Event.EnqueueMainThreadTask(() =>
+                {
+                    ItemSealableEnvelope.OpenEnvelope(slot, fromplayer, "envelopes:envelope-opened");
+                }, "openenvelope");
                 return false;
             }
 

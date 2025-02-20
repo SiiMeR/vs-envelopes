@@ -54,7 +54,7 @@ public class ItemSealableEnvelope : Item
         var contentsId = slot.Itemstack.Attributes.GetString("ContentsId");
         if (string.IsNullOrEmpty(contentsId))
         {
-            globalApi.Logger.Error("No ContentsId on closed envelope.");
+            globalApi.Logger.Debug("Trying to open empty envelope.");
             return;
         }
 
@@ -143,9 +143,9 @@ public class ItemSealableEnvelope : Item
                                 return;
                             _currentConfirmationDialog.TryClose();
                             OpenEnvelope(slot, player.Player, nextCode);
+                            var sealedHandled = EnumHandHandling.Handled;
+                            (slot.Itemstack.Collectible as ItemBook)?.OnHeldInteractStart(slot, byEntity, blockSel, entitySel, true, ref sealedHandled);
 
-                            var preventSubsequent = EnumHandHandling.Handled;
-                            (slot.Itemstack.Collectible as ItemBook)?.OnHeldInteractStart(slot, byEntity, blockSel, entitySel, true, ref preventSubsequent);
                         });
                     _currentConfirmationDialog.TryOpen();
                 }
@@ -156,12 +156,24 @@ public class ItemSealableEnvelope : Item
             case "envelope-unsealed":
                 OpenEnvelope(slot, player.Player, nextCode);
                 handling = EnumHandHandling.Handled;
-                (slot.Itemstack.Collectible as ItemBook)?.OnHeldInteractStart(slot, byEntity, blockSel, entitySel, true, ref handling);
-
+                if (api.Side == EnumAppSide.Client)
+                {
+                    var unsealedHandled = EnumHandHandling.Handled;
+                    (slot.Itemstack.Collectible as ItemBook)?.OnHeldInteractStart(slot, byEntity, blockSel, entitySel, true, ref unsealedHandled);
+                }
+                return;
+            case "envelope-opened":
+                OpenEnvelope(slot, player.Player, "envelopes:envelope-opened");
+                handling = EnumHandHandling.Handled;
+                if (api.Side == EnumAppSide.Client)
+                {
+                    var openedHandled = EnumHandHandling.Handled;
+                    (slot.Itemstack.Collectible as ItemBook)?.OnHeldInteractStart(slot, byEntity, blockSel, entitySel, true, ref openedHandled);
+                }
                 return;
             default:
                 base.OnHeldInteractStart(slot, byEntity, blockSel, entitySel, firstEvent, ref handling);
-                break;
+                return;
         }
     }
     
