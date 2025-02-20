@@ -18,7 +18,7 @@
     }
   },
   variantgroups: [
-    { code: "state", states: ["unsealed", "sealed", "opened"] },
+    { code: "state", states: ["empty", "unsealed", "sealed", "opened"] },
   ],
   shape: { base: "item/envelope-{state}" },
   creativeinventory: { "general": ["*"], "items": ["*"] },

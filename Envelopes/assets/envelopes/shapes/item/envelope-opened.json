@@ -6,10 +6,12 @@
   "textureWidth": 12,
   "textureHeight": 12,
   "textureSizes": {
-    "letter-envelope": [12,12]
+    "letter-envelope": [12,12],
+    "envelope-flap": [20, 8]
   },
   "textures": {
-    "letter-envelope": "letter-envelope"
+    "letter-envelope": "letter-envelope",
+    "envelope-flap": "envelope-flap"
   },
   "elements": [
     {
@@ -21,6 +23,33 @@
       "faces": {
       },
       "children": [
+        {
+          "name": "flap",
+          "from": [-5.0, 0.6, -2.5],
+          "to": [5.0, 0.7, 0.5],
+          "rotationOrigin": [0.0, 0.6, -2.5],
+          "rotationX": -20.0,
+          "faces": {
+            "up": { "texture": "#envelope-flap", "uv": [0.0, 0.0, 20.0, 8.0] }
+          },
+          "children": [
+            {
+              "name": "waxPiece",
+              "from": [ 4.25, 0, 2.75 ],
+              "to": [ 5.75, 0.25, 3.25 ],
+              "autoUnwrap": false,
+              "uv": [ 7.0, 0.0 ],
+              "rotationOrigin": [ 5.0, 0.5, 2.5 ],
+              "faces": {
+                "north": { "texture": "#letter-envelope", "uv": [ 11.0, 1.0, 12.0, 1.5 ], "windMode": [-1,-1,-1,-1] },
+                "east": { "texture": "#letter-envelope", "uv": [ 10.0, 0.0, 11.0, 0.5 ], "windMode": [-1,-1,-1,-1] },
+                "south": { "texture": "#letter-envelope", "uv": [ 10.0, 0.5, 11.0, 1.0 ], "windMode": [-1,-1,-1,-1] },
+                "west": { "texture": "#letter-envelope", "uv": [ 10.0, 1.0, 11.0, 1.5 ] },
+                "up": { "texture": "#letter-envelope", "uv": [ 11.0, 0.0, 12.0, 1.0 ], "windMode": [-1,-1,-1,-1] }
+              }
+            },
+          ]
+        },
         {
           "name": "envelope",
           "from": [ -5.0, 0.1, -2.5 ],
@@ -40,7 +69,7 @@
           "children": [
             {
               "name": "wax",
-              "from": [ 4.25, 0.5, 2.75 ],
+              "from": [ 4.25, 0.5, 3.25 ],
               "to": [ 5.75, 0.75, 3.75 ],
               "autoUnwrap": false,
               "uv": [ 7.0, 0.0 ],
