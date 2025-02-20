@@ -20,10 +20,10 @@ This problem could be alleviated by putting your letter inside an envelope and s
 
 Such a solution is exactly what this mod aims to implement. 
 Initially, the solution would be done in a simple way:
-1) You can put a letter (any parchment) into an envelope by using one on the other. 
-2) You can then seal the envelope by using a piece of beeswax on an envelope. This will put the envelope in a sealed state, and include the name of the sealer on the item. 
+1) You can put a letter (any parchment) into an empty envelope by using them in the crafting grid. 
+2) You can then seal the envelope by using a piece of beeswax on an envelope (in the crafting grid). This will put the envelope in a sealed state, and include the name of the sealer on the item. 
 3) The envelope item itself would now only carry a reference ID of the contents, and the name of the sealer. Nothing else. 
-4) You can use a combination of keys (most likely crouch + sprint + right click) to unseal the envelope (alternatively, it would ask for confirmation). This will put the envelope in an "unsealed" state. The graphics will be updated to show a broken seal, and the item itself will also mention that it has been opened. You will receive the letter inside and at this point the contents of the letter would also be fetched from the server. You will be able to keep the unsealed envelope, should you wish to put the letter back inside (or another letter, for that matter). 
+4) You can use right click to unseal the envelope. For wax-sealed envelopes, a confirmation box will pop up.  The graphics will be updated to show a broken seal, and the item itself will also mention that it has been opened. You will receive the letter inside and at this point the contents of the letter would also be fetched from the server. You will be able to keep the unsealed envelope, should you wish to put the letter back inside (or another letter, for that matter). 
 
 Future plans:
 * in-world crafting of envelopes 

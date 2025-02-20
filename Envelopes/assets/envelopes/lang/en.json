@@ -3,5 +3,6 @@
     "item-envelope-unsealed": "Envelope",
     "item-envelope-sealed": "Wax-sealed envelope",
     "item-envelope-opened": "Wax-sealed envelope (opened)",
-    "heldhelp-open": "Open envelope"
+    "open-envelope": "Open envelope",
+    "open-envelope-confirmation": "Are you sure you wish to unseal this envelope?"
 }

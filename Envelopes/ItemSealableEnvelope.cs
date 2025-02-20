@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
+using Vintagestory.API.Config;
 using Vintagestory.API.Util;
 using Vintagestory.GameContent;
 
@@ -11,6 +12,8 @@ namespace Envelopes;
 
 public class ItemSealableEnvelope : Item
 {
+    private GuiDialogConfirm _currentConfirmationDialog;
+    
     private string GenerateEnvelopeId() => Guid.NewGuid().ToString("n");
 
     public string GetModDataPath()
@@ -110,10 +113,33 @@ public class ItemSealableEnvelope : Item
             return;
         }
         
+        
         var code = slot.Itemstack.Collectible.Code.Path;
-        if (code is "envelope-sealed" or "envelope-unsealed")
+        var nextCode = code == "envelope-sealed" ? "envelopes:envelope-opened" : "envelopes:envelope-empty";
+
+        if (code is "envelope-sealed")
         {
-            var nextCode = code == "envelope-sealed" ? "envelopes:envelope-opened" : "envelopes:envelope-empty";
+            if (api.Side == EnumAppSide.Client)
+            {
+                _currentConfirmationDialog = new GuiDialogConfirm(api as ICoreClientAPI, Lang.Get("open-envelope-confirmation"),
+                    (ok) =>
+                    {
+                        if (!ok)
+                            return;
+                        _currentConfirmationDialog.TryClose();
+                        OpenEnvelope(slot, player.Player, nextCode);
+                        var preventSubsequent = EnumHandHandling.Handled;
+                        (slot.Itemstack.Collectible as ItemBook)?.OnHeldInteractStart(slot, byEntity, blockSel, entitySel, true, ref preventSubsequent);
+                    });
+                _currentConfirmationDialog.TryOpen();
+            }
+            
+            handling = EnumHandHandling.Handled;
+            return;
+        }
+        
+        if (code is "envelope-unsealed")
+        {
             OpenEnvelope(slot, player.Player, nextCode);
             handling = EnumHandHandling.Handled;
             (slot.Itemstack.Collectible as ItemBook)?.OnHeldInteractStart(slot, byEntity, blockSel, entitySel, true, ref handling);
@@ -132,7 +158,7 @@ public class ItemSealableEnvelope : Item
         {
             worldInteractions.Add(new WorldInteraction
             {
-                ActionLangCode = "heldhelp-open",
+                ActionLangCode = "open-envelope",
                 MouseButton = EnumMouseButton.Right,
             });
         }
