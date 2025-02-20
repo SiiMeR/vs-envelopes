@@ -4,8 +4,11 @@ namespace Envelopes;
 
 public class EnvelopesModSystem : ModSystem
 {
+    public static string ModId;
+
     public override void Start(ICoreAPI api)
     {
-       api.RegisterItemClass("ItemSealableEnvelope", typeof(ItemSealableEnvelope));
+        ModId = Mod.Info.ModID;
+        api.RegisterItemClass("ItemSealableEnvelope", typeof(ItemSealableEnvelope));
     }
 }
