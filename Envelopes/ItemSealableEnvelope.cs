@@ -5,6 +5,7 @@ using System.Linq;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Util;
+using Vintagestory.GameContent;
 
 namespace Envelopes;
 
@@ -44,7 +45,6 @@ public class ItemSealableEnvelope : Item
 
     private void OpenEnvelope(ItemSlot slot, IPlayer opener, string nextCode)
     {
-
         var contentsId = slot.Itemstack.Attributes.GetString("ContentsId");
         if (string.IsNullOrEmpty(contentsId))
         {
@@ -60,25 +60,21 @@ public class ItemSealableEnvelope : Item
             return;
         }
         
-
         using var stream = File.OpenRead(filePath);
         using var binaryReader = new BinaryReader(stream);
         
         var paper = new ItemStack(api.World.GetItem(new AssetLocation("game:paper-parchment")));
         paper.Attributes.FromBytes(binaryReader);
-        if (!opener.InventoryManager.TryGiveItemstack(paper, true))
-        {
-            api.World.SpawnItemEntity(paper, opener.Entity.SidedPos.XYZ);
-        }
+
         
         var nextItem = new ItemStack(api.World.GetItem(new AssetLocation(nextCode)));
         if (!opener.InventoryManager.TryGiveItemstack(nextItem, true))
         {
             api.World.SpawnItemEntity(nextItem, opener.Entity.SidedPos.XYZ);
         }
-
-        slot.Itemstack = null;
-        slot.MarkDirty();;
+        
+        slot.Itemstack = paper;
+        slot.MarkDirty();
     }
 
     public override bool ConsumeCraftingIngredients(ItemSlot[] slots, ItemSlot outputSlot, GridRecipe matchingRecipe)
@@ -120,6 +116,8 @@ public class ItemSealableEnvelope : Item
             var nextCode = code == "envelope-sealed" ? "envelopes:envelope-opened" : "envelopes:envelope-empty";
             OpenEnvelope(slot, player.Player, nextCode);
             handling = EnumHandHandling.Handled;
+            (slot.Itemstack.Collectible as ItemBook)?.OnHeldInteractStart(slot, byEntity, blockSel, entitySel, true, ref handling);
+
             return;
         }
 
