@@ -2,5 +2,6 @@
     "item-envelope-empty": "Envelope (empty)",
     "item-envelope-unsealed": "Envelope",
     "item-envelope-sealed": "Wax-sealed envelope",
-    "item-envelope-opened": "Wax-sealed envelope (opened)"
+    "item-envelope-opened": "Wax-sealed envelope (opened)",
+    "heldhelp-open": "Open envelope"
 }

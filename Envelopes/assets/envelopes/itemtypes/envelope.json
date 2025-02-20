@@ -1,7 +1,10 @@
 {
   code: "envelope",
   class: "ItemSealableEnvelope",
-  maxstacksize: 1,
+  maxstacksizeByType: {
+    "*-empty": 32,
+    "*": 1,
+  },
   behaviors: [
     { name: "GroundStorable", properties: { layout: 'Quadrants', collisionBox: { x1: 0, y1: 0, z1: 0, x2: 1, y2: 0.0625, z2: 1 } } }
   ],
@@ -10,7 +13,6 @@
     shelvable: true,
     readable: true,
     editable: false,
-    maxPageCount: 1,
     groundStorageTransform: {
       translation: { x: 0, y: -0.05, z: 0 },
       rotation: { x: 0, y: 41, z: 0 },
