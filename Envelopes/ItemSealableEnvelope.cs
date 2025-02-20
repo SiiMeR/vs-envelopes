@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
-using Vintagestory.API.Server;
 using Vintagestory.API.Util;
 
 namespace Envelopes;
@@ -20,12 +19,11 @@ public class ItemSealableEnvelope : Item
     }
     
     
-    private void PutLetterIntoEnvelope(ItemStack letter, ItemSlot outputSlot)
+    private void PutLetterIntoEnvelope(ItemSlot letterSlot, ItemSlot outputSlot)
     {
+        letterSlot.MarkDirty();
+        
         if (api.World.Side != EnumAppSide.Server)
-            return;
-
-        if (api is not ICoreServerAPI serverApi)
             return;
 
         var id = GenerateEnvelopeId();
@@ -33,7 +31,7 @@ public class ItemSealableEnvelope : Item
 
         using var stream = File.OpenWrite(Path.Combine(modDataPath, id));
         using var binaryWriter = new BinaryWriter(stream);
-        letter.Attributes.ToBytes(binaryWriter);
+        letterSlot.Itemstack.Attributes.ToBytes(binaryWriter);
         
         outputSlot.Itemstack.Attributes.SetString("ContentsId", id);
         outputSlot.MarkDirty();
@@ -44,9 +42,10 @@ public class ItemSealableEnvelope : Item
         Console.WriteLine("Sealed");
     }
 
-    private void OpenEnvelope(ItemStack envelope, IPlayer opener, string nextCode)
+    private void OpenEnvelope(ItemSlot slot, IPlayer opener, string nextCode)
     {
-        var contentsId = envelope.Attributes.GetString("ContentsId");
+
+        var contentsId = slot.Itemstack.Attributes.GetString("ContentsId");
         if (string.IsNullOrEmpty(contentsId))
         {
             api.Logger.Error("No ContentsId on closed envelope.");
@@ -77,6 +76,9 @@ public class ItemSealableEnvelope : Item
         {
             api.World.SpawnItemEntity(nextItem, opener.Entity.SidedPos.XYZ);
         }
+
+        slot.Itemstack = null;
+        slot.MarkDirty();;
     }
 
     public override bool ConsumeCraftingIngredients(ItemSlot[] slots, ItemSlot outputSlot, GridRecipe matchingRecipe)
@@ -87,7 +89,7 @@ public class ItemSealableEnvelope : Item
         {
             case "envelope-unsealed":
                 var letterSlot = slots.First(slot => !slot.Empty && slot.Itemstack.Collectible.Code.Path.Contains("parchment"));
-                PutLetterIntoEnvelope(letterSlot.Itemstack, outputSlot);
+                PutLetterIntoEnvelope(letterSlot, outputSlot);
                 break;
             case "envelope-sealed":
                 SealEnvelope();
@@ -97,33 +99,33 @@ public class ItemSealableEnvelope : Item
         return base.ConsumeCraftingIngredients(slots, outputSlot, matchingRecipe);
     }
 
-
     public override void OnHeldInteractStart(ItemSlot slot, EntityAgent byEntity, BlockSelection blockSel, EntitySelection entitySel,
         bool firstEvent, ref EnumHandHandling handling)
     {
-        // if (api.World.Side != EnumAppSide.Server)
-        // {
-        //     return;
-        // }
-        //
+        if (byEntity.Controls.ShiftKey)
+        {
+            base.OnHeldInteractStart(slot, byEntity, blockSel, entitySel, firstEvent, ref handling);
+            return;
+        }
+
         if (byEntity is not EntityPlayer player)
         {
+            base.OnHeldInteractStart(slot, byEntity, blockSel, entitySel, firstEvent, ref handling);
             return;
         }
         
         var code = slot.Itemstack.Collectible.Code.Path;
         if (code is "envelope-sealed" or "envelope-unsealed")
         {
-            var envelope = slot.TakeOut(1);
             var nextCode = code == "envelope-sealed" ? "envelopes:envelope-opened" : "envelopes:envelope-empty";
-            OpenEnvelope(envelope, player.Player, nextCode);
-            slot.MarkDirty();
+            OpenEnvelope(slot, player.Player, nextCode);
+            handling = EnumHandHandling.Handled;
+            return;
         }
-        
+
         base.OnHeldInteractStart(slot, byEntity, blockSel, entitySel, firstEvent, ref handling);
     }
-
-
+    
     public override WorldInteraction[] GetHeldInteractionHelp(ItemSlot inSlot)
     {
         var worldInteractions = new List<WorldInteraction>();
