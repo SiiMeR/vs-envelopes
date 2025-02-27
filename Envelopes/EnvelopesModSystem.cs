@@ -1,4 +1,5 @@
-﻿using Vintagestory.API.Client;
+﻿using System.Linq;
+using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Server;
 
@@ -22,7 +23,8 @@ public class EnvelopesModSystem : ModSystem
     {
         ClientNetworkChannel = api.Network.RegisterChannel("envelopes")
             .RegisterMessageType<SealEnvelopePacket>()
-            .RegisterMessageType<OpenEnvelopePacket>();
+            .RegisterMessageType<OpenEnvelopePacket>()
+            .RegisterMessageType<RemapSealerIdPacket>();
 
         base.StartClientSide(api);
     }
@@ -32,8 +34,10 @@ public class EnvelopesModSystem : ModSystem
         ServerNetworkChannel = api.Network.RegisterChannel("envelopes")
             .RegisterMessageType<SealEnvelopePacket>()
             .RegisterMessageType<OpenEnvelopePacket>()
+            .RegisterMessageType<RemapSealerIdPacket>()
             .SetMessageHandler<SealEnvelopePacket>(OnSealEnvelopePacket)
-            .SetMessageHandler<OpenEnvelopePacket>(OnOpenEnvelopePacket);
+            .SetMessageHandler<OpenEnvelopePacket>(OnOpenEnvelopePacket)
+            .SetMessageHandler<RemapSealerIdPacket>(OnRemapSealerIdPacket);
 
         base.StartServerSide(api);
     }
@@ -43,9 +47,9 @@ public class EnvelopesModSystem : ModSystem
         fromplayer.Entity.WalkInventory((slot =>
         {
             var contentsId = slot?.Itemstack?.Attributes?.GetString("ContentsId");
-            if (contentsId != null && contentsId == packet.ContentsId)
+            if (!string.IsNullOrEmpty(contentsId) && contentsId == packet.ContentsId)
             {
-                slot.Itemstack.Attributes.SetString("SealerId", fromplayer.PlayerUID);
+                slot.Itemstack.Attributes.SetString("SealerName", fromplayer.PlayerName);
                 slot.MarkDirty();
                 return false;
             }
@@ -70,5 +74,25 @@ public class EnvelopesModSystem : ModSystem
 
             return true;
         }));
+    }
+
+    private void OnRemapSealerIdPacket(IServerPlayer fromplayer, RemapSealerIdPacket packet)
+    {
+        var itemSlot = fromplayer
+            ?.InventoryManager
+            ?.OpenedInventories
+            ?.FirstOrDefault(inv => inv.InventoryID == packet?.InventoryId)?[packet.SlotId];
+
+        var itemStack = itemSlot?.Itemstack;
+        
+        var sealerId = itemStack?.Attributes.GetString("SealerId");
+        if (!string.IsNullOrEmpty(sealerId))
+        {
+            var name = Api.World.PlayerByUid(fromplayer.PlayerUID)?.PlayerName;
+            itemStack.Attributes.SetString("SealerName", name);
+            itemStack.Attributes.RemoveAttribute("SealerId");
+            
+            itemSlot.MarkDirty();
+        }
     }
 }

@@ -25,7 +25,6 @@ public class ItemSealableEnvelope : Item
         return globalApi.GetOrCreateDataPath(localPath);
     }
     
-    
     private void PutLetterIntoEnvelope(ItemSlot letterSlot, ItemSlot outputSlot)
     {
         letterSlot.MarkDirty();
@@ -89,10 +88,10 @@ public class ItemSealableEnvelope : Item
         
         var nextItem = new ItemStack(globalApi.World.GetItem(new AssetLocation(nextCode)));
 
-        var sealerId = slot?.Itemstack?.Attributes?.GetString("SealerId");
-        if (!string.IsNullOrEmpty(sealerId))
+        var sealerName = slot?.Itemstack?.Attributes?.GetString("SealerName");
+        if (!string.IsNullOrEmpty(sealerName))
         {
-            nextItem.Attributes?.SetString("SealerId",sealerId);
+            nextItem.Attributes?.SetString("SealerName",sealerName);
         }
         
         if (!opener.InventoryManager.TryGiveItemstack(nextItem, true))
@@ -225,10 +224,23 @@ public class ItemSealableEnvelope : Item
             dsc.AppendLine(Lang.Get($"{EnvelopesModSystem.ModId}:envelope-sealbroken"));
         }
 
+        
+        // backwards compatibility mapping for older envelopes
         var sealerId = inSlot?.Itemstack?.Attributes?.GetString("SealerId");
         if (!string.IsNullOrEmpty(sealerId))
         {
-            var sealerName = world.PlayerByUid(sealerId).PlayerName;
+            EnvelopesModSystem.ClientNetworkChannel.SendPacket(new RemapSealerIdPacket
+            {
+                InventoryId = inSlot.Inventory.InventoryID,
+                SlotId = inSlot.Inventory.GetSlotId(inSlot)
+            });
+            inSlot.MarkDirty();
+        }
+        
+
+        var sealerName = inSlot?.Itemstack?.Attributes?.GetString("SealerName");
+        if (!string.IsNullOrEmpty(sealerName))
+        {
             dsc.AppendLine($"{Lang.Get($"{EnvelopesModSystem.ModId}:envelope-sealedby")}: {sealerName}");
         }
         
