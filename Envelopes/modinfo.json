@@ -6,7 +6,7 @@
         "SiiMeR"
     ],
     "description": "Adds envelopes to the game, sealable with wax",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "dependencies": {
         "game": ""
     }
