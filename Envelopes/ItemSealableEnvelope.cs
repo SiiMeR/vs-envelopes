@@ -68,6 +68,7 @@ public class ItemSealableEnvelope : Item
         if (globalApi.World.Side == EnumAppSide.Client)
         {
             EnvelopesModSystem.ClientNetworkChannel.SendPacket(new OpenEnvelopePacket{ ContentsId = contentsId});
+            return;
         }
     
         

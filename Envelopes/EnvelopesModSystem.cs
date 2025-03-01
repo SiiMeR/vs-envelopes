@@ -17,6 +17,7 @@ public class EnvelopesModSystem : ModSystem
         Api = api;
         ModId = Mod.Info.ModID;
         api.RegisterItemClass("ItemSealableEnvelope", typeof(ItemSealableEnvelope));
+        api.RegisterItemClass("ItemWaxSealStamp", typeof(ItemWaxSealStamp));
     }
 
     public override void StartClientSide(ICoreClientAPI api)

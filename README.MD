@@ -14,6 +14,9 @@ You decide to take out your ink and quill, and draft a letter:
 You sign the letter and find a trusted courier. The courier takes the letter to the king. Later that week, you receive a reply and you successfully manage to establish the alliance. 
 
 ------- 
+
+# 1st Iteration
+
 In Vintage Story, there is currently no way to hide the contents of such a letter. The courier could actually have been working with some interested 3rd parties, and now your confidential information is out there. 
 
 This problem could be alleviated by putting your letter inside an envelope and sealing it with a wax stamp. The courier might still break the seal and read its contents, but at least the receiving end would know that the envelope had been tampered with. This gives you a chance to go after such a courier. 
@@ -30,3 +33,12 @@ Future plans:
 * more realistic wax by combining wax with resin and some coloring agent. 
 * in-world sealing of envelopes, possibly by having to melt the wax beforehand
 * custom seal stamps
+
+
+-----
+
+# 2nd iteration
+
+The second iteration of the mod will focus on making the sealing process a bit more realistic. An item -- wax seal stamp -- will be introduced.
+A wax seal stamp can have a custom design, with an editor akin to something like in the Coinage mod. A wax seal will have an unique ID, using which seals can be differentiated. A seal can also be named (example: "The Royal Eagle") for immersion. 
+For now, the stamp will be required in the crafting recipe, and from it, attributes will be copied over to indicate sealing data on the envelope itself. 
