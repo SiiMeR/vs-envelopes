@@ -9,19 +9,17 @@ using Vintagestory.API.Config;
 using Vintagestory.API.Util;
 using Vintagestory.GameContent;
 
-namespace Envelopes;
+namespace Envelopes.Items;
 
 public class ItemSealableEnvelope : Item
 {
-    private GuiDialogConfirm _currentConfirmationDialog;
-    
     private string GenerateEnvelopeId() => Guid.NewGuid().ToString("n");
 
     public static string GetModDataPath()
     {
         var globalApi = EnvelopesModSystem.Api;
 
-        string localPath = Path.Combine("ModData", globalApi.World.SavegameIdentifier, EnvelopesModSystem.ModId);
+        var localPath = Path.Combine("ModData", globalApi.World.SavegameIdentifier, EnvelopesModSystem.ModId);
         return globalApi.GetOrCreateDataPath(localPath);
     }
     
@@ -154,18 +152,20 @@ public class ItemSealableEnvelope : Item
             {
                 if (api.Side == EnumAppSide.Client)
                 {
-                    _currentConfirmationDialog = new GuiDialogConfirm(api as ICoreClientAPI, Lang.Get(
+                    GuiDialogConfirm? confirmationDialog = null;
+                    var dialog = confirmationDialog;
+                    confirmationDialog = new GuiDialogConfirm(api as ICoreClientAPI, Lang.Get(
                             $"{EnvelopesModSystem.ModId}:open-envelope-confirmation"),
                         (ok) =>
                         {
                             if (!ok)
                                 return;
-                            _currentConfirmationDialog.TryClose();
+                            dialog?.TryClose();
                             OpenEnvelope(slot, player.Player, nextCode);
                             var sealedHandled = EnumHandHandling.Handled;
                             (slot.Itemstack.Collectible as ItemBook)?.OnHeldInteractStart(slot, byEntity, blockSel, entitySel, true, ref sealedHandled);
                         });
-                    _currentConfirmationDialog.TryOpen();
+                    confirmationDialog.TryOpen();
                 }
             
                 handling = EnumHandHandling.Handled;

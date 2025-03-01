@@ -1,4 +1,6 @@
 ﻿using System.Linq;
+using Envelopes.Database;
+using Envelopes.Items;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Server;
@@ -11,6 +13,8 @@ public class EnvelopesModSystem : ModSystem
     public static ICoreAPI Api;
     public static IClientNetworkChannel ClientNetworkChannel;
     public static IServerNetworkChannel ServerNetworkChannel;
+
+    public static StampDatabase StampDatabase;
     
     public override void Start(ICoreAPI api)
     {
@@ -18,6 +22,7 @@ public class EnvelopesModSystem : ModSystem
         ModId = Mod.Info.ModID;
         api.RegisterItemClass("ItemSealableEnvelope", typeof(ItemSealableEnvelope));
         api.RegisterItemClass("ItemWaxSealStamp", typeof(ItemWaxSealStamp));
+        api.RegisterItemClass("ItemWaxStick", typeof(ItemWaxStick));
     }
 
     public override void StartClientSide(ICoreClientAPI api)
@@ -40,6 +45,8 @@ public class EnvelopesModSystem : ModSystem
             .SetMessageHandler<OpenEnvelopePacket>(OnOpenEnvelopePacket)
             .SetMessageHandler<RemapSealerIdPacket>(OnRemapSealerIdPacket);
 
+        StampDatabase = new StampDatabase();
+        
         base.StartServerSide(api);
     }
 

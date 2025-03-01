@@ -1,8 +1,7 @@
 ﻿using Vintagestory.API.Common;
 
-namespace Envelopes;
+namespace Envelopes.Items;
 
 public class ItemWaxSealStamp : Item
 {
-    
 }
