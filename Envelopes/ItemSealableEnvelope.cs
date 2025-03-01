@@ -163,7 +163,6 @@ public class ItemSealableEnvelope : Item
                             OpenEnvelope(slot, player.Player, nextCode);
                             var sealedHandled = EnumHandHandling.Handled;
                             (slot.Itemstack.Collectible as ItemBook)?.OnHeldInteractStart(slot, byEntity, blockSel, entitySel, true, ref sealedHandled);
-
                         });
                     _currentConfirmationDialog.TryOpen();
                 }

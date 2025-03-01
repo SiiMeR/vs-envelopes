@@ -11,12 +11,10 @@
   attributes: {
     displaycaseable: true,
     shelvable: true,
-    readable: true,
-    editable: false,
     groundStorageTransform: {
-      translation: { x: 0, y: -0.05, z: 0 },
-      rotation: { x: 0, y: 41, z: 0 },
-      scale: 0.9
+      translation: { x: 0, y: -0.2, z: 0 },
+      rotation: { x: 0, y: 0, z: 0 },
+      scale: 0.6
     }
   },
   variantgroups: [
