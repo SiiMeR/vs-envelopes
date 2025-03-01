@@ -213,20 +213,20 @@ public class ItemSealableEnvelope : Item
 
     public override void GetHeldItemInfo(ItemSlot inSlot, StringBuilder dsc, IWorldAccessor world, bool withDebugInfo)
     {
-        var contentsId = inSlot?.Itemstack?.Attributes?.GetString("ContentsId");
+        var contentsId = inSlot.Itemstack?.Attributes?.GetString("ContentsId");
         if (!string.IsNullOrEmpty(contentsId))
         {
             dsc.AppendLine(Lang.Get($"{EnvelopesModSystem.ModId}:envelope-hascontents"));
         }
 
-        if (inSlot?.Itemstack?.Item?.Code?.Path?.Contains("envelope-opened") ?? false)
+        if (inSlot.Itemstack?.Item?.Code?.Path?.Contains("envelope-opened") ?? false)
         {
             dsc.AppendLine(Lang.Get($"{EnvelopesModSystem.ModId}:envelope-sealbroken"));
         }
 
         
         // backwards compatibility mapping for older envelopes
-        var sealerId = inSlot?.Itemstack?.Attributes?.GetString("SealerId");
+        var sealerId = inSlot.Itemstack?.Attributes?.GetString("SealerId");
         if (!string.IsNullOrEmpty(sealerId))
         {
             EnvelopesModSystem.ClientNetworkChannel.SendPacket(new RemapSealerIdPacket
@@ -238,7 +238,7 @@ public class ItemSealableEnvelope : Item
         }
         
 
-        var sealerName = inSlot?.Itemstack?.Attributes?.GetString("SealerName");
+        var sealerName = inSlot.Itemstack?.Attributes?.GetString("SealerName");
         if (!string.IsNullOrEmpty(sealerName))
         {
             dsc.AppendLine($"{Lang.Get($"{EnvelopesModSystem.ModId}:envelope-sealedby")}: {sealerName}");

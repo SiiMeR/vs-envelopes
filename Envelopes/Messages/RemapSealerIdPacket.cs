@@ -6,7 +6,7 @@ namespace Envelopes;
 public class RemapSealerIdPacket
 {
     [ProtoMember(1)]
-    public string InventoryId;
+    public required string InventoryId;
 
     [ProtoMember(2)] public int SlotId;
 }
