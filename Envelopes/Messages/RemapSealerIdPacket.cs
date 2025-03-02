@@ -1,6 +1,6 @@
 ﻿using ProtoBuf;
 
-namespace Envelopes;
+namespace Envelopes.Messages;
 
 [ProtoContract]
 public class RemapSealerIdPacket

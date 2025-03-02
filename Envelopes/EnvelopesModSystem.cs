@@ -1,6 +1,8 @@
 ﻿using System.Linq;
 using Envelopes.Database;
 using Envelopes.Items;
+using Envelopes.Messages;
+using Envelopes.Util;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Server;
@@ -9,13 +11,12 @@ namespace Envelopes;
 
 public class EnvelopesModSystem : ModSystem
 {
-    public static string ModId;
-    public static ICoreAPI Api;
-    public static IClientNetworkChannel ClientNetworkChannel;
-    public static IServerNetworkChannel ServerNetworkChannel;
+    public static string? ModId;
+    public static ICoreAPI? Api;
+    public static IClientNetworkChannel? ClientNetworkChannel;
+    public static IServerNetworkChannel? ServerNetworkChannel;
+    public static StampDatabase? StampDatabase;
 
-    public static StampDatabase StampDatabase;
-    
     public override void Start(ICoreAPI api)
     {
         Api = api;
@@ -30,7 +31,9 @@ public class EnvelopesModSystem : ModSystem
         ClientNetworkChannel = api.Network.RegisterChannel("envelopes")
             .RegisterMessageType<SealEnvelopePacket>()
             .RegisterMessageType<OpenEnvelopePacket>()
-            .RegisterMessageType<RemapSealerIdPacket>();
+            .RegisterMessageType<RemapSealerIdPacket>()
+            .RegisterMessageType<SaveStampDesignPacket>();
+
 
         base.StartClientSide(api);
     }
@@ -41,47 +44,59 @@ public class EnvelopesModSystem : ModSystem
             .RegisterMessageType<SealEnvelopePacket>()
             .RegisterMessageType<OpenEnvelopePacket>()
             .RegisterMessageType<RemapSealerIdPacket>()
+            .RegisterMessageType<SaveStampDesignPacket>()
             .SetMessageHandler<SealEnvelopePacket>(OnSealEnvelopePacket)
             .SetMessageHandler<OpenEnvelopePacket>(OnOpenEnvelopePacket)
-            .SetMessageHandler<RemapSealerIdPacket>(OnRemapSealerIdPacket);
+            .SetMessageHandler<RemapSealerIdPacket>(OnRemapSealerIdPacket)
+            .SetMessageHandler<SaveStampDesignPacket>(OnSaveStampDesignPacket);
 
         StampDatabase = new StampDatabase();
-        
+
         base.StartServerSide(api);
+    }
+
+    private void OnSaveStampDesignPacket(IServerPlayer fromplayer, SaveStampDesignPacket packet)
+    {
+        StampDatabase?.InsertStamp(new Stamp
+        {
+            Title = packet.Title,
+            Design = BooleanArrayPacker.PackToByteArray(packet.Design),
+            Dimensions = packet.Dimensions,
+            CreatorId = fromplayer.PlayerUID
+        });
     }
 
     private void OnSealEnvelopePacket(IServerPlayer fromplayer, SealEnvelopePacket packet)
     {
-        fromplayer.Entity.WalkInventory((slot =>
+        fromplayer.Entity.WalkInventory(slot =>
         {
             var contentsId = slot?.Itemstack?.Attributes?.GetString("ContentsId");
             if (!string.IsNullOrEmpty(contentsId) && contentsId == packet.ContentsId)
             {
-                slot.Itemstack.Attributes.SetString("SealerName", fromplayer.PlayerName);
-                slot.MarkDirty();
+                slot?.Itemstack?.Attributes?.SetString("SealerName", fromplayer.PlayerName);
+                slot?.MarkDirty();
                 return false;
             }
 
             return true;
-        }));
+        });
     }
 
     private void OnOpenEnvelopePacket(IServerPlayer fromplayer, OpenEnvelopePacket packet)
     {
-        fromplayer.Entity.WalkInventory((slot =>
+        fromplayer.Entity.WalkInventory(slot =>
         {
             var contentsId = slot?.Itemstack?.Attributes?.GetString("ContentsId");
             if (contentsId != null && contentsId == packet.ContentsId)
             {
-                Api.Event.EnqueueMainThreadTask(() =>
-                {
-                    ItemSealableEnvelope.OpenEnvelope(slot, fromplayer, "envelopes:envelope-opened");
-                }, "openenvelope");
+                Api?.Event.EnqueueMainThreadTask(
+                    () => { ItemSealableEnvelope.OpenEnvelope(slot, fromplayer, "envelopes:envelope-opened"); },
+                    "openenvelope");
                 return false;
             }
 
             return true;
-        }));
+        });
     }
 
     private void OnRemapSealerIdPacket(IServerPlayer fromplayer, RemapSealerIdPacket packet)
@@ -92,14 +107,14 @@ public class EnvelopesModSystem : ModSystem
             ?.FirstOrDefault(inv => inv.InventoryID == packet?.InventoryId)?[packet.SlotId];
 
         var itemStack = itemSlot?.Itemstack;
-        
+
         var sealerId = itemStack?.Attributes.GetString("SealerId");
         if (!string.IsNullOrEmpty(sealerId))
         {
             var name = Api.World.PlayerByUid(fromplayer.PlayerUID)?.PlayerName;
             itemStack.Attributes.SetString("SealerName", name);
             itemStack.Attributes.RemoveAttribute("SealerId");
-            
+
             itemSlot.MarkDirty();
         }
     }

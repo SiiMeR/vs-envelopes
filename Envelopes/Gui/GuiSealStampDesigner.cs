@@ -1,4 +1,6 @@
 ﻿using System;
+using Envelopes.Messages;
+using Envelopes.Util;
 using Vintagestory.API.Client;
 
 namespace Envelopes.Gui;
@@ -139,7 +141,8 @@ public class GuiSealStampDesigner : GuiDialog
 
     private void OnToggleButton(bool newState, int x, int y)
     {
-        _designState[y, x] = newState;
+        // the toggles are inverted
+        _designState[y, x] = !newState;
     }
 
     private void OnClose()
@@ -153,7 +156,13 @@ public class GuiSealStampDesigner : GuiDialog
         {
             if (confirmed)
             {
-                Console.WriteLine(_designState);
+                var title = SingleComposer.GetTextInput("title").GetText();
+
+
+                EnvelopesModSystem.ClientNetworkChannel?.SendPacket(new SaveStampDesignPacket
+                {
+                    Title = title, Design = BooleanArrayPacker.Pack(_designState), Dimensions = GridDimensions
+                });
             }
         }).TryOpen();
 

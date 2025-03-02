@@ -1,11 +1,9 @@
 ﻿using ProtoBuf;
-using Vintagestory.GameContent;
 
-namespace Envelopes;
+namespace Envelopes.Messages;
 
 [ProtoContract]
 public class OpenEnvelopePacket
 {
-    [ProtoMember(1)]
-    public string ContentsId;
+    [ProtoMember(1)] public required string ContentsId;
 }

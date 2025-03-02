@@ -1,44 +1,56 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
+using Envelopes.Util;
 using Microsoft.Data.Sqlite;
 using Vintagestory.API.Config;
 
 namespace Envelopes.Database;
 
-
-public record Stamp(string Id, string Title, byte[] Design);
+public record Stamp
+{
+    public int Id { get; set; }
+    public required string Title { get; init; }
+    public required string CreatorId { get; init; }
+    public required byte[] Design { get; init; }
+    public required int Dimensions { get; init; }
+}
 
 public class StampDatabase
 {
-    private const string CreateTableQuery = "CREATE TABLE IF NOT EXISTS Stamps (Id TEXT PRIMARY KEY, Title TEXT DEFAULT '', Design BLOB);";
-    private const string InsertStampQuery = "INSERT INTO Stamps (Id, Title, Design) VALUES (@Id, @Title, @Design);";
-    private const string GetStampQuery = "SELECT Id, Name, Design FROM Stamps WHERE Id = @Id;";
+    private const string CreateTableQuery =
+        "CREATE TABLE IF NOT EXISTS Stamps (Id INTEGER PRIMARY KEY, CreatorId TEXT, Title TEXT DEFAULT '', Design BLOB, Dimensions INTEGER);";
+
+    private const string InsertStampQuery =
+        "INSERT INTO Stamps (Title, CreatorId, Design, Dimensions) VALUES (@Title, @CreatorId, @Design, @Dimensions);";
+
+    private const string GetStampQuery = "SELECT Id, CreatorId, Title, Design, Dimensions FROM Stamps WHERE Id = @Id;";
 
     private readonly string _connectionString;
 
     public StampDatabase()
     {
-        var path = Path.Combine(GamePaths.DataPath, "ModData", EnvelopesModSystem.Api.World.SavegameIdentifier,EnvelopesModSystem.ModId, "stamps.db");
+        var path = Path.Combine(GamePaths.DataPath, "ModData", Helpers.GetApi().World.SavegameIdentifier,
+            EnvelopesModSystem.ModId, "stamps.db");
         _connectionString = $"Data Source={path};";
 
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();
-        
+
         using var command = new SqliteCommand(CreateTableQuery, connection);
         command.ExecuteNonQuery();
     }
-    
+
     public void InsertStamp(Stamp stamp)
     {
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();
 
         using var command = new SqliteCommand(InsertStampQuery, connection);
-        
-        command.Parameters.AddWithValue("@Id", stamp.Id);
+
         command.Parameters.AddWithValue("@Title", stamp.Title);
+        command.Parameters.AddWithValue("@CreatorId", stamp.CreatorId);
+        command.Parameters.AddWithValue("@Dimensions", stamp.Dimensions);
         command.Parameters.AddWithValue("@Design", stamp.Design);
-        
+
         command.ExecuteNonQuery();
     }
 
@@ -49,22 +61,26 @@ public class StampDatabase
 
         using var command = new SqliteCommand(GetStampQuery, connection);
         command.Parameters.AddWithValue("@Id", id);
-        
+
         using var reader = command.ExecuteReader();
         if (!reader.Read())
         {
             return null;
         }
 
-        var identifier = reader["Id"].ToString();
-        var title = reader["Title"]?.ToString() ?? string.Empty;
+        var identifier = (int)reader["Id"];
+        var title = (string)reader["Title"];
         var design = (byte[])reader["Design"];
+        var dimensions = (int)reader["Dimensions"];
+        var creatorId = (string)reader["CreatorId"];
 
-        if (string.IsNullOrEmpty(identifier))
+        return new Stamp
         {
-            return null;
-        }
-            
-        return new Stamp(identifier,title,design);
+            Id = identifier,
+            Title = title,
+            Design = design,
+            Dimensions = dimensions,
+            CreatorId = creatorId
+        };
     }
 }
