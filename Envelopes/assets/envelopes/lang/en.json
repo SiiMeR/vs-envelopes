@@ -14,5 +14,7 @@
   "stampdesigner-btn-create": "Create",
   "stampdesigner-btn-reset": "Reset",
   "stampdesigner-create-warning": "Are you sure you want to lock in this stamp design? You won't be able to edit it later.",
-  "stampdesigner-reset-warning": "Are you sure you want to reset? All changes will be lost."
+  "stampdesigner-reset-warning": "Are you sure you want to reset? All changes will be lost.",
+  "stampdesigner-add-tutorial": "Add",
+  "stampdesigner-remove-tutorial": "Remove"
 }

@@ -100,6 +100,7 @@ public class GuiSealStampDesigner : GuiDialog
 
         // ==== End Grid
 
+
         var buttonWidth = 120.0;
         var createButtonBounds = ElementBounds.Fixed(LeftSectionWidth + GuiStyle.ElementToDialogPadding,
             LeftSectionWidth, buttonWidth, LineHeight);
@@ -107,7 +108,22 @@ public class GuiSealStampDesigner : GuiDialog
             LeftSectionWidth + GuiStyle.ElementToDialogPadding * 2.0,
             buttonWidth, LineHeight);
 
+        var addTutorialTextBounds = ElementBounds.Fixed((int)(LeftSectionWidth + GuiStyle.ElementToDialogPadding),
+            LeftSectionWidth - LineHeight * 2, buttonWidth, LineHeight);
+
+        var removeTutorialTextBounds = ElementBounds.Fixed((int)(LeftSectionWidth + GuiStyle.ElementToDialogPadding),
+            LeftSectionWidth - LineHeight, buttonWidth, LineHeight);
+
+        var addTutorialText =
+            $"<icon name=leftmousebutton></icon>: {Helpers.EnvelopesLangString("stampdesigner-add-tutorial")}";
+        var removeTutorialText =
+            $"<icon name=rightmousebutton></icon>: {Helpers.EnvelopesLangString("stampdesigner-remove-tutorial")}";
+        var tutorialTextFont = CairoFont.WhiteDetailText().WithFontSize(20);
         SingleComposer
+            .AddRichtext(addTutorialText, tutorialTextFont, addTutorialTextBounds,
+                "addTutorial")
+            .AddRichtext(removeTutorialText, tutorialTextFont, removeTutorialTextBounds,
+                "removeTutorial")
             .AddButton(Helpers.EnvelopesLangString("stampdesigner-btn-create"), OnCreate, createButtonBounds,
                 key: "createButton")
             .AddButton(Helpers.EnvelopesLangString("stampdesigner-btn-reset"), OnReset, resetButtonBounds,
