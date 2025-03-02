@@ -16,10 +16,12 @@ public class ItemWaxSealStamp : Item
             return;
         }
 
-        var dialog = new GuiSealStampDesigner(EnvelopesModSystem.Api as ICoreClientAPI);
-
-        dialog.TryOpen(true);
-        handling = EnumHandHandling.PreventDefault;
+        if (firstEvent)
+        {
+            var dialog = new GuiSealStampDesigner(EnvelopesModSystem.Api as ICoreClientAPI);
+            dialog.TryOpen(true);
+            handling = EnumHandHandling.PreventDefault;
+        }
 
         base.OnHeldInteractStart(slot, byEntity, blockSel, entitySel, firstEvent, ref handling);
     }
