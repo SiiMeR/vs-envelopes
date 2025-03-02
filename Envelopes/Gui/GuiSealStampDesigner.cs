@@ -1,33 +1,19 @@
 ﻿using System;
-using Cairo;
 using Vintagestory.API.Client;
 
 namespace Envelopes.Gui;
 
 public class GuiSealStampDesigner : GuiDialog
 {
-    private readonly int[,] _editableArea =
-    {
-        { 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0 },
-        { 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0 },
-        { 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0 },
-        { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 },
-        { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 },
-        { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-        { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-        { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-        { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-        { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-        { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 },
-        { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 },
-        { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 },
-        { 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0 },
-        { 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0 },
-        { 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0 }
-    };
+    private const int LeftSectionWidth = 400;
+    private const int LineHeight = 30;
+    private const int GridDimensions = 24;
 
-    private bool[,] _designState = new bool[16, 16];
+    private bool[,] _designState = new bool[GridDimensions, GridDimensions];
 
+    private ElementBounds? _gridBounds;
+
+    private bool _isDragging;
 
     public GuiSealStampDesigner(ICoreClientAPI? capi) : base(capi)
     {
@@ -42,33 +28,29 @@ public class GuiSealStampDesigner : GuiDialog
         capi?.Input.SetHotKeyHandler("redraw", _ => SetupDialog());
     }
 
+
+    private ElementBounds BaseBounds => ElementStdBounds.AutosizedMainDialog.WithAlignment(EnumDialogArea.CenterMiddle);
+
+
     public override string ToggleKeyCombinationCode => "sealstampdesignerkeycombo";
 
     private bool SetupDialog()
     {
-        _designState = new bool[16, 16];
+        _designState = new bool[GridDimensions, GridDimensions];
 
-        var leftSectionWidth = 400;
-        var lineHeight = 30;
-        var elementToDialogPadding = GuiStyle.ElementToDialogPadding;
-        var inputBounds = ElementBounds.Fixed(5.0, elementToDialogPadding, leftSectionWidth, lineHeight);
-        var gridBounds = ElementBounds
-            .Fixed(5.0, elementToDialogPadding * 2.0 + lineHeight, leftSectionWidth, leftSectionWidth)
-            .WithFixedPadding(2.0);
+        var inputBounds = ElementBounds.Fixed(5.0, GuiStyle.ElementToDialogPadding, LeftSectionWidth, LineHeight);
 
         var totalWidth = 550.0;
         var dialogContentBounds =
-            ElementBounds.Fixed(0.0, 0.0, totalWidth, leftSectionWidth + 63).WithFixedPadding(14.0, 30.0);
-        var dialogBounds = ElementBounds.Fixed(0.0, 0.0, totalWidth, leftSectionWidth + 63)
+            ElementBounds.Fixed(0.0, 0.0, totalWidth, LeftSectionWidth + 63).WithFixedPadding(14.0, 30.0);
+        var dialogBounds = ElementBounds.Fixed(0.0, 0.0, totalWidth, LeftSectionWidth + 63)
             .WithFixedPadding(14.0, 30.0);
 
 
-        SingleComposer = capi.Gui.CreateCompo("stampdesigner",
-                ElementStdBounds.AutosizedMainDialog.WithAlignment(EnumDialogArea.CenterMiddle))
+        SingleComposer = capi.Gui.CreateCompo("stampdesigner", BaseBounds)
             .AddShadedDialogBG(dialogBounds)
             .AddDialogTitleBar(Helpers.EnvelopesLangString("stampdesigner-title"), OnClose)
             .BeginChildElements(dialogContentBounds);
-
 
         SingleComposer.AddTextInput(inputBounds, OnTitleChanged, key: "title", font: CairoFont.TextInput());
 
@@ -78,24 +60,27 @@ public class GuiSealStampDesigner : GuiDialog
 
         // ==== Grid
 
-        SingleComposer.BeginChildElements(gridBounds);
+        _gridBounds = ElementBounds
+            .Fixed(5.0, GuiStyle.ElementToDialogPadding * 2.0 + LineHeight, LeftSectionWidth, LeftSectionWidth)
+            .WithParent(dialogContentBounds);
 
-        var toggleWidth = leftSectionWidth / 16;
-        var toggleHeight = leftSectionWidth / 16;
-        var toggleBounds = ElementBounds.Fixed(0, 0, toggleWidth, toggleHeight);
+        SingleComposer.BeginChildElements(_gridBounds);
 
-        for (var y = 0; y < 16; y++)
+        var toggleSize = _gridBounds.fixedWidth / GridDimensions;
+        var toggleBounds = ElementBounds.Fixed(0, 0, toggleSize, toggleSize);
+
+        for (var y = 0; y < GridDimensions; y++)
         {
-            for (var x = 0; x < 16; x++)
+            for (var x = 0; x < GridDimensions; x++)
             {
-                var shouldDraw = _editableArea[y, x] == 1;
+                var shouldDraw = Constants.EditableArea[y, x] == 1;
 
                 if (!shouldDraw)
                 {
                     continue;
                 }
 
-                var buttonBounds = toggleBounds.CopyOffsetedSibling(x * toggleWidth, y * toggleHeight);
+                var buttonBounds = toggleBounds.CopyOffsetedSibling(x * toggleSize, y * toggleSize);
                 var capturedX = x;
                 var capturedY = y;
                 var key = $"design-{x},{y}";
@@ -116,29 +101,29 @@ public class GuiSealStampDesigner : GuiDialog
         // ==== End Grid
 
         var buttonWidth = 120.0;
-        var createButtonBounds = ElementBounds.Fixed(leftSectionWidth + elementToDialogPadding,
-            leftSectionWidth, buttonWidth, lineHeight);
-        var resetButtonBounds = ElementBounds.Fixed(leftSectionWidth + elementToDialogPadding,
-            leftSectionWidth + elementToDialogPadding * 2.0,
-            buttonWidth, lineHeight);
+        var createButtonBounds = ElementBounds.Fixed(LeftSectionWidth + GuiStyle.ElementToDialogPadding,
+            LeftSectionWidth, buttonWidth, LineHeight);
+        var resetButtonBounds = ElementBounds.Fixed(LeftSectionWidth + GuiStyle.ElementToDialogPadding,
+            LeftSectionWidth + GuiStyle.ElementToDialogPadding * 2.0,
+            buttonWidth, LineHeight);
 
         SingleComposer
             .AddButton(Helpers.EnvelopesLangString("stampdesigner-btn-create"), OnCreate, createButtonBounds,
                 key: "createButton")
             .AddButton(Helpers.EnvelopesLangString("stampdesigner-btn-reset"), OnReset, resetButtonBounds,
                 key: "resetButton")
-            .EndChildElements()
-            .Compose();
+            .EndChildElements();
 
         SingleComposer.GetButton("createButton").Enabled = false;
+
         SingleComposer.Compose();
 
         return true;
     }
 
-    private void OnToggleButton(bool on, int x, int y)
+    private void OnToggleButton(bool newState, int x, int y)
     {
-        _designState[y, x] = on;
+        _designState[y, x] = newState;
     }
 
     private void OnClose()
@@ -176,5 +161,121 @@ public class GuiSealStampDesigner : GuiDialog
     private void OnTitleChanged(string newTitle)
     {
         SingleComposer.GetButton("createButton").Enabled = newTitle.Length > 0;
+    }
+
+    public override void OnMouseUp(MouseEvent args)
+    {
+        _isDragging = false;
+        base.OnMouseUp(args);
+    }
+
+    public override void OnMouseDown(MouseEvent args)
+    {
+        if (_gridBounds == null)
+        {
+            base.OnMouseDown(args);
+            return;
+        }
+
+        _isDragging = true;
+
+        var posInside = _gridBounds.PositionInside(args.X, args.Y);
+        if (posInside == null)
+        {
+            base.OnMouseDown(args);
+            return;
+        }
+
+        var toggleSize = _gridBounds.ChildBounds[0].OuterWidth;
+
+        var x = Convert.ToInt32(posInside.X / toggleSize);
+        var y = Convert.ToInt32(posInside.Y / toggleSize);
+
+        if (x < 0 || x >= GridDimensions || y < 0 || y >= GridDimensions)
+        {
+            base.OnMouseDown(args);
+            return;
+        }
+
+        if (Constants.EditableArea[y, x] != 1)
+        {
+            base.OnMouseDown(args);
+            return;
+        }
+
+        var shouldAdd = capi.Input.MouseButton.Left;
+        var shouldDelete = capi.Input.MouseButton.Right;
+
+        if (shouldAdd)
+        {
+            UpdateToggleState(x, y, false);
+        }
+        else if (shouldDelete)
+        {
+            UpdateToggleState(x, y, true);
+        }
+    }
+
+    public override void OnMouseMove(MouseEvent args)
+    {
+        if (_gridBounds == null)
+        {
+            base.OnMouseMove(args);
+            return;
+        }
+
+        if (!_isDragging)
+        {
+            base.OnMouseMove(args);
+            return;
+        }
+
+        var posInside = _gridBounds.PositionInside(args.X, args.Y);
+        if (posInside == null)
+        {
+            base.OnMouseMove(args);
+            return;
+        }
+
+
+        var toggleSize = _gridBounds.ChildBounds[0].OuterWidth;
+
+        var x = Convert.ToInt32(posInside.X / toggleSize);
+        var y = Convert.ToInt32(posInside.Y / toggleSize);
+
+        if (x < 0 || x >= GridDimensions || y < 0 || y >= GridDimensions)
+        {
+            base.OnMouseMove(args);
+            return;
+        }
+
+        if (Constants.EditableArea[y, x] != 1)
+        {
+            base.OnMouseMove(args);
+            return;
+        }
+
+        var shouldAdd = capi.Input.MouseButton.Left;
+        var shouldDelete = capi.Input.MouseButton.Right;
+
+        if (shouldAdd)
+        {
+            UpdateToggleState(x, y, false);
+        }
+        else if (shouldDelete)
+        {
+            UpdateToggleState(x, y, true);
+        }
+    }
+
+    private void UpdateToggleState(int x, int y, bool state)
+    {
+        var key = $"design-{x},{y}";
+        var button = SingleComposer.GetToggleButton(key);
+        if (button != null && button.On != state)
+        {
+            button.On = state;
+            OnToggleButton(state, x, y);
+        }
     }
 }
