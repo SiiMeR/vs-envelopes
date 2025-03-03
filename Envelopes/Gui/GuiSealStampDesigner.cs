@@ -115,9 +115,9 @@ public class GuiSealStampDesigner : GuiDialog
             LeftSectionWidth - LineHeight, buttonWidth, LineHeight);
 
         var addTutorialText =
-            $"<icon name=leftmousebutton></icon>: {Helpers.EnvelopesLangString("stampdesigner-add-tutorial")}";
+            $"<icon name=leftmousebutton></icon>: {Helpers.EnvelopesLangString("stampdesigner-carve-tutorial")}";
         var removeTutorialText =
-            $"<icon name=rightmousebutton></icon>: {Helpers.EnvelopesLangString("stampdesigner-remove-tutorial")}";
+            $"<icon name=rightmousebutton></icon>: {Helpers.EnvelopesLangString("stampdesigner-fill-tutorial")}";
         var tutorialTextFont = CairoFont.WhiteDetailText().WithFontSize(20);
         SingleComposer
             .AddRichtext(addTutorialText, tutorialTextFont, addTutorialTextBounds,

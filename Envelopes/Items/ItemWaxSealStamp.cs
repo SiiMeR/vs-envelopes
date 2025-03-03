@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using Envelopes.Gui;
+using Envelopes.Util;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 
@@ -17,7 +18,7 @@ public class ItemWaxSealStamp : Item
             return;
         }
 
-        var hasStampId = slot.Itemstack?.Attributes.HasAttribute("StampId") ?? false;
+        var hasStampId = slot.Itemstack?.Attributes.HasAttribute(StampAttributes.StampId) ?? false;
         if (firstEvent && !hasStampId)
         {
             var dialog = new GuiSealStampDesigner(EnvelopesModSystem.Api as ICoreClientAPI);
@@ -33,7 +34,7 @@ public class ItemWaxSealStamp : Item
         var heldItemName = base.GetHeldItemName(itemStack);
 
         var attributes = itemStack.Attributes;
-        var stampTitle = attributes.GetString("StampTitle");
+        var stampTitle = attributes.GetString(StampAttributes.StampTitle);
         if (stampTitle == null)
         {
             return heldItemName;
@@ -49,7 +50,7 @@ public class ItemWaxSealStamp : Item
         base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);
 
         var attributes = inSlot.Itemstack.Attributes;
-        var stampId = attributes.TryGetLong("StampId");
+        var stampId = attributes.TryGetLong(StampAttributes.StampId);
         if (stampId != null)
         {
             dsc.AppendLine($"<font color=\"orange\">ID: {stampId}</font>");

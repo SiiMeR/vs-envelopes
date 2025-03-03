@@ -72,10 +72,10 @@ public class EnvelopesModSystem : ModSystem
         });
 
         var itemSlot = Helpers.FindCollectibleOfTypeInInventory<ItemWaxSealStamp>(fromPlayer);
-        if (itemSlot != null && !itemSlot.Itemstack.Attributes.HasAttribute("StampId"))
+        if (itemSlot != null && !itemSlot.Itemstack.Attributes.HasAttribute(StampAttributes.StampId))
         {
-            itemSlot.Itemstack.Attributes.SetLong("StampId", stampId);
-            itemSlot.Itemstack.Attributes.SetString("StampTitle", packet.Title);
+            itemSlot.Itemstack.Attributes.SetLong(StampAttributes.StampId, stampId);
+            itemSlot.Itemstack.Attributes.SetString(StampAttributes.StampTitle, packet.Title);
         }
 
         itemSlot?.MarkDirty();
@@ -85,10 +85,10 @@ public class EnvelopesModSystem : ModSystem
     {
         fromplayer.Entity.WalkInventory(slot =>
         {
-            var contentsId = slot?.Itemstack?.Attributes?.GetString("ContentsId");
+            var contentsId = slot?.Itemstack?.Attributes?.GetString(EnvelopeAttributes.ContentsId);
             if (!string.IsNullOrEmpty(contentsId) && contentsId == packet.ContentsId)
             {
-                slot?.Itemstack?.Attributes?.SetString("SealerName", fromplayer.PlayerName);
+                slot?.Itemstack?.Attributes?.SetString(EnvelopeAttributes.SealerName, fromplayer.PlayerName);
                 slot?.MarkDirty();
                 return false;
             }
@@ -101,7 +101,7 @@ public class EnvelopesModSystem : ModSystem
     {
         fromplayer.Entity.WalkInventory(slot =>
         {
-            var contentsId = slot?.Itemstack?.Attributes?.GetString("ContentsId");
+            var contentsId = slot?.Itemstack?.Attributes?.GetString(EnvelopeAttributes.ContentsId);
             if (contentsId != null && contentsId == packet.ContentsId)
             {
                 Api?.Event.EnqueueMainThreadTask(
@@ -123,12 +123,12 @@ public class EnvelopesModSystem : ModSystem
 
         var itemStack = itemSlot?.Itemstack;
 
-        var sealerId = itemStack?.Attributes.GetString("SealerId");
+        var sealerId = itemStack?.Attributes.GetString(EnvelopeAttributes.SealerId);
         if (!string.IsNullOrEmpty(sealerId))
         {
             var name = Api.World.PlayerByUid(fromplayer.PlayerUID)?.PlayerName;
-            itemStack?.Attributes.SetString("SealerName", name);
-            itemStack?.Attributes.RemoveAttribute("SealerId");
+            itemStack?.Attributes.SetString(EnvelopeAttributes.SealerName, name);
+            itemStack?.Attributes.RemoveAttribute(EnvelopeAttributes.SealerId);
 
             itemSlot?.MarkDirty();
         }

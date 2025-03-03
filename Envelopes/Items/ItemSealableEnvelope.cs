@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Envelopes.Messages;
+using Envelopes.Util;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
@@ -43,26 +44,31 @@ public class ItemSealableEnvelope : Item
         using var binaryWriter = new BinaryWriter(stream);
         letterSlot.Itemstack.Attributes.ToBytes(binaryWriter);
 
-        outputSlot.Itemstack.Attributes.SetString("ContentsId", id);
+        outputSlot.Itemstack.Attributes.SetString(EnvelopeAttributes.ContentsId, id);
         outputSlot.MarkDirty();
     }
 
-    private void SealEnvelope(ItemSlot inputSlot)
+    private void SealEnvelope(ItemSlot inputSlot, ItemSlot outputSlot)
     {
-        var contentsId = inputSlot?.Itemstack?.Attributes?.GetString("ContentsId");
+        var contentsId = inputSlot?.Itemstack?.Attributes?.GetString(EnvelopeAttributes.ContentsId);
         if (string.IsNullOrEmpty(contentsId))
         {
             api.Logger.Debug("Trying to seal an empty envelope.");
             return;
         }
 
-        EnvelopesModSystem.ClientNetworkChannel.SendPacket(new SealEnvelopePacket { ContentsId = contentsId });
+        EnvelopesModSystem.ClientNetworkChannel?.SendPacket(new SealEnvelopePacket { ContentsId = contentsId });
     }
 
     public static void OpenEnvelope(ItemSlot slot, IPlayer opener, string nextCode)
     {
         var globalApi = EnvelopesModSystem.Api;
-        var contentsId = slot.Itemstack.Attributes.GetString("ContentsId");
+        if (globalApi == null)
+        {
+            return;
+        }
+
+        var contentsId = slot.Itemstack.Attributes.GetString(EnvelopeAttributes.ContentsId);
         if (string.IsNullOrEmpty(contentsId))
         {
             globalApi.Logger.Debug("Trying to open empty envelope.");
@@ -86,10 +92,10 @@ public class ItemSealableEnvelope : Item
 
         var nextItem = new ItemStack(globalApi.World.GetItem(new AssetLocation(nextCode)));
 
-        var sealerName = slot?.Itemstack?.Attributes?.GetString("SealerName");
+        var sealerName = slot.Itemstack?.Attributes?.GetString(EnvelopeAttributes.SealerName);
         if (!string.IsNullOrEmpty(sealerName))
         {
-            nextItem.Attributes?.SetString("SealerName", sealerName);
+            nextItem.Attributes?.SetString(EnvelopeAttributes.SealerName, sealerName);
         }
 
         if (!opener.InventoryManager.TryGiveItemstack(nextItem, true))
@@ -106,6 +112,8 @@ public class ItemSealableEnvelope : Item
         var code = outputSlot.Itemstack.Collectible.Code.Path;
         var letterSlot = slots.FirstOrDefault(slot =>
             !slot.Empty && slot.Itemstack.Collectible.Code.Path.Contains("parchment"));
+        var envelopeSlot = slots.FirstOrDefault(slot =>
+            !slot.Empty && slot.Itemstack.Collectible.Code.Path.Contains("envelope-unsealed"));
 
         switch (code)
         {
@@ -116,9 +124,7 @@ public class ItemSealableEnvelope : Item
                 if (api.Side == EnumAppSide.Client)
                 {
                     // TODO: Call all of this server side to immediately seal without any packet magic
-                    var envelopeSlot = slots.FirstOrDefault(slot =>
-                        !slot.Empty && slot.Itemstack.Collectible.Code.Path.Contains("envelope-unsealed"));
-                    SealEnvelope(envelopeSlot);
+                    SealEnvelope(envelopeSlot, outputSlot);
                 }
 
                 break;
@@ -169,7 +175,7 @@ public class ItemSealableEnvelope : Item
                             }
 
                             dialog?.TryClose();
-                            var contentsId = slot.Itemstack.Attributes.GetString("ContentsId");
+                            var contentsId = slot.Itemstack.Attributes.GetString(EnvelopeAttributes.ContentsId);
                             EnvelopesModSystem.ClientNetworkChannel.SendPacket(new OpenEnvelopePacket
                                 { ContentsId = contentsId });
                             var sealedHandled = EnumHandHandling.Handled;
@@ -228,7 +234,7 @@ public class ItemSealableEnvelope : Item
 
     public override void GetHeldItemInfo(ItemSlot inSlot, StringBuilder dsc, IWorldAccessor world, bool withDebugInfo)
     {
-        var contentsId = inSlot.Itemstack?.Attributes?.GetString("ContentsId");
+        var contentsId = inSlot.Itemstack?.Attributes?.GetString(EnvelopeAttributes.ContentsId);
         if (!string.IsNullOrEmpty(contentsId))
         {
             dsc.AppendLine(Lang.Get($"{EnvelopesModSystem.ModId}:envelope-hascontents"));
@@ -241,7 +247,7 @@ public class ItemSealableEnvelope : Item
 
 
         // backwards compatibility mapping for older envelopes
-        var sealerId = inSlot.Itemstack?.Attributes?.GetString("SealerId");
+        var sealerId = inSlot.Itemstack?.Attributes?.GetString(EnvelopeAttributes.SealerId);
         if (!string.IsNullOrEmpty(sealerId))
         {
             EnvelopesModSystem.ClientNetworkChannel.SendPacket(new RemapSealerIdPacket
@@ -253,7 +259,7 @@ public class ItemSealableEnvelope : Item
         }
 
 
-        var sealerName = inSlot.Itemstack?.Attributes?.GetString("SealerName");
+        var sealerName = inSlot.Itemstack?.Attributes?.GetString(EnvelopeAttributes.SealerName);
         if (!string.IsNullOrEmpty(sealerName))
         {
             dsc.AppendLine($"{Lang.Get($"{EnvelopesModSystem.ModId}:envelope-sealedby")}: {sealerName}");
