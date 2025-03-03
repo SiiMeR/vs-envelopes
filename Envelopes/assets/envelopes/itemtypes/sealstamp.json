@@ -2,16 +2,34 @@
   "code": "sealstamp",
   "class": "ItemWaxSealStamp",
   "maxstacksize": 1,
-//  "storageFlags": 257, makes it offhandable
+  //  "storageFlags": 257, makes it offhandable
   "creativeinventory": {
-    "general": [ "*" ],
-    "envelopes": [ "*" ]
+    "general": [
+      "*"
+    ],
+    "envelopes": [
+      "*"
+    ]
   },
+  durability: 2000,
   "shape": {
     "base": "item/sealstamp"
   },
   behaviors: [
-    { name: "GroundStorable", properties: { layout: 'Quadrants', collisionBox: { x1: 0, y1: 0, z1: 0, x2: 1, y2: 0.125, z2: 1 } } }
+    {
+      name: "GroundStorable",
+      properties: {
+        layout: 'Quadrants',
+        collisionBox: {
+          x1: 0,
+          y1: 0,
+          z1: 0,
+          x2: 1,
+          y2: 0.125,
+          z2: 1
+        }
+      }
+    }
   ],
   "attributes": {},
   "heldRightReadyAnimation": "chiselready",

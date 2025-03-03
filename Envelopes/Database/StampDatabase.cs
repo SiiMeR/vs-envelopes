@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using Envelopes.Util;
 using Microsoft.Data.Sqlite;
 using Vintagestory.API.Config;
 
@@ -29,7 +28,7 @@ public class StampDatabase
 
     public StampDatabase()
     {
-        var path = Path.Combine(GamePaths.DataPath, "ModData", Helpers.GetApi().World.SavegameIdentifier,
+        var path = Path.Combine(GamePaths.DataPath, "ModData", EnvelopesModSystem.SApi.World.SavegameIdentifier,
             EnvelopesModSystem.ModId, "stamps.db");
         _connectionString = $"Data Source={path};";
 

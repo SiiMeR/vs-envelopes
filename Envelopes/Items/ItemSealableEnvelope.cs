@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Envelopes.Messages;
-using Envelopes.Util;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
@@ -22,7 +21,7 @@ public class ItemSealableEnvelope : Item
 
     public static string GetModDataPath()
     {
-        var globalApi = EnvelopesModSystem.Api;
+        var globalApi = EnvelopesModSystem.SApi;
 
         var localPath = Path.Combine("ModData", globalApi.World.SavegameIdentifier, EnvelopesModSystem.ModId);
         return globalApi.GetOrCreateDataPath(localPath);
@@ -62,20 +61,13 @@ public class ItemSealableEnvelope : Item
 
     public static void OpenEnvelope(ItemSlot slot, IPlayer opener, string nextCode)
     {
-        var globalApi = Helpers.GetApi();
+        var globalApi = EnvelopesModSystem.SApi;
         var contentsId = slot.Itemstack.Attributes.GetString("ContentsId");
         if (string.IsNullOrEmpty(contentsId))
         {
             globalApi.Logger.Debug("Trying to open empty envelope.");
             return;
         }
-
-        if (globalApi.World.Side == EnumAppSide.Client)
-        {
-            EnvelopesModSystem.ClientNetworkChannel.SendPacket(new OpenEnvelopePacket { ContentsId = contentsId });
-            return;
-        }
-
 
         var modDataPath = GetModDataPath();
         var filePath = Path.Combine(modDataPath, contentsId);
@@ -158,6 +150,7 @@ public class ItemSealableEnvelope : Item
         var code = slot.Itemstack.Collectible.Code.Path;
         var nextCode = code == "envelope-sealed" ? "envelopes:envelope-opened" : "envelopes:envelope-empty";
 
+
         switch (code)
         {
             case "envelope-sealed":
@@ -176,7 +169,9 @@ public class ItemSealableEnvelope : Item
                             }
 
                             dialog?.TryClose();
-                            OpenEnvelope(slot, player.Player, nextCode);
+                            var contentsId = slot.Itemstack.Attributes.GetString("ContentsId");
+                            EnvelopesModSystem.ClientNetworkChannel.SendPacket(new OpenEnvelopePacket
+                                { ContentsId = contentsId });
                             var sealedHandled = EnumHandHandling.Handled;
                             (slot.Itemstack.Collectible as ItemBook)?.OnHeldInteractStart(slot, byEntity, blockSel,
                                 entitySel, true, ref sealedHandled);
