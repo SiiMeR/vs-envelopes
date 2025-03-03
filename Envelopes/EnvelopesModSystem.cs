@@ -17,6 +17,7 @@ public class EnvelopesModSystem : ModSystem
     public static IClientNetworkChannel? ClientNetworkChannel;
     public static IServerNetworkChannel? ServerNetworkChannel;
     public static StampDatabase? StampDatabase;
+    public static EnvelopeDatabase? EnvelopeDatabase;
 
     public override void Start(ICoreAPI api)
     {
@@ -52,6 +53,7 @@ public class EnvelopesModSystem : ModSystem
             .SetMessageHandler<SaveStampDesignPacket>(OnSaveStampDesignPacket);
 
         StampDatabase = new StampDatabase();
+        EnvelopeDatabase = new EnvelopeDatabase();
 
         base.StartServerSide(api);
     }
