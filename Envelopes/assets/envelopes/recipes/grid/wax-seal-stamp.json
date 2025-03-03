@@ -1,0 +1,22 @@
+﻿{
+  ingredientPattern: "S,I",
+  ingredients: {
+    "S": {
+      type: "item",
+      code: "game:stick"
+    },
+    "I": {
+      type: "item",
+      name: "ingot",
+      code: "game:ingot-*"
+    }
+  },
+  width: 1,
+  height: 2,
+  shapeless: true,
+  output: {
+    type: "item",
+    code: "sealstamp",
+    quantity: 1
+  }
+}

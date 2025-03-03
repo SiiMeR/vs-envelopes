@@ -1,12 +1,62 @@
-{
-  ingredientPattern: "E,W",
-  ingredients: {
-    "E": { type: "item", code: "envelope-unsealed" },
-    "W": { type: "item", code: "game:beeswax" }
+[
+  {
+    ingredientPattern: "S_,WC,E_",
+    ingredients: {
+      "S": {
+        type: "item",
+        code: "sealstamp"
+      },
+      "W": {
+        type: "item",
+        code: "game:beeswax"
+      },
+      "C": {
+        type: "item",
+        code: "game:candle"
+      },
+      "E": {
+        type: "item",
+        code: "envelope-unsealed"
+      }
+    },
+    width: 2,
+    height: 3,
+    shapeless: true,
+    copyAttributesFrom: 'E',
+    output: {
+      type: "item",
+      code: "envelope-sealed",
+      quantity: 1
+    }
   },
-  width: 1,
-  height: 2,
-  shapeless: true,
-  copyAttributesFrom: 'E',
-  output: { type: "item", code: "envelope-sealed", quantity: 1  }
-}
+  {
+    ingredientPattern: "S_,WT,E_",
+    ingredients: {
+      "S": {
+        type: "item",
+        code: "sealstamp"
+      },
+      "W": {
+        type: "item",
+        code: "game:beeswax"
+      },
+      "T": {
+        type: "block",
+        code: "game:torch-basic-lit-up"
+      },
+      "E": {
+        type: "item",
+        code: "envelope-unsealed"
+      }
+    },
+    width: 2,
+    height: 3,
+    shapeless: true,
+    copyAttributesFrom: 'E',
+    output: {
+      type: "item",
+      code: "envelope-sealed",
+      quantity: 1
+    }
+  }
+]

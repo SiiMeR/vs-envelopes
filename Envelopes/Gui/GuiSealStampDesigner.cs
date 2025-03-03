@@ -93,8 +93,6 @@ public class GuiSealStampDesigner : GuiDialog
                     buttonBounds,
                     key
                 );
-
-                SingleComposer.GetToggleButton(key).On = true;
             }
         }
 
@@ -141,8 +139,7 @@ public class GuiSealStampDesigner : GuiDialog
 
     private void OnToggleButton(bool newState, int x, int y)
     {
-        // the toggles are inverted
-        _designState[y, x] = !newState;
+        _designState[y, x] = newState;
     }
 
     private void OnClose()
@@ -158,11 +155,12 @@ public class GuiSealStampDesigner : GuiDialog
             {
                 var title = SingleComposer.GetTextInput("title").GetText();
 
-
                 EnvelopesModSystem.ClientNetworkChannel?.SendPacket(new SaveStampDesignPacket
                 {
                     Title = title, Design = BooleanArrayPacker.Pack(_designState), Dimensions = GridDimensions
                 });
+
+                TryClose();
             }
         }).TryOpen();
 
@@ -233,11 +231,11 @@ public class GuiSealStampDesigner : GuiDialog
 
         if (shouldAdd)
         {
-            UpdateToggleState(x, y, false);
+            UpdateToggleState(x, y, true);
         }
         else if (shouldDelete)
         {
-            UpdateToggleState(x, y, true);
+            UpdateToggleState(x, y, false);
         }
     }
 
@@ -285,11 +283,11 @@ public class GuiSealStampDesigner : GuiDialog
 
         if (shouldAdd)
         {
-            UpdateToggleState(x, y, false);
+            UpdateToggleState(x, y, true);
         }
         else if (shouldDelete)
         {
-            UpdateToggleState(x, y, true);
+            UpdateToggleState(x, y, false);
         }
     }
 

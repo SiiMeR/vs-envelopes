@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using Envelopes.Util;
 using Microsoft.Data.Sqlite;
 using Vintagestory.API.Config;
@@ -20,7 +21,7 @@ public class StampDatabase
         "CREATE TABLE IF NOT EXISTS Stamps (Id INTEGER PRIMARY KEY, CreatorId TEXT, Title TEXT DEFAULT '', Design BLOB, Dimensions INTEGER);";
 
     private const string InsertStampQuery =
-        "INSERT INTO Stamps (Title, CreatorId, Design, Dimensions) VALUES (@Title, @CreatorId, @Design, @Dimensions);";
+        "INSERT INTO Stamps (Title, CreatorId, Design, Dimensions) VALUES (@Title, @CreatorId, @Design, @Dimensions);SELECT last_insert_rowid();";
 
     private const string GetStampQuery = "SELECT Id, CreatorId, Title, Design, Dimensions FROM Stamps WHERE Id = @Id;";
 
@@ -39,7 +40,7 @@ public class StampDatabase
         command.ExecuteNonQuery();
     }
 
-    public void InsertStamp(Stamp stamp)
+    public long InsertStamp(Stamp stamp)
     {
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();
@@ -51,7 +52,15 @@ public class StampDatabase
         command.Parameters.AddWithValue("@Dimensions", stamp.Dimensions);
         command.Parameters.AddWithValue("@Design", stamp.Design);
 
-        command.ExecuteNonQuery();
+        var result = command.ExecuteScalar();
+        if (result == null)
+        {
+            throw new InvalidOperationException("Failed to insert a new stamp.");
+        }
+
+        var stampId = (long)result;
+
+        return stampId;
     }
 
     public Stamp? GetStamp(string id)

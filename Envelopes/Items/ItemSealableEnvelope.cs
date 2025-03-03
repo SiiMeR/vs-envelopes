@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Envelopes.Messages;
+using Envelopes.Util;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
@@ -61,7 +62,7 @@ public class ItemSealableEnvelope : Item
 
     public static void OpenEnvelope(ItemSlot slot, IPlayer opener, string nextCode)
     {
-        var globalApi = EnvelopesModSystem.Api;
+        var globalApi = Helpers.GetApi();
         var contentsId = slot.Itemstack.Attributes.GetString("ContentsId");
         if (string.IsNullOrEmpty(contentsId))
         {
@@ -122,6 +123,7 @@ public class ItemSealableEnvelope : Item
             case "envelope-sealed":
                 if (api.Side == EnumAppSide.Client)
                 {
+                    // TODO: Call all of this server side to immediately seal without any packet magic
                     var envelopeSlot = slots.FirstOrDefault(slot =>
                         !slot.Empty && slot.Itemstack.Collectible.Code.Path.Contains("envelope-unsealed"));
                     SealEnvelope(envelopeSlot);

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Envelopes.Database;
 using Envelopes.Items;
 using Envelopes.Messages;
@@ -55,15 +56,29 @@ public class EnvelopesModSystem : ModSystem
         base.StartServerSide(api);
     }
 
-    private void OnSaveStampDesignPacket(IServerPlayer fromplayer, SaveStampDesignPacket packet)
+    private void OnSaveStampDesignPacket(IServerPlayer fromPlayer, SaveStampDesignPacket packet)
     {
-        StampDatabase?.InsertStamp(new Stamp
+        if (StampDatabase == null)
+        {
+            throw new InvalidOperationException("The stamp database has not yet been initialized");
+        }
+
+        var stampId = StampDatabase.InsertStamp(new Stamp
         {
             Title = packet.Title,
             Design = BooleanArrayPacker.PackToByteArray(packet.Design),
             Dimensions = packet.Dimensions,
-            CreatorId = fromplayer.PlayerUID
+            CreatorId = fromPlayer.PlayerUID
         });
+
+        var itemSlot = Helpers.FindCollectibleOfTypeInInventory<ItemWaxSealStamp>(fromPlayer);
+        if (itemSlot != null && !itemSlot.Itemstack.Attributes.HasAttribute("StampId"))
+        {
+            itemSlot.Itemstack.Attributes.SetLong("StampId", stampId);
+            itemSlot.Itemstack.Attributes.SetString("StampTitle", packet.Title);
+        }
+
+        itemSlot?.MarkDirty();
     }
 
     private void OnSealEnvelopePacket(IServerPlayer fromplayer, SealEnvelopePacket packet)
@@ -102,9 +117,9 @@ public class EnvelopesModSystem : ModSystem
     private void OnRemapSealerIdPacket(IServerPlayer fromplayer, RemapSealerIdPacket packet)
     {
         var itemSlot = fromplayer
-            ?.InventoryManager
+            .InventoryManager
             ?.OpenedInventories
-            ?.FirstOrDefault(inv => inv.InventoryID == packet?.InventoryId)?[packet.SlotId];
+            ?.FirstOrDefault(inv => inv.InventoryID == packet.InventoryId)?[packet.SlotId];
 
         var itemStack = itemSlot?.Itemstack;
 
@@ -112,10 +127,10 @@ public class EnvelopesModSystem : ModSystem
         if (!string.IsNullOrEmpty(sealerId))
         {
             var name = Api.World.PlayerByUid(fromplayer.PlayerUID)?.PlayerName;
-            itemStack.Attributes.SetString("SealerName", name);
-            itemStack.Attributes.RemoveAttribute("SealerId");
+            itemStack?.Attributes.SetString("SealerName", name);
+            itemStack?.Attributes.RemoveAttribute("SealerId");
 
-            itemSlot.MarkDirty();
+            itemSlot?.MarkDirty();
         }
     }
 }
