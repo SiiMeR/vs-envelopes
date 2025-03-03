@@ -28,7 +28,7 @@ public class StampDatabase
 
     public StampDatabase()
     {
-        var path = Path.Combine(GamePaths.DataPath, "ModData", EnvelopesModSystem.SApi.World.SavegameIdentifier,
+        var path = Path.Combine(GamePaths.DataPath, "ModData", EnvelopesModSystem.Api.World.SavegameIdentifier,
             EnvelopesModSystem.ModId, "stamps.db");
         _connectionString = $"Data Source={path};";
 

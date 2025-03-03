@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using Envelopes.Gui;
+using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 
 namespace Envelopes.Items;
@@ -19,7 +20,7 @@ public class ItemWaxSealStamp : Item
         var hasStampId = slot.Itemstack?.Attributes.HasAttribute("StampId") ?? false;
         if (firstEvent && !hasStampId)
         {
-            var dialog = new GuiSealStampDesigner(EnvelopesModSystem.CApi);
+            var dialog = new GuiSealStampDesigner(EnvelopesModSystem.Api as ICoreClientAPI);
             dialog.TryOpen(true);
             handling = EnumHandHandling.PreventDefault;
         }

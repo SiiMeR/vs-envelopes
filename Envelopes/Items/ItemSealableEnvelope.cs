@@ -21,7 +21,7 @@ public class ItemSealableEnvelope : Item
 
     public static string GetModDataPath()
     {
-        var globalApi = EnvelopesModSystem.SApi;
+        var globalApi = EnvelopesModSystem.Api;
 
         var localPath = Path.Combine("ModData", globalApi.World.SavegameIdentifier, EnvelopesModSystem.ModId);
         return globalApi.GetOrCreateDataPath(localPath);
@@ -61,7 +61,7 @@ public class ItemSealableEnvelope : Item
 
     public static void OpenEnvelope(ItemSlot slot, IPlayer opener, string nextCode)
     {
-        var globalApi = EnvelopesModSystem.SApi;
+        var globalApi = EnvelopesModSystem.Api;
         var contentsId = slot.Itemstack.Attributes.GetString("ContentsId");
         if (string.IsNullOrEmpty(contentsId))
         {

@@ -13,14 +13,14 @@ namespace Envelopes;
 public class EnvelopesModSystem : ModSystem
 {
     public static string? ModId;
-    public static ICoreServerAPI? SApi;
-    public static ICoreClientAPI? CApi;
+    public static ICoreAPI? Api;
     public static IClientNetworkChannel? ClientNetworkChannel;
     public static IServerNetworkChannel? ServerNetworkChannel;
     public static StampDatabase? StampDatabase;
 
     public override void Start(ICoreAPI api)
     {
+        Api = api;
         ModId = Mod.Info.ModID;
         api.RegisterItemClass("ItemSealableEnvelope", typeof(ItemSealableEnvelope));
         api.RegisterItemClass("ItemWaxSealStamp", typeof(ItemWaxSealStamp));
@@ -29,7 +29,6 @@ public class EnvelopesModSystem : ModSystem
 
     public override void StartClientSide(ICoreClientAPI api)
     {
-        CApi = api;
         ClientNetworkChannel = api.Network.RegisterChannel("envelopes")
             .RegisterMessageType<SealEnvelopePacket>()
             .RegisterMessageType<OpenEnvelopePacket>()
@@ -42,7 +41,6 @@ public class EnvelopesModSystem : ModSystem
 
     public override void StartServerSide(ICoreServerAPI api)
     {
-        SApi = api;
         ServerNetworkChannel = api.Network.RegisterChannel("envelopes")
             .RegisterMessageType<SealEnvelopePacket>()
             .RegisterMessageType<OpenEnvelopePacket>()
@@ -106,7 +104,7 @@ public class EnvelopesModSystem : ModSystem
             var contentsId = slot?.Itemstack?.Attributes?.GetString("ContentsId");
             if (contentsId != null && contentsId == packet.ContentsId)
             {
-                SApi?.Event.EnqueueMainThreadTask(
+                Api?.Event.EnqueueMainThreadTask(
                     () => { ItemSealableEnvelope.OpenEnvelope(slot, fromplayer, "envelopes:envelope-opened"); },
                     "openenvelope");
                 return false;
@@ -128,7 +126,7 @@ public class EnvelopesModSystem : ModSystem
         var sealerId = itemStack?.Attributes.GetString("SealerId");
         if (!string.IsNullOrEmpty(sealerId))
         {
-            var name = SApi.World.PlayerByUid(fromplayer.PlayerUID)?.PlayerName;
+            var name = Api.World.PlayerByUid(fromplayer.PlayerUID)?.PlayerName;
             itemStack?.Attributes.SetString("SealerName", name);
             itemStack?.Attributes.RemoveAttribute("SealerId");
 
