@@ -62,7 +62,7 @@ public class ItemSealableEnvelope : Item
             return;
         }
 
-        var stampId = stampSlot?.Itemstack?.Attributes?.GetLong(StampAttributes.StampId);
+        var stampId = stampSlot?.Itemstack?.Attributes?.TryGetLong(StampAttributes.StampId);
         if (!stampId.HasValue)
         {
             api.Logger.Debug("Trying to seal with an empty stamp.");
@@ -105,10 +105,16 @@ public class ItemSealableEnvelope : Item
 
         var nextItem = new ItemStack(globalApi.World.GetItem(new AssetLocation(nextCode)));
 
-        var sealerName = slot.Itemstack?.Attributes?.GetString(EnvelopeAttributes.SealerName);
-        if (!string.IsNullOrEmpty(sealerName))
+        var stampId = slot.Itemstack?.Attributes?.TryGetLong(StampAttributes.StampId);
+        if (stampId.HasValue)
         {
-            nextItem.Attributes?.SetString(EnvelopeAttributes.SealerName, sealerName);
+            nextItem.Attributes?.SetLong(StampAttributes.StampId, stampId.Value);
+        }
+
+        var stampTitle = slot.Itemstack?.Attributes?.GetString(StampAttributes.StampTitle);
+        if (!string.IsNullOrEmpty(stampTitle))
+        {
+            nextItem.Attributes?.SetString(StampAttributes.StampTitle, stampTitle);
         }
 
         if (!opener.InventoryManager.TryGiveItemstack(nextItem, true))
@@ -263,7 +269,7 @@ public class ItemSealableEnvelope : Item
         dsc.AppendLine("");
 
         var stampName = inSlot.Itemstack?.Attributes?.GetString(StampAttributes.StampTitle);
-        var stampId = inSlot.Itemstack?.Attributes?.GetLong(StampAttributes.StampId);
+        var stampId = inSlot.Itemstack?.Attributes?.TryGetLong(StampAttributes.StampId);
         if (!string.IsNullOrEmpty(stampName) && stampId.HasValue)
         {
             var id = $"<font color=\"gray\">(ID:{stampId})</font>";
