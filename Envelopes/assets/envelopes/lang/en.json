@@ -8,6 +8,7 @@
   "envelope-hascontents": "The envelope contains a letter.",
   "envelope-sealbroken": "The seal has been broken.",
   "envelope-sealedby": "Sealed by",
+  "envelope-emblem": "Emblem",
   "item-sealstamp-blank": "Wax seal stamp (blank)",
   "item-sealstamp-engraved": "Wax seal stamp",
   "stampdesigner-title": "Create a new wax seal stamp",

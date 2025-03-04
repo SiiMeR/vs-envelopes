@@ -7,7 +7,7 @@ namespace Envelopes.Database;
 
 public record Envelope
 {
-    public int Id { get; set; }
+    public long Id { get; set; }
     public required string CreatorId { get; init; }
     public required byte[] ItemBlob { get; init; }
 }
@@ -74,7 +74,7 @@ public class EnvelopeDatabase
             return null;
         }
 
-        var identifier = (int)reader["Id"];
+        var identifier = (long)reader["Id"];
         var itemBlob = (byte[])reader["ItemBlob"];
         var creatorId = (string)reader["CreatorId"];
 

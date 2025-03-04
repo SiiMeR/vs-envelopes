@@ -92,12 +92,20 @@ public class EnvelopesModSystem : ModSystem
 
     private void OnSealEnvelopePacket(IServerPlayer fromplayer, SealEnvelopePacket packet)
     {
+        var stamp = StampDatabase?.GetStamp(packet.StampId);
+        if (stamp == null)
+        {
+            Api.Logger.Debug($"Unable to seal envelope. Envelope:{packet.EnvelopeId}, Stamp{packet.StampId}");
+            return;
+        }
+
         fromplayer.Entity.WalkInventory(slot =>
         {
             var contentsId = slot?.Itemstack?.Attributes?.GetString(EnvelopeAttributes.ContentsId);
-            if (!string.IsNullOrEmpty(contentsId) && contentsId == packet.ContentsId)
+            if (!string.IsNullOrEmpty(contentsId) && contentsId == packet.EnvelopeId)
             {
-                slot?.Itemstack?.Attributes?.SetString(EnvelopeAttributes.SealerName, fromplayer.PlayerName);
+                slot?.Itemstack?.Attributes?.SetLong(StampAttributes.StampId, stamp.Id);
+                slot?.Itemstack?.Attributes?.SetString(StampAttributes.StampTitle, stamp.Title);
                 slot?.MarkDirty();
                 return false;
             }

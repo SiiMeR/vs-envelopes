@@ -7,11 +7,11 @@ namespace Envelopes.Database;
 
 public record Stamp
 {
-    public int Id { get; set; }
+    public long Id { get; set; }
     public required string Title { get; init; }
     public required string CreatorId { get; init; }
     public required byte[] Design { get; init; }
-    public required int Dimensions { get; init; }
+    public required long Dimensions { get; init; }
 }
 
 public class StampDatabase
@@ -62,7 +62,7 @@ public class StampDatabase
         return stampId;
     }
 
-    public Stamp? GetStamp(string id)
+    public Stamp? GetStamp(long id)
     {
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();
@@ -76,10 +76,10 @@ public class StampDatabase
             return null;
         }
 
-        var identifier = (int)reader["Id"];
+        var identifier = (long)reader["Id"];
         var title = (string)reader["Title"];
         var design = (byte[])reader["Design"];
-        var dimensions = (int)reader["Dimensions"];
+        var dimensions = (long)reader["Dimensions"];
         var creatorId = (string)reader["CreatorId"];
 
         return new Stamp

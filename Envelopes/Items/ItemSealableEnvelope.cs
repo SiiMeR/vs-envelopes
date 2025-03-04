@@ -48,16 +48,29 @@ public class ItemSealableEnvelope : Item
         outputSlot.MarkDirty();
     }
 
-    private void SealEnvelope(ItemSlot inputSlot, ItemSlot outputSlot)
+    private void SealEnvelope(ItemSlot? envelopeSlot, ItemSlot? stampSlot)
     {
-        var contentsId = inputSlot?.Itemstack?.Attributes?.GetString(EnvelopeAttributes.ContentsId);
+        if (envelopeSlot == null || stampSlot == null)
+        {
+            return;
+        }
+
+        var contentsId = envelopeSlot?.Itemstack?.Attributes?.GetString(EnvelopeAttributes.ContentsId);
         if (string.IsNullOrEmpty(contentsId))
         {
             api.Logger.Debug("Trying to seal an empty envelope.");
             return;
         }
 
-        EnvelopesModSystem.ClientNetworkChannel?.SendPacket(new SealEnvelopePacket { ContentsId = contentsId });
+        var stampId = stampSlot?.Itemstack?.Attributes?.GetLong(StampAttributes.StampId);
+        if (!stampId.HasValue)
+        {
+            api.Logger.Debug("Trying to seal with an empty stamp.");
+            return;
+        }
+
+        EnvelopesModSystem.ClientNetworkChannel?.SendPacket(new SealEnvelopePacket
+            { EnvelopeId = contentsId, StampId = stampId.Value });
     }
 
     public static void OpenEnvelope(ItemSlot slot, IPlayer opener, string nextCode)
@@ -114,6 +127,8 @@ public class ItemSealableEnvelope : Item
             !slot.Empty && slot.Itemstack.Collectible.Code.Path.Contains("parchment"));
         var envelopeSlot = slots.FirstOrDefault(slot =>
             !slot.Empty && slot.Itemstack.Collectible.Code.Path.Contains("envelope-unsealed"));
+        var stampSlot = slots.FirstOrDefault(slot =>
+            !slot.Empty && slot.Itemstack.Collectible.Code.Path.Contains("sealstamp-engraved"));
 
         switch (code)
         {
@@ -124,7 +139,7 @@ public class ItemSealableEnvelope : Item
                 if (api.Side == EnumAppSide.Client)
                 {
                     // TODO: Call all of this server side to immediately seal without any packet magic
-                    SealEnvelope(envelopeSlot, outputSlot);
+                    SealEnvelope(envelopeSlot, stampSlot);
                 }
 
                 break;
@@ -245,6 +260,19 @@ public class ItemSealableEnvelope : Item
             dsc.AppendLine(Lang.Get($"{EnvelopesModSystem.ModId}:envelope-sealbroken"));
         }
 
+        dsc.AppendLine("");
+
+        var stampName = inSlot.Itemstack?.Attributes?.GetString(StampAttributes.StampTitle);
+        var stampId = inSlot.Itemstack?.Attributes?.GetLong(StampAttributes.StampId);
+        if (!string.IsNullOrEmpty(stampName) && stampId.HasValue)
+        {
+            var id = $"<font color=\"gray\">(ID:{stampId})</font>";
+            var name = $"<font color=\"orange\">“{stampName}” </font>";
+            dsc.AppendLine(Helpers.EnvelopesLangString("envelope-emblem") + ":");
+            dsc.AppendLine(
+                $"{name} {id}");
+        }
+
 
         // backwards compatibility mapping for older envelopes
         var sealerId = inSlot.Itemstack?.Attributes?.GetString(EnvelopeAttributes.SealerId);
@@ -258,7 +286,7 @@ public class ItemSealableEnvelope : Item
             inSlot.MarkDirty();
         }
 
-
+        // backwards compatibility for older envelopes
         var sealerName = inSlot.Itemstack?.Attributes?.GetString(EnvelopeAttributes.SealerName);
         if (!string.IsNullOrEmpty(sealerName))
         {
