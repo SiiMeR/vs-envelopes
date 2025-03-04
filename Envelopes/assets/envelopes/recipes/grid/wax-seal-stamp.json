@@ -16,7 +16,7 @@
   shapeless: true,
   output: {
     type: "item",
-    code: "sealstamp",
+    code: "sealstamp-blank",
     quantity: 1
   }
 }

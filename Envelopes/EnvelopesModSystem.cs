@@ -65,6 +65,9 @@ public class EnvelopesModSystem : ModSystem
             throw new InvalidOperationException("The stamp database has not yet been initialized");
         }
 
+        var nextItem = new ItemStack(Api?.World.GetItem(new AssetLocation("envelopes:sealstamp-engraved")));
+
+
         var stampId = StampDatabase.InsertStamp(new Stamp
         {
             Title = packet.Title,
@@ -74,10 +77,14 @@ public class EnvelopesModSystem : ModSystem
         });
 
         var itemSlot = Helpers.FindCollectibleOfTypeInInventory<ItemWaxSealStamp>(fromPlayer);
-        if (itemSlot != null && !itemSlot.Itemstack.Attributes.HasAttribute(StampAttributes.StampId))
+        itemSlot?.TakeOut(1);
+
+        nextItem.Attributes.SetLong(StampAttributes.StampId, stampId);
+        nextItem.Attributes.SetString(StampAttributes.StampTitle, packet.Title);
+
+        if (!fromPlayer.InventoryManager.TryGiveItemstack(nextItem, true))
         {
-            itemSlot.Itemstack.Attributes.SetLong(StampAttributes.StampId, stampId);
-            itemSlot.Itemstack.Attributes.SetString(StampAttributes.StampTitle, packet.Title);
+            Api?.World.SpawnItemEntity(nextItem, fromPlayer.Entity.SidedPos.XYZ);
         }
 
         itemSlot?.MarkDirty();

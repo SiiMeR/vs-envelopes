@@ -18,8 +18,8 @@ public class ItemWaxSealStamp : Item
             return;
         }
 
-        var hasStampId = slot.Itemstack?.Attributes.HasAttribute(StampAttributes.StampId) ?? false;
-        if (firstEvent && !hasStampId)
+        var alreadyEngraved = slot.Itemstack.Collectible.Code.Path.Contains("engraved");
+        if (firstEvent && !alreadyEngraved)
         {
             var dialog = new GuiSealStampDesigner(EnvelopesModSystem.Api as ICoreClientAPI);
             dialog.TryOpen(true);

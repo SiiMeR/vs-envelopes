@@ -4,7 +4,7 @@
     ingredients: {
       "S": {
         type: "item",
-        code: "sealstamp",
+        code: "sealstamp-engraved",
         isTool: true,
         toolDurabilityCost: 1
       },
@@ -36,7 +36,7 @@
     ingredients: {
       "S": {
         type: "item",
-        code: "sealstamp",
+        code: "sealstamp-engraved",
         isTool: true,
         toolDurabilityCost: 1
       },

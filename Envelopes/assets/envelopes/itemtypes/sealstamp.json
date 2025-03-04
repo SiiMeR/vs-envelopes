@@ -1,7 +1,10 @@
 {
   "code": "sealstamp",
   "class": "ItemWaxSealStamp",
-  "maxstacksize": 1,
+  "maxstacksizeByType": {
+    "*-blank": 4,
+    "*": 1
+  },
   //  "storageFlags": 257, makes it offhandable
   "creativeinventory": {
     "general": [
@@ -12,6 +15,15 @@
     ]
   },
   durability: 2000,
+  variantgroups: [
+    {
+      code: "state",
+      states: [
+        "blank",
+        "engraved"
+      ]
+    }
+  ],
   "shape": {
     "base": "item/sealstamp"
   },
@@ -31,7 +43,23 @@
       }
     }
   ],
-  "attributes": {},
+  "attributes": {
+    displaycaseable: true,
+    shelvable: true,
+    groundStorageTransform: {
+      translation: {
+        x: 0,
+        y: -0.2,
+        z: 0
+      },
+      rotation: {
+        x: 0,
+        y: 0,
+        z: 0
+      },
+      scale: 0.6
+    }
+  },
   "heldRightReadyAnimation": "chiselready",
   "tpHandTransform": {
     "translation": {
@@ -77,23 +105,43 @@
     },
     "scale": 2.13
   },
-  "guiTransform": {
-    "translation": {
-      "x": 3,
-      "y": -0.6,
-      "z": 0
+  guiTransformByType: {
+    "*-blank": {
+      "translation": {
+        "x": 3,
+        "y": -0.6,
+        "z": 0
+      },
+      "rotation": {
+        "x": 157,
+        "y": -45,
+        "z": 0
+      },
+      "origin": {
+        "x": 0.5,
+        "y": 0.2,
+        "z": 0.5
+      },
+      "scale": 2.53
     },
-    "rotation": {
-      "x": 157,
-      "y": -45,
-      "z": 0
-    },
-    "origin": {
-      "x": 0.5,
-      "y": 0.2,
-      "z": 0.5
-    },
-    "scale": 2.53
+    "*": {
+      "translation": {
+        "x": 0,
+        "y": 0,
+        "z": 0
+      },
+      "rotation": {
+        "x": -20,
+        "y": 45,
+        "z": -15
+      },
+      "origin": {
+        "x": 0.5,
+        "y": 0.2,
+        "z": 0.5
+      },
+      "scale": 2.53
+    }
   },
   "groundTransform": {
     "translation": {
