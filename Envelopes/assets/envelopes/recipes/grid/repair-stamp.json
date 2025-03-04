@@ -1,0 +1,22 @@
+﻿{
+  ingredientPattern: "EB",
+  ingredients: {
+    "E": {
+      type: "item",
+      code: "sealstamp-engraved"
+    },
+    "B": {
+      type: "item",
+      name: "ingot",
+      code: "sealstamp-blank"
+    }
+  },
+  width: 2,
+  height: 1,
+  copyAttributesFrom: 'E',
+  output: {
+    type: "item",
+    code: "sealstamp-engraved",
+    quantity: 1
+  }
+}
