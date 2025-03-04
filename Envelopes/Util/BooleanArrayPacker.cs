@@ -59,4 +59,24 @@ public static class BooleanArrayPacker
 
         return bytes;
     }
+
+    public static bool[] UnpackFromByteArray(byte[] bytes)
+    {
+        var maxBits = bytes.Length * 8;
+        var result = new bool[maxBits];
+
+        for (var i = 0; i < maxBits; i++)
+        {
+            result[i] = (bytes[i / 8] & (1 << (i % 8))) != 0;
+        }
+
+        return result;
+    }
+
+    public static bool[,] UnpackFromByteArray(byte[] bytes, int dimensions)
+    {
+        var linearArray = UnpackFromByteArray(bytes);
+
+        return Unpack(linearArray, dimensions);
+    }
 }
