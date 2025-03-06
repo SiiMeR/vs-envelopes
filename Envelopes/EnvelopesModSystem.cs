@@ -74,7 +74,6 @@ public class EnvelopesModSystem : ModSystem
                         var contents = File.ReadAllBytes(path);
                         var fileName = Path.GetFileNameWithoutExtension(path);
 
-                        Console.WriteLine(contents.Length);
                         var envelope = new Envelope
                         {
                             Id = fileName,
@@ -152,7 +151,7 @@ public class EnvelopesModSystem : ModSystem
     {
         fromplayer.Entity.WalkInventory(slot =>
         {
-            var contentsId = slot?.Itemstack?.Attributes?.GetString(EnvelopeAttributes.ContentsId);
+            var contentsId = slot.Itemstack?.Attributes?.GetString(EnvelopeAttributes.ContentsId);
             if (contentsId != null && contentsId == packet.ContentsId)
             {
                 ItemSealableEnvelope.OpenEnvelope(slot, fromplayer);
