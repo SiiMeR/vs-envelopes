@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Envelopes.Database;
 using Envelopes.Messages;
 using Envelopes.Util;
 using Vintagestory.API.Client;
@@ -15,36 +16,40 @@ namespace Envelopes.Items;
 
 public class ItemSealableEnvelope : Item
 {
-    private string GenerateEnvelopeId()
+    private void PutLetterIntoEnvelope(ItemSlot? letterSlot, ItemSlot? outputSlot)
     {
-        return Guid.NewGuid().ToString("n");
-    }
-
-    public static string GetModDataPath()
-    {
-        var globalApi = EnvelopesModSystem.Api;
-
-        var localPath = Path.Combine("ModData", globalApi.World.SavegameIdentifier, EnvelopesModSystem.ModId);
-        return globalApi.GetOrCreateDataPath(localPath);
-    }
-
-    private void PutLetterIntoEnvelope(ItemSlot letterSlot, ItemSlot outputSlot)
-    {
-        letterSlot.MarkDirty();
+        if (letterSlot == null || outputSlot == null)
+        {
+            return;
+        }
 
         if (api.World.Side != EnumAppSide.Server)
         {
             return;
         }
 
-        var id = GenerateEnvelopeId();
-        var modDataPath = GetModDataPath();
+        var envelopeDatabase = EnvelopesModSystem.EnvelopeDatabase;
+        if (envelopeDatabase == null)
+        {
+            throw new InvalidOperationException("The envelopes database has not been initialized yet.");
+        }
 
-        using var stream = File.OpenWrite(Path.Combine(modDataPath, id));
+        letterSlot.MarkDirty();
+        using var stream = new MemoryStream();
         using var binaryWriter = new BinaryWriter(stream);
         letterSlot.Itemstack.Attributes.ToBytes(binaryWriter);
 
-        outputSlot.Itemstack.Attributes.SetString(EnvelopeAttributes.ContentsId, id);
+        var ownerId = outputSlot.Inventory.openedByPlayerGUIds.FirstOrDefault();
+
+        var envelope = new Envelope
+        {
+            CreatorId = ownerId ?? "unknown",
+            ItemBlob = stream.ToArray()
+        };
+
+        var envelopeId = envelopeDatabase.InsertEnvelope(envelope);
+
+        outputSlot.Itemstack.Attributes.SetString(EnvelopeAttributes.ContentsId, envelopeId);
         outputSlot.MarkDirty();
     }
 
@@ -55,14 +60,14 @@ public class ItemSealableEnvelope : Item
             return;
         }
 
-        var contentsId = envelopeSlot?.Itemstack?.Attributes?.GetString(EnvelopeAttributes.ContentsId);
+        var contentsId = envelopeSlot.Itemstack?.Attributes?.GetString(EnvelopeAttributes.ContentsId);
         if (string.IsNullOrEmpty(contentsId))
         {
             api.Logger.Debug("Trying to seal an empty envelope.");
             return;
         }
 
-        var stampId = stampSlot?.Itemstack?.Attributes?.TryGetLong(StampAttributes.StampId);
+        var stampId = stampSlot.Itemstack?.Attributes?.TryGetLong(StampAttributes.StampId);
         if (!stampId.HasValue)
         {
             api.Logger.Debug("Trying to seal with an empty stamp.");
@@ -73,7 +78,7 @@ public class ItemSealableEnvelope : Item
             { EnvelopeId = contentsId, StampId = stampId.Value });
     }
 
-    public static void OpenEnvelope(ItemSlot slot, IPlayer opener, string nextCode)
+    public static void OpenEnvelope(ItemSlot slot, IPlayer opener)
     {
         var globalApi = EnvelopesModSystem.Api;
         if (globalApi == null)
@@ -81,26 +86,42 @@ public class ItemSealableEnvelope : Item
             return;
         }
 
+        if (opener.Entity.World.Side != EnumAppSide.Server)
+        {
+            return;
+        }
+
         var contentsId = slot.Itemstack.Attributes.GetString(EnvelopeAttributes.ContentsId);
         if (string.IsNullOrEmpty(contentsId))
         {
-            globalApi.Logger.Debug("Trying to open empty envelope.");
+            globalApi.Logger.Debug("Trying to open an empty envelope.");
             return;
         }
 
-        var modDataPath = GetModDataPath();
-        var filePath = Path.Combine(modDataPath, contentsId);
-        if (!File.Exists(filePath))
+        var database = EnvelopesModSystem.EnvelopeDatabase;
+        if (database == null)
         {
-            globalApi.Logger.Error("Envelope contents don't exist on disk.");
-            return;
+            throw new InvalidOperationException("The envelopes database has not been initialized yet.");
         }
 
-        using var stream = File.OpenRead(filePath);
-        using var binaryReader = new BinaryReader(stream);
+        var envelope = database.GetEnvelope(contentsId);
+        if (envelope == null)
+        {
+            throw new InvalidOperationException("Failed to retrieve envelope contents.");
+        }
+
+        using var memoryStream = new MemoryStream(envelope.ItemBlob);
+        using var binaryReader = new BinaryReader(memoryStream);
 
         var paper = new ItemStack(globalApi.World.GetItem(new AssetLocation("game:paper-parchment")));
         paper.Attributes.FromBytes(binaryReader);
+
+        var codePath = slot.Itemstack.Collectible.Code.Path;
+        var nextCode = codePath.Contains("opened")
+            ? "envelopes:envelope-opened"
+            : codePath.Contains("unsealed")
+                ? "envelopes:envelope-empty"
+                : "envelopes:envelope-opened";
 
 
         var nextItem = new ItemStack(globalApi.World.GetItem(new AssetLocation(nextCode)));
@@ -167,17 +188,7 @@ public class ItemSealableEnvelope : Item
             return;
         }
 
-        if (byEntity is not EntityPlayer player)
-        {
-            base.OnHeldInteractStart(slot, byEntity, blockSel, entitySel, firstEvent, ref handling);
-            return;
-        }
-
-
         var code = slot.Itemstack.Collectible.Code.Path;
-        var nextCode = code == "envelope-sealed" ? "envelopes:envelope-opened" : "envelopes:envelope-empty";
-
-
         switch (code)
         {
             case "envelope-sealed":
@@ -197,7 +208,7 @@ public class ItemSealableEnvelope : Item
 
                             dialog?.TryClose();
                             var contentsId = slot.Itemstack.Attributes.GetString(EnvelopeAttributes.ContentsId);
-                            EnvelopesModSystem.ClientNetworkChannel.SendPacket(new OpenEnvelopePacket
+                            EnvelopesModSystem.ClientNetworkChannel?.SendPacket(new OpenEnvelopePacket
                                 { ContentsId = contentsId });
                             var sealedHandled = EnumHandHandling.Handled;
                             (slot.Itemstack.Collectible as ItemBook)?.OnHeldInteractStart(slot, byEntity, blockSel,
@@ -210,24 +221,22 @@ public class ItemSealableEnvelope : Item
                 return;
             }
             case "envelope-unsealed":
-                OpenEnvelope(slot, player.Player, nextCode);
                 handling = EnumHandHandling.Handled;
                 if (api.Side == EnumAppSide.Client)
                 {
-                    var unsealedHandled = EnumHandHandling.Handled;
-                    (slot.Itemstack.Collectible as ItemBook)?.OnHeldInteractStart(slot, byEntity, blockSel, entitySel,
-                        true, ref unsealedHandled);
+                    var contentsId = slot.Itemstack.Attributes.GetString(EnvelopeAttributes.ContentsId);
+                    EnvelopesModSystem.ClientNetworkChannel?.SendPacket(new OpenEnvelopePacket
+                        { ContentsId = contentsId });
                 }
 
                 return;
             case "envelope-opened":
-                OpenEnvelope(slot, player.Player, "envelopes:envelope-opened");
                 handling = EnumHandHandling.Handled;
                 if (api.Side == EnumAppSide.Client)
                 {
-                    var openedHandled = EnumHandHandling.Handled;
-                    (slot.Itemstack.Collectible as ItemBook)?.OnHeldInteractStart(slot, byEntity, blockSel, entitySel,
-                        true, ref openedHandled);
+                    var contentsId = slot.Itemstack.Attributes.GetString(EnvelopeAttributes.ContentsId);
+                    EnvelopesModSystem.ClientNetworkChannel?.SendPacket(new OpenEnvelopePacket
+                        { ContentsId = contentsId });
                 }
 
                 return;

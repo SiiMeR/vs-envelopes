@@ -7,7 +7,7 @@ namespace Envelopes.Database;
 
 public record Envelope
 {
-    public long Id { get; set; }
+    public string? Id { get; set; }
     public required string CreatorId { get; init; }
     public required byte[] ItemBlob { get; init; }
 }
@@ -15,10 +15,10 @@ public record Envelope
 public class EnvelopeDatabase
 {
     private const string CreateTableQuery =
-        "CREATE TABLE IF NOT EXISTS Envelopes (Id INTEGER PRIMARY KEY, CreatorId TEXT, ItemBlob BLOB);";
+        "CREATE TABLE IF NOT EXISTS Envelopes (Id TEXT PRIMARY KEY, CreatorId TEXT, ItemBlob BLOB);";
 
     private const string InsertEnvelopeQuery =
-        "INSERT INTO Envelopes (CreatorId, ItemBlob) VALUES (@CreatorId, @ItemBlob);SELECT last_insert_rowid();";
+        "INSERT INTO Envelopes (Id, CreatorId, ItemBlob) VALUES (newguid(), @CreatorId, @ItemBlob) RETURNING Id;";
 
     private const string GetEnvelopeQuery =
         "SELECT Id, CreatorId, ItemBlob FROM Envelopes WHERE Id = @Id;";
@@ -27,23 +27,34 @@ public class EnvelopeDatabase
 
     public EnvelopeDatabase()
     {
+        if (EnvelopesModSystem.Api == null)
+        {
+            throw new InvalidOperationException("The EnvelopesModSystem has not been initialized yet.");
+        }
+
         var path = Path.Combine(GamePaths.DataPath, "ModData", EnvelopesModSystem.Api.World.SavegameIdentifier,
             EnvelopesModSystem.ModId, "envelopes.db");
 
         _connectionString = $"Data Source={path};";
 
-        using var connection = new SqliteConnection(_connectionString);
-        connection.Open();
-
+        using var connection = CreateConnection();
         using var command = new SqliteCommand(CreateTableQuery, connection);
         command.ExecuteNonQuery();
     }
 
-    public long InsertEnvelope(Envelope envelope)
+    private SqliteConnection CreateConnection()
     {
-        using var connection = new SqliteConnection(_connectionString);
+        var connection = new SqliteConnection(_connectionString);
         connection.Open();
 
+        connection.CreateFunction("newguid", () => Guid.NewGuid().ToString("n"));
+
+        return connection;
+    }
+
+    public string InsertEnvelope(Envelope envelope)
+    {
+        using var connection = CreateConnection();
         using var command = new SqliteCommand(InsertEnvelopeQuery, connection);
 
         command.Parameters.AddWithValue("@CreatorId", envelope.CreatorId);
@@ -55,16 +66,14 @@ public class EnvelopeDatabase
             throw new InvalidOperationException("Failed to insert a new Envelope.");
         }
 
-        var envelopeId = (long)result;
+        var envelopeId = (string)result;
 
         return envelopeId;
     }
 
     public Envelope? GetEnvelope(string id)
     {
-        using var connection = new SqliteConnection(_connectionString);
-        connection.Open();
-
+        using var connection = CreateConnection();
         using var command = new SqliteCommand(GetEnvelopeQuery, connection);
         command.Parameters.AddWithValue("@Id", id);
 
@@ -74,7 +83,7 @@ public class EnvelopeDatabase
             return null;
         }
 
-        var identifier = (long)reader["Id"];
+        var identifier = (string)reader["Id"];
         var itemBlob = (byte[])reader["ItemBlob"];
         var creatorId = (string)reader["CreatorId"];
 

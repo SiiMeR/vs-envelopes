@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using Envelopes.Database;
 using Envelopes.Items;
@@ -12,7 +13,7 @@ namespace Envelopes;
 
 public class EnvelopesModSystem : ModSystem
 {
-    public static string? ModId;
+    public static string ModId = "envelopes";
     public static ICoreAPI? Api;
     public static IClientNetworkChannel? ClientNetworkChannel;
     public static IServerNetworkChannel? ServerNetworkChannel;
@@ -36,7 +37,6 @@ public class EnvelopesModSystem : ModSystem
             .RegisterMessageType<RemapSealerIdPacket>()
             .RegisterMessageType<SaveStampDesignPacket>();
 
-
         base.StartClientSide(api);
     }
 
@@ -54,8 +54,42 @@ public class EnvelopesModSystem : ModSystem
 
         StampDatabase = new StampDatabase();
         EnvelopeDatabase = new EnvelopeDatabase();
+        MoveOldEnvelopesToDatabase(EnvelopeDatabase);
 
         base.StartServerSide(api);
+    }
+
+    private void MoveOldEnvelopesToDatabase(EnvelopeDatabase envelopeDatabase)
+    {
+        var modDataPath = Helpers.GetModDataPath();
+
+        Directory.GetFiles(modDataPath, "*")
+            .Where(file => Path.GetExtension(file) == string.Empty)
+            .ToList()
+            .ForEach(
+                path =>
+                {
+                    try
+                    {
+                        var contents = File.ReadAllBytes(path);
+                        var fileName = Path.GetFileNameWithoutExtension(path);
+
+                        Console.WriteLine(contents.Length);
+                        var envelope = new Envelope
+                        {
+                            Id = fileName,
+                            CreatorId = "legacy",
+                            ItemBlob = contents
+                        };
+
+                        envelopeDatabase.InsertEnvelope(envelope);
+                        File.Delete(path);
+                    }
+                    catch (Exception e)
+                    {
+                        Api?.Logger.Error("Failed to move old envelope to database", e.Message);
+                    }
+                });
     }
 
     private void OnSaveStampDesignPacket(IServerPlayer fromPlayer, SaveStampDesignPacket packet)
@@ -121,9 +155,7 @@ public class EnvelopesModSystem : ModSystem
             var contentsId = slot?.Itemstack?.Attributes?.GetString(EnvelopeAttributes.ContentsId);
             if (contentsId != null && contentsId == packet.ContentsId)
             {
-                Api?.Event.EnqueueMainThreadTask(
-                    () => { ItemSealableEnvelope.OpenEnvelope(slot, fromplayer, "envelopes:envelope-opened"); },
-                    "openenvelope");
+                ItemSealableEnvelope.OpenEnvelope(slot, fromplayer);
                 return false;
             }
 

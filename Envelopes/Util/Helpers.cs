@@ -1,4 +1,6 @@
-﻿using Vintagestory.API.Common;
+﻿using System;
+using System.IO;
+using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.Server;
 
@@ -34,5 +36,17 @@ public static class Helpers
         });
 
         return matchingSlot;
+    }
+
+    public static string GetModDataPath()
+    {
+        var globalApi = EnvelopesModSystem.Api;
+        if (globalApi == null)
+        {
+            throw new InvalidOperationException("The EnvelopesModSystem has not been initialized yet.");
+        }
+
+        var localPath = Path.Combine("ModData", globalApi.World.SavegameIdentifier, EnvelopesModSystem.ModId);
+        return globalApi.GetOrCreateDataPath(localPath);
     }
 }

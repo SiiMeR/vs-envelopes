@@ -28,6 +28,12 @@ public class StampDatabase
 
     public StampDatabase()
     {
+        if (EnvelopesModSystem.Api == null)
+        {
+            throw new InvalidOperationException("The EnvelopesModSystem has not been initialized yet.");
+        }
+
+
         var path = Path.Combine(GamePaths.DataPath, "ModData", EnvelopesModSystem.Api.World.SavegameIdentifier,
             EnvelopesModSystem.ModId, "stamps.db");
         _connectionString = $"Data Source={path};";
