@@ -14,7 +14,7 @@
       "*"
     ]
   },
-  durability: 2000,
+  durability: 200,
   variantgroups: [
     {
       code: "state",

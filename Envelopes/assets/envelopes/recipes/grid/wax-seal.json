@@ -1,6 +1,6 @@
 [
   {
-    ingredientPattern: "S_,WC,E_",
+    ingredientPattern: "S_,W_,E_",
     ingredients: {
       "S": {
         type: "item",
@@ -11,10 +11,6 @@
       "W": {
         type: "item",
         code: "game:beeswax"
-      },
-      "C": {
-        type: "item",
-        code: "game:candle"
       },
       "E": {
         type: "item",
@@ -32,7 +28,7 @@
     }
   },
   {
-    ingredientPattern: "S_,WT,E_",
+    ingredientPattern: "S_,W_,E_",
     ingredients: {
       "S": {
         type: "item",
@@ -43,10 +39,6 @@
       "W": {
         type: "item",
         code: "game:beeswax"
-      },
-      "T": {
-        type: "block",
-        code: "game:torch-basic-lit-up"
       },
       "E": {
         type: "item",

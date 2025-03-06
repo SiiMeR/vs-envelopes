@@ -2,23 +2,44 @@
   {
     ingredientPattern: "P,E",
     ingredients: {
-      "P": { type: "item", code: "game:paper-parchment" },
-      "E": { type: "item", code: "envelope-empty" }
+      "P": {
+        type: "item",
+        code: "game:paper-parchment"
+      },
+      "E": {
+        type: "item",
+        code: "envelope-empty"
+      }
     },
     width: 1,
     height: 2,
     shapeless: true,
-    output: { type: "item", code: "envelope-unsealed", quantity: 1  }
+    output: {
+      type: "item",
+      code: "envelope-unsealed",
+      quantity: 1
+    }
   },
   {
     ingredientPattern: "P,E",
     ingredients: {
-      "P": { type: "item", code: "game:paper-parchment" },
-      "E": { type: "item", code: "envelope-opened" }
+      "P": {
+        type: "item",
+        code: "game:paper-parchment"
+      },
+      "E": {
+        type: "item",
+        code: "envelope-opened"
+      }
     },
     width: 1,
     height: 2,
     shapeless: true,
-    output: { type: "item", code: "envelope-opened", quantity: 1  }
+    copyAttributesFrom: 'E',
+    output: {
+      type: "item",
+      code: "envelope-opened",
+      quantity: 1
+    }
   }
 ]

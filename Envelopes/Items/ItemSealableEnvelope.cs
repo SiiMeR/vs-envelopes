@@ -16,9 +16,9 @@ namespace Envelopes.Items;
 
 public class ItemSealableEnvelope : Item
 {
-    private void PutLetterIntoEnvelope(ItemSlot? letterSlot, ItemSlot? outputSlot)
+    private void PutLetterIntoEnvelope(ItemSlot? letterSlot, ItemSlot? envelopeSlot)
     {
-        if (letterSlot == null || outputSlot == null)
+        if (letterSlot == null || envelopeSlot == null)
         {
             return;
         }
@@ -39,7 +39,7 @@ public class ItemSealableEnvelope : Item
         using var binaryWriter = new BinaryWriter(stream);
         letterSlot.Itemstack.Attributes.ToBytes(binaryWriter);
 
-        var ownerId = outputSlot.Inventory.openedByPlayerGUIds.FirstOrDefault();
+        var ownerId = envelopeSlot.Inventory.openedByPlayerGUIds.FirstOrDefault();
 
         var envelope = new Envelope
         {
@@ -49,8 +49,8 @@ public class ItemSealableEnvelope : Item
 
         var envelopeId = envelopeDatabase.InsertEnvelope(envelope);
 
-        outputSlot.Itemstack.Attributes.SetString(EnvelopeAttributes.ContentsId, envelopeId);
-        outputSlot.MarkDirty();
+        envelopeSlot.Itemstack.Attributes.SetString(EnvelopeAttributes.ContentsId, envelopeId);
+        envelopeSlot.MarkDirty();
     }
 
     private void SealEnvelope(ItemSlot? envelopeSlot, ItemSlot? stampSlot)
