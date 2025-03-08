@@ -20,14 +20,6 @@ public class GuiSealStampDesigner : GuiDialog
     public GuiSealStampDesigner(ICoreClientAPI? capi) : base(capi)
     {
         SetupDialog();
-
-        capi?.Input.RegisterHotKey(
-            "redraw",
-            "Redraw",
-            GlKeys.N,
-            HotkeyType.GUIOrOtherControls
-        );
-        capi?.Input.SetHotKeyHandler("redraw", _ => SetupDialog());
     }
 
 

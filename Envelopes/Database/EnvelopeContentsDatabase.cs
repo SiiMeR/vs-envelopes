@@ -5,14 +5,14 @@ using Vintagestory.API.Config;
 
 namespace Envelopes.Database;
 
-public record Envelope
+public record EnvelopeContents
 {
     public string? Id { get; set; }
     public required string CreatorId { get; init; }
     public required byte[] ItemBlob { get; init; }
 }
 
-public class EnvelopeDatabase
+public class EnvelopeContentsDatabase
 {
     private const string CreateTableQuery =
         "CREATE TABLE IF NOT EXISTS Envelopes (Id TEXT PRIMARY KEY, CreatorId TEXT, ItemBlob BLOB);";
@@ -25,7 +25,7 @@ public class EnvelopeDatabase
 
     private readonly string _connectionString;
 
-    public EnvelopeDatabase()
+    public EnvelopeContentsDatabase()
     {
         if (EnvelopesModSystem.Api == null)
         {
@@ -38,8 +38,7 @@ public class EnvelopeDatabase
         _connectionString = $"Data Source={path};";
 
         using var connection = CreateConnection();
-        using var command = new SqliteCommand(CreateTableQuery, connection);
-        command.ExecuteNonQuery();
+        new SqliteCommand(CreateTableQuery, connection).ExecuteNonQuery();
     }
 
     private SqliteConnection CreateConnection()
@@ -52,13 +51,13 @@ public class EnvelopeDatabase
         return connection;
     }
 
-    public string InsertEnvelope(Envelope envelope)
+    public string InsertEnvelope(EnvelopeContents envelopeContents)
     {
         using var connection = CreateConnection();
         using var command = new SqliteCommand(InsertEnvelopeQuery, connection);
 
-        command.Parameters.AddWithValue("@CreatorId", envelope.CreatorId);
-        command.Parameters.AddWithValue("@ItemBlob", envelope.ItemBlob);
+        command.Parameters.AddWithValue("@CreatorId", envelopeContents.CreatorId);
+        command.Parameters.AddWithValue("@ItemBlob", envelopeContents.ItemBlob);
 
         var result = command.ExecuteScalar();
         if (result == null)
@@ -71,7 +70,7 @@ public class EnvelopeDatabase
         return envelopeId;
     }
 
-    public Envelope? GetEnvelope(string id)
+    public EnvelopeContents? GetEnvelope(string id)
     {
         using var connection = CreateConnection();
         using var command = new SqliteCommand(GetEnvelopeQuery, connection);
@@ -87,7 +86,7 @@ public class EnvelopeDatabase
         var itemBlob = (byte[])reader["ItemBlob"];
         var creatorId = (string)reader["CreatorId"];
 
-        return new Envelope
+        return new EnvelopeContents
         {
             Id = identifier,
             ItemBlob = itemBlob,

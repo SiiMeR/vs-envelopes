@@ -18,5 +18,11 @@
   "stampdesigner-create-warning": "Are you sure you want to lock in this stamp design? You won't be able to edit it later.",
   "stampdesigner-reset-warning": "Are you sure you want to reset? All changes will be lost.",
   "stampdesigner-carve-tutorial": "Carve",
-  "stampdesigner-fill-tutorial": "Fill"
+  "stampdesigner-fill-tutorial": "Fill",
+  "headereditor-from": "From",
+  "headereditor-to": "To",
+  "headereditor-close": "Close",
+  "headereditor-save": "Save",
+  "envelopesguide-title": "Working with envelopes",
+  "envelopesguide-text": "Envelopes are a way to send messages to other players. You can write a letter, optionally seal it with a wax seal, and send it off. The recipient can then read the letter by opening the envelope."
 }

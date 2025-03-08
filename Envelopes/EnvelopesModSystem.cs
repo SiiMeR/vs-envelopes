@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using Envelopes.Behaviors;
 using Envelopes.Database;
 using Envelopes.Items;
 using Envelopes.Messages;
@@ -18,12 +19,13 @@ public class EnvelopesModSystem : ModSystem
     public static IClientNetworkChannel? ClientNetworkChannel;
     public static IServerNetworkChannel? ServerNetworkChannel;
     public static StampDatabase? StampDatabase;
-    public static EnvelopeDatabase? EnvelopeDatabase;
+    public static EnvelopeContentsDatabase? EnvelopeDatabase;
 
     public override void Start(ICoreAPI api)
     {
         Api = api;
         ModId = Mod.Info.ModID;
+        api.RegisterCollectibleBehaviorClass("Addressable", typeof(AddressableBehavior));
         api.RegisterItemClass("ItemSealableEnvelope", typeof(ItemSealableEnvelope));
         api.RegisterItemClass("ItemWaxSealStamp", typeof(ItemWaxSealStamp));
         api.RegisterItemClass("ItemWaxStick", typeof(ItemWaxStick));
@@ -35,7 +37,8 @@ public class EnvelopesModSystem : ModSystem
             .RegisterMessageType<SealEnvelopePacket>()
             .RegisterMessageType<OpenEnvelopePacket>()
             .RegisterMessageType<RemapSealerIdPacket>()
-            .RegisterMessageType<SaveStampDesignPacket>();
+            .RegisterMessageType<SaveStampDesignPacket>()
+            .RegisterMessageType<SetEnvelopeFromToPacket>();
 
         base.StartClientSide(api);
     }
@@ -47,19 +50,39 @@ public class EnvelopesModSystem : ModSystem
             .RegisterMessageType<OpenEnvelopePacket>()
             .RegisterMessageType<RemapSealerIdPacket>()
             .RegisterMessageType<SaveStampDesignPacket>()
+            .RegisterMessageType<SetEnvelopeFromToPacket>()
             .SetMessageHandler<SealEnvelopePacket>(OnSealEnvelopePacket)
             .SetMessageHandler<OpenEnvelopePacket>(OnOpenEnvelopePacket)
             .SetMessageHandler<RemapSealerIdPacket>(OnRemapSealerIdPacket)
-            .SetMessageHandler<SaveStampDesignPacket>(OnSaveStampDesignPacket);
+            .SetMessageHandler<SaveStampDesignPacket>(OnSaveStampDesignPacket)
+            .SetMessageHandler<SetEnvelopeFromToPacket>(OnSetEnvelopeFromToPacket);
 
         StampDatabase = new StampDatabase();
-        EnvelopeDatabase = new EnvelopeDatabase();
+        EnvelopeDatabase = new EnvelopeContentsDatabase();
         MoveOldEnvelopesToDatabase(EnvelopeDatabase);
 
         base.StartServerSide(api);
     }
 
-    private void MoveOldEnvelopesToDatabase(EnvelopeDatabase envelopeDatabase)
+    private void OnSetEnvelopeFromToPacket(IServerPlayer fromPlayer, SetEnvelopeFromToPacket packet)
+    {
+        var itemSlot = fromPlayer.InventoryManager
+            ?.OpenedInventories
+            ?.FirstOrDefault(inv => inv.InventoryID == packet.InventoryId)?[packet.SlotId];
+
+        if (itemSlot == null)
+        {
+            return;
+        }
+
+
+        itemSlot.Itemstack?.Attributes.SetString(EnvelopeAttributes.From, packet.From);
+        itemSlot.Itemstack?.Attributes.SetString(EnvelopeAttributes.To, packet.To);
+
+        itemSlot.MarkDirty();
+    }
+
+    private void MoveOldEnvelopesToDatabase(EnvelopeContentsDatabase envelopeContentsDatabase)
     {
         var modDataPath = Helpers.GetModDataPath();
 
@@ -74,14 +97,14 @@ public class EnvelopesModSystem : ModSystem
                         var contents = File.ReadAllBytes(path);
                         var fileName = Path.GetFileNameWithoutExtension(path);
 
-                        var envelope = new Envelope
+                        var envelope = new EnvelopeContents
                         {
                             Id = fileName,
                             CreatorId = "legacy",
                             ItemBlob = contents
                         };
 
-                        envelopeDatabase.InsertEnvelope(envelope);
+                        envelopeContentsDatabase.InsertEnvelope(envelope);
                         File.Delete(path);
                     }
                     catch (Exception e)
@@ -128,7 +151,7 @@ public class EnvelopesModSystem : ModSystem
         var stamp = StampDatabase?.GetStamp(packet.StampId);
         if (stamp == null)
         {
-            Api.Logger.Debug($"Unable to seal envelope. Envelope:{packet.EnvelopeId}, Stamp{packet.StampId}");
+            Api.Logger.Debug($"Unable to seal envelope. Envelope:{packet.EnvelopeId}, Stamp:{packet.StampId}");
             return;
         }
 

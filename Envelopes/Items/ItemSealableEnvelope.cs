@@ -41,7 +41,7 @@ public class ItemSealableEnvelope : Item
 
         var ownerId = envelopeSlot.Inventory.openedByPlayerGUIds.FirstOrDefault();
 
-        var envelope = new Envelope
+        var envelope = new EnvelopeContents
         {
             CreatorId = ownerId ?? "unknown",
             ItemBlob = stream.ToArray()
@@ -248,18 +248,21 @@ public class ItemSealableEnvelope : Item
 
     public override WorldInteraction[] GetHeldInteractionHelp(ItemSlot inSlot)
     {
-        var worldInteractions = new List<WorldInteraction>();
-        var code = inSlot.Itemstack.Collectible.Code.Path;
-        if (code is "envelope-unsealed" or "envelope-sealed")
+        return ObjectCacheUtil.GetOrCreate<WorldInteraction[]>(api, "envelopeInteractions", () =>
         {
-            worldInteractions.Add(new WorldInteraction
+            var interactions = new List<WorldInteraction>();
+            var code = inSlot.Itemstack.Collectible.Code.Path;
+            if (code is "envelope-unsealed" or "envelope-sealed")
             {
-                ActionLangCode = $"{EnvelopesModSystem.ModId}:open-envelope",
-                MouseButton = EnumMouseButton.Right
-            });
-        }
+                interactions.Add(new WorldInteraction
+                {
+                    ActionLangCode = $"{EnvelopesModSystem.ModId}:open-envelope",
+                    MouseButton = EnumMouseButton.Right
+                });
+            }
 
-        return worldInteractions.ToArray().Append(base.GetHeldInteractionHelp(inSlot));
+            return interactions.ToArray().Append(base.GetHeldInteractionHelp(inSlot));
+        });
     }
 
     public override void GetHeldItemInfo(ItemSlot inSlot, StringBuilder dsc, IWorldAccessor world, bool withDebugInfo)

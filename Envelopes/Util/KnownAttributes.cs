@@ -5,6 +5,8 @@ public static class EnvelopeAttributes
     public const string ContentsId = "ContentsId";
     public const string SealerId = "SealerId";
     public const string SealerName = "SealerName";
+    public const string From = "From";
+    public const string To = "To";
 }
 
 public static class StampAttributes
