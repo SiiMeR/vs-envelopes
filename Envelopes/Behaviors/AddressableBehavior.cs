@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Text;
 using Envelopes.Gui;
 using Envelopes.Messages;
@@ -8,7 +6,6 @@ using Envelopes.Util;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Util;
-using Vintagestory.GameContent;
 
 namespace Envelopes.Behaviors;
 

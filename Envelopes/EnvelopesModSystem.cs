@@ -75,10 +75,16 @@ public class EnvelopesModSystem : ModSystem
             return;
         }
 
+        if (!string.IsNullOrWhiteSpace(packet.From))
+        {
+            itemSlot.Itemstack?.Attributes.SetString(EnvelopeAttributes.From, packet.From);
+        }
 
-        itemSlot.Itemstack?.Attributes.SetString(EnvelopeAttributes.From, packet.From);
-        itemSlot.Itemstack?.Attributes.SetString(EnvelopeAttributes.To, packet.To);
-
+        if (!string.IsNullOrWhiteSpace(packet.To))
+        {
+            itemSlot.Itemstack?.Attributes.SetString(EnvelopeAttributes.To, packet.To);
+        }
+        
         itemSlot.MarkDirty();
     }
 
