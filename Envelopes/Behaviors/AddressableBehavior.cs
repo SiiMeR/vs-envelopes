@@ -43,8 +43,15 @@ public class AddressableBehavior : CollectibleBehavior
             return;
         }
 
+        handling = EnumHandling.Handled;
 
-        var gui = new GuiDialogEnvelopeHeadersEditor(EnvelopesModSystem.Api as ICoreClientAPI, (from, to) =>
+        if (EnvelopesModSystem.Api is not ICoreClientAPI capi)
+        {
+            return;
+        }
+
+
+        var gui = new GuiDialogEnvelopeHeadersEditor(capi, (from, to) =>
         {
             if (string.IsNullOrWhiteSpace(from) && string.IsNullOrWhiteSpace(to))
             {
@@ -56,7 +63,7 @@ public class AddressableBehavior : CollectibleBehavior
                 return;
             }
 
-            EnvelopesModSystem.ClientNetworkChannel.SendPacket(new SetEnvelopeFromToPacket
+            EnvelopesModSystem.ClientNetworkChannel?.SendPacket(new SetEnvelopeFromToPacket
             {
                 From = from,
                 To = to,
@@ -70,6 +77,8 @@ public class AddressableBehavior : CollectibleBehavior
 
     public override WorldInteraction[] GetHeldInteractionHelp(ItemSlot inSlot, ref EnumHandling handling)
     {
+        var heldInteractionHelp = base.GetHeldInteractionHelp(inSlot, ref handling);
+
         return ObjectCacheUtil.GetOrCreate(EnvelopesModSystem.Api, "writableBehaviorInteractions", () =>
         {
             var interactions = new List<WorldInteraction>
@@ -81,9 +90,9 @@ public class AddressableBehavior : CollectibleBehavior
                     HotKeyCode = "ctrl",
                     Itemstacks = new[]
                         { new ItemStack(EnvelopesModSystem.Api?.World.GetItem(new AssetLocation("game:inkandquill"))) },
-                    GetMatchingStacks = (wi, bs, es) =>
+                    GetMatchingStacks = (wi, _, _) =>
                     {
-                        var activeHotbarSlot = (EnvelopesModSystem.Api as ICoreClientAPI).World.Player.InventoryManager
+                        var activeHotbarSlot = (EnvelopesModSystem.Api as ICoreClientAPI)?.World.Player.InventoryManager
                             .ActiveHotbarSlot;
 
                         if (activeHotbarSlot == null)
@@ -98,7 +107,7 @@ public class AddressableBehavior : CollectibleBehavior
                     },
                 }
             };
-            return interactions.ToArray();
+            return interactions.ToArray().Append(heldInteractionHelp);
         });
     }
 
@@ -115,7 +124,5 @@ public class AddressableBehavior : CollectibleBehavior
         {
             dsc.AppendLine(Helpers.EnvelopesLangString("headereditor-to") + ": " + to);
         }
-
-        base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);
     }
 }

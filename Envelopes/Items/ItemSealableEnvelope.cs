@@ -125,7 +125,7 @@ public class ItemSealableEnvelope : Item
 
 
         var nextItem = new ItemStack(globalApi.World.GetItem(new AssetLocation(nextCode)));
-
+        // TODO code to handle copying attributes from the old envelope to the new one
         var stampId = slot.Itemstack?.Attributes?.TryGetLong(StampAttributes.StampId);
         if (stampId.HasValue)
         {
@@ -136,6 +136,18 @@ public class ItemSealableEnvelope : Item
         if (!string.IsNullOrEmpty(stampTitle))
         {
             nextItem.Attributes?.SetString(StampAttributes.StampTitle, stampTitle);
+        }
+
+        var from = slot.Itemstack?.Attributes?.GetString(EnvelopeAttributes.From);
+        if (!string.IsNullOrEmpty(from))
+        {
+            nextItem.Attributes?.SetString(EnvelopeAttributes.From, from);
+        }
+
+        var to = slot.Itemstack?.Attributes?.GetString(EnvelopeAttributes.To);
+        if (!string.IsNullOrEmpty(to))
+        {
+            nextItem.Attributes?.SetString(EnvelopeAttributes.To, to);
         }
 
         if (!opener.InventoryManager.TryGiveItemstack(nextItem, true))
@@ -182,7 +194,7 @@ public class ItemSealableEnvelope : Item
         EntitySelection entitySel,
         bool firstEvent, ref EnumHandHandling handling)
     {
-        if (byEntity.Controls.ShiftKey)
+        if (byEntity.Controls.ShiftKey || byEntity.Controls.CtrlKey)
         {
             base.OnHeldInteractStart(slot, byEntity, blockSel, entitySel, firstEvent, ref handling);
             return;
@@ -210,9 +222,13 @@ public class ItemSealableEnvelope : Item
                             var contentsId = slot.Itemstack.Attributes.GetString(EnvelopeAttributes.ContentsId);
                             EnvelopesModSystem.ClientNetworkChannel?.SendPacket(new OpenEnvelopePacket
                                 { ContentsId = contentsId });
-                            var sealedHandled = EnumHandHandling.Handled;
-                            (slot.Itemstack.Collectible as ItemBook)?.OnHeldInteractStart(slot, byEntity, blockSel,
-                                entitySel, true, ref sealedHandled);
+
+                            api.Event.EnqueueMainThreadTask((() =>
+                            {
+                                var sealedHandled = EnumHandHandling.Handled;
+                                (slot.Itemstack.Collectible as ItemBook)?.OnHeldInteractStart(slot, byEntity, blockSel,
+                                    entitySel, true, ref sealedHandled);
+                            }), "open-envelope");
                         });
                     confirmationDialog.TryOpen();
                 }
@@ -267,6 +283,8 @@ public class ItemSealableEnvelope : Item
 
     public override void GetHeldItemInfo(ItemSlot inSlot, StringBuilder dsc, IWorldAccessor world, bool withDebugInfo)
     {
+        base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);
+
         var contentsId = inSlot.Itemstack?.Attributes?.GetString(EnvelopeAttributes.ContentsId);
         if (!string.IsNullOrEmpty(contentsId))
         {
@@ -310,7 +328,5 @@ public class ItemSealableEnvelope : Item
         {
             dsc.AppendLine($"{Lang.Get($"{EnvelopesModSystem.ModId}:envelope-sealedby")}: {sealerName}");
         }
-
-        base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);
     }
 }

@@ -42,3 +42,9 @@ Future plans:
 The second iteration of the mod will focus on making the sealing process a bit more realistic. An item -- wax seal stamp -- will be introduced.
 A wax seal stamp can have a custom design, with an editor akin to something like in the Coinage mod. A wax seal will have an unique ID, using which seals can be differentiated. A seal can also be named (example: "The Royal Eagle") for immersion. 
 For now, the stamp will be required in the crafting recipe, and from it, attributes will be copied over to indicate sealing data on the envelope itself. 
+
+------
+
+# 3rd iteration 
+
+The third iteration focuses on adding From/To fields to the envelope. This makes the work of the courier easier, as they can now deliver the letter to the correct recipient.

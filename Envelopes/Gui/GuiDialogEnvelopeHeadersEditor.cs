@@ -17,13 +17,13 @@ public class GuiDialogEnvelopeHeadersEditor : GuiDialog
     public GuiDialogEnvelopeHeadersEditor(ICoreClientAPI capi, Action<string, string> onSave) : base(capi)
     {
         _onSave = onSave;
-        capi?.Input.RegisterHotKey(
-            "redraw",
-            "Redraw",
-            GlKeys.N,
-            HotkeyType.GUIOrOtherControls
-        );
-        capi?.Input.SetHotKeyHandler("redraw", _ => SetupDialog());
+        // capi?.Input.RegisterHotKey(
+        //     "redraw",
+        //     "Redraw",
+        //     GlKeys.N,
+        //     HotkeyType.GUIOrOtherControls
+        // );
+        // capi?.Input.SetHotKeyHandler("redraw", _ => SetupDialog());
     }
 
     private ElementBounds BaseBounds => ElementStdBounds.AutosizedMainDialog.WithAlignment(EnumDialogArea.CenterMiddle);

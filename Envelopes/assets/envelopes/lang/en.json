@@ -23,6 +23,7 @@
   "headereditor-to": "To",
   "headereditor-close": "Close",
   "headereditor-save": "Save",
+  "headereditor-action": "Fill in the From/To fields",
   "envelopesguide-title": "Working with envelopes",
   "envelopesguide-text": "Envelopes are a way to send messages to other players. You can write a letter, optionally seal it with a wax seal, and send it off. The recipient can then read the letter by opening the envelope."
 }
