@@ -200,6 +200,13 @@ public class ItemSealableEnvelope : Item
             return;
         }
 
+        var contentsId = slot.Itemstack.Attributes.GetString(EnvelopeAttributes.ContentsId);
+        if (string.IsNullOrEmpty(contentsId))
+        {
+            base.OnHeldInteractStart(slot, byEntity, blockSel, entitySel, firstEvent, ref handling);
+            return;
+        }
+
         var code = slot.Itemstack.Collectible.Code.Path;
         switch (code)
         {
@@ -219,7 +226,6 @@ public class ItemSealableEnvelope : Item
                             }
 
                             dialog?.TryClose();
-                            var contentsId = slot.Itemstack.Attributes.GetString(EnvelopeAttributes.ContentsId);
                             EnvelopesModSystem.ClientNetworkChannel?.SendPacket(new OpenEnvelopePacket
                                 { ContentsId = contentsId });
 
@@ -240,7 +246,6 @@ public class ItemSealableEnvelope : Item
                 handling = EnumHandHandling.Handled;
                 if (api.Side == EnumAppSide.Client)
                 {
-                    var contentsId = slot.Itemstack.Attributes.GetString(EnvelopeAttributes.ContentsId);
                     EnvelopesModSystem.ClientNetworkChannel?.SendPacket(new OpenEnvelopePacket
                         { ContentsId = contentsId });
                 }
@@ -250,7 +255,6 @@ public class ItemSealableEnvelope : Item
                 handling = EnumHandHandling.Handled;
                 if (api.Side == EnumAppSide.Client)
                 {
-                    var contentsId = slot.Itemstack.Attributes.GetString(EnvelopeAttributes.ContentsId);
                     EnvelopesModSystem.ClientNetworkChannel?.SendPacket(new OpenEnvelopePacket
                         { ContentsId = contentsId });
                 }

@@ -32,10 +32,15 @@ public class EnvelopeContentsDatabase
             throw new InvalidOperationException("The EnvelopesModSystem has not been initialized yet.");
         }
 
-        var path = Path.Combine(GamePaths.DataPath, "ModData", EnvelopesModSystem.Api.World.SavegameIdentifier,
-            EnvelopesModSystem.ModId, "envelopes.db");
-
+        var directory = Path.Combine(GamePaths.DataPath, "ModData", EnvelopesModSystem.Api.World.SavegameIdentifier,
+            EnvelopesModSystem.ModId);
+        var path = Path.Combine(directory, "envelopes.db");
         _connectionString = $"Data Source={path};";
+
+        if (!Directory.Exists(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
 
         using var connection = CreateConnection();
         new SqliteCommand(CreateTableQuery, connection).ExecuteNonQuery();

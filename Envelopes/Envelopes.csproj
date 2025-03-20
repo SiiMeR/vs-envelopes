@@ -7,6 +7,9 @@
         <RootNamespace>Envelopes</RootNamespace>
         <Nullable>enable</Nullable>
     </PropertyGroup>
+    <PropertyGroup>
+        <PathMap>$(MSBuildProjectDirectory)=.</PathMap>
+    </PropertyGroup>
 
     <ItemGroup>
         <Reference Include="VintagestoryAPI">

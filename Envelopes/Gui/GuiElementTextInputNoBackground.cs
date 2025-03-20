@@ -14,10 +14,7 @@ public static class GuiElementHelpers
         CairoFont? font = null,
         string? key = null)
     {
-        if (font == null)
-        {
-            font = CairoFont.TextInput();
-        }
+        font ??= CairoFont.TextInput();
 
         if (!composer.Composed)
         {

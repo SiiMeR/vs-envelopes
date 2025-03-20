@@ -34,15 +34,27 @@ public class StampDatabase
         }
 
 
-        var path = Path.Combine(GamePaths.DataPath, "ModData", EnvelopesModSystem.Api.World.SavegameIdentifier,
-            EnvelopesModSystem.ModId, "stamps.db");
+        var databaseDirectory = Path.Combine(GamePaths.DataPath, "ModData",
+            EnvelopesModSystem.Api.World.SavegameIdentifier,
+            EnvelopesModSystem.ModId);
+        var path = Path.Combine(databaseDirectory, "stamps.db");
         _connectionString = $"Data Source={path};";
 
-        using var connection = new SqliteConnection(_connectionString);
+        if (!Directory.Exists(databaseDirectory))
+        {
+            Directory.CreateDirectory(databaseDirectory);
+        }
+
+        using var connection = CreateConnection();
+        new SqliteCommand(CreateTableQuery, connection).ExecuteNonQuery();
+    }
+
+    private SqliteConnection CreateConnection()
+    {
+        var connection = new SqliteConnection(_connectionString);
         connection.Open();
 
-        using var command = new SqliteCommand(CreateTableQuery, connection);
-        command.ExecuteNonQuery();
+        return connection;
     }
 
     public long InsertStamp(Stamp stamp)
