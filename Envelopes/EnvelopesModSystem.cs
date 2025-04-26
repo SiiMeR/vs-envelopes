@@ -34,7 +34,6 @@ public class EnvelopesModSystem : ModSystem
     public override void StartClientSide(ICoreClientAPI api)
     {
         ClientNetworkChannel = api.Network.RegisterChannel("envelopes")
-            .RegisterMessageType<SealEnvelopePacket>()
             .RegisterMessageType<OpenEnvelopePacket>()
             .RegisterMessageType<RemapSealerIdPacket>()
             .RegisterMessageType<SaveStampDesignPacket>()
@@ -46,12 +45,10 @@ public class EnvelopesModSystem : ModSystem
     public override void StartServerSide(ICoreServerAPI api)
     {
         ServerNetworkChannel = api.Network.RegisterChannel("envelopes")
-            .RegisterMessageType<SealEnvelopePacket>()
             .RegisterMessageType<OpenEnvelopePacket>()
             .RegisterMessageType<RemapSealerIdPacket>()
             .RegisterMessageType<SaveStampDesignPacket>()
             .RegisterMessageType<SetEnvelopeFromToPacket>()
-            .SetMessageHandler<SealEnvelopePacket>(OnSealEnvelopePacket)
             .SetMessageHandler<OpenEnvelopePacket>(OnOpenEnvelopePacket)
             .SetMessageHandler<RemapSealerIdPacket>(OnRemapSealerIdPacket)
             .SetMessageHandler<SaveStampDesignPacket>(OnSaveStampDesignPacket)
@@ -84,7 +81,7 @@ public class EnvelopesModSystem : ModSystem
         {
             itemSlot.Itemstack?.Attributes.SetString(EnvelopeAttributes.To, packet.To);
         }
-        
+
         itemSlot.MarkDirty();
     }
 
@@ -152,29 +149,6 @@ public class EnvelopesModSystem : ModSystem
         itemSlot?.MarkDirty();
     }
 
-    private void OnSealEnvelopePacket(IServerPlayer fromplayer, SealEnvelopePacket packet)
-    {
-        var stamp = StampDatabase?.GetStamp(packet.StampId);
-        if (stamp == null)
-        {
-            Api.Logger.Debug($"Unable to seal envelope. Envelope:{packet.EnvelopeId}, Stamp:{packet.StampId}");
-            return;
-        }
-
-        fromplayer.Entity.WalkInventory(slot =>
-        {
-            var contentsId = slot?.Itemstack?.Attributes?.GetString(EnvelopeAttributes.ContentsId);
-            if (!string.IsNullOrEmpty(contentsId) && contentsId == packet.EnvelopeId)
-            {
-                slot?.Itemstack?.Attributes?.SetLong(StampAttributes.StampId, stamp.Id);
-                slot?.Itemstack?.Attributes?.SetString(StampAttributes.StampTitle, stamp.Title);
-                slot?.MarkDirty();
-                return false;
-            }
-
-            return true;
-        });
-    }
 
     private void OnOpenEnvelopePacket(IServerPlayer fromplayer, OpenEnvelopePacket packet)
     {

@@ -14,8 +14,114 @@ using Vintagestory.GameContent;
 
 namespace Envelopes.Items;
 
-public class ItemSealableEnvelope : Item
+public class ItemSealableEnvelope : Item // , IContainedMeshSource
 {
+    private bool[,]? _design;
+
+    // public override void OnLoaded(ICoreAPI api)
+    // {
+    //     if (api.Side == EnumAppSide.Client)
+    //     {
+    //         base.OnLoaded(api);
+    //         return;
+    //     }
+    //
+    //     base.OnLoaded(api);
+    // }
+
+
+    #region Render
+
+    // private Dictionary<string, MultiTextureMeshRef> Meshrefs =>
+    //     ObjectCacheUtil.GetOrCreate(api, "envelopestampmeshrefs",
+    //         () => new Dictionary<string, MultiTextureMeshRef>());
+    //
+    // public override void OnBeforeRender(ICoreClientAPI capi, ItemStack itemstack, EnumItemRenderTarget target,
+    //     ref ItemRenderInfo renderinfo)
+    // {
+    //     var stampId = itemstack.Attributes.TryGetLong(StampAttributes.StampId);
+    //     if (stampId.HasValue)
+    //     {
+    //         var meshCacheKey = GetMeshCacheKey(itemstack);
+    //         if (Meshrefs.TryGetValue(meshCacheKey, out var multiTextureMeshRef))
+    //         {
+    //             renderinfo.ModelRef = multiTextureMeshRef;
+    //         }
+    //         else
+    //         {
+    //             var mesh = GenMesh(itemstack, null!, null!);
+    //
+    //             var multiTextureMeshRef2 = capi.Render.UploadMultiTextureMesh(mesh);
+    //             renderinfo.ModelRef = Meshrefs[meshCacheKey] = multiTextureMeshRef2;
+    //         }
+    //     }
+    //
+    //     base.OnBeforeRender(capi, itemstack, target, ref renderinfo);
+    // }
+    //
+    // public MeshData GenMesh(ItemStack itemstack, ITextureAtlasAPI targetAtlas, BlockPos atBlockPos)
+    // {
+    //     var capi = (ICoreClientAPI)api;
+    //
+    //     if (!Code.Path.Contains("envelope-sealed"))
+    //     {
+    //         capi.Tesselator.TesselateItem(itemstack.Item, out var regularMeshData);
+    //         return regularMeshData;
+    //     }
+    //
+    //     var cachedShape = capi.TesselatorManager.GetCachedShape(Shape.Base);
+    //
+    //     var waxShapeElement = cachedShape.GetElementByName("wax");
+    //
+    //     ShapeElementFace shapeElementFace = new ShapeElementFace
+    //     {
+    //         Texture = "letter-envelope",
+    //         Uv = new[] { 6f, 6f, 8f, 8f }
+    //     };
+    //     var array = new ShapeElementFace[6];
+    //     array[0] = shapeElementFace;
+    //     array[1] = shapeElementFace;
+    //     array[2] = shapeElementFace;
+    //     array[3] = shapeElementFace;
+    //     array[4] = shapeElementFace;
+    //
+    //     var shapeElement = new ShapeElement
+    //     {
+    //         Name = "seal",
+    //         ParentElement = waxShapeElement,
+    //         From = new[]
+    //         {
+    //             1,
+    //             0.0,
+    //             1
+    //         },
+    //         To = new[]
+    //         {
+    //             2,
+    //             3.0,
+    //             2
+    //         },
+    //         FacesResolved = array
+    //     };
+    //
+    //     shapeElement.ParentElement = waxShapeElement;
+    //
+    //     waxShapeElement.Children = new[] { shapeElement };
+    //
+    //
+    //     capi.Tesselator.TesselateShape(itemstack.Collectible, cachedShape, out var meshData);
+    //     return meshData;
+    // }
+    //
+    // public string GetMeshCacheKey(ItemStack itemstack)
+    // {
+    //     var stampId = itemstack.Attributes.GetLong(StampAttributes.StampId);
+    //
+    //     return $"stamp-design-{stampId}";
+    // }
+
+    #endregion
+
     private void PutLetterIntoEnvelope(ItemSlot? letterSlot, ItemSlot? envelopeSlot)
     {
         if (letterSlot == null || envelopeSlot == null)
@@ -23,7 +129,7 @@ public class ItemSealableEnvelope : Item
             return;
         }
 
-        if (api.World.Side != EnumAppSide.Server)
+        if (api.Side != EnumAppSide.Server)
         {
             return;
         }
@@ -53,7 +159,8 @@ public class ItemSealableEnvelope : Item
         envelopeSlot.MarkDirty();
     }
 
-    private void SealEnvelope(ItemSlot? envelopeSlot, ItemSlot? stampSlot)
+
+    private void SealEnvelope(ItemSlot? envelopeSlot, ItemSlot? stampSlot, ItemSlot outputSlot)
     {
         if (envelopeSlot == null || stampSlot == null)
         {
@@ -74,8 +181,18 @@ public class ItemSealableEnvelope : Item
             return;
         }
 
-        EnvelopesModSystem.ClientNetworkChannel?.SendPacket(new SealEnvelopePacket
-            { EnvelopeId = contentsId, StampId = stampId.Value });
+        var stamp = EnvelopesModSystem.StampDatabase?.GetStamp(stampId.Value);
+        if (stamp == null)
+        {
+            api.Logger.Debug($"Unable to seal envelope. Envelope:{contentsId}, Stamp:{stampId}");
+            return;
+        }
+
+        _design = BooleanArrayPacker.UnpackFromByteArray(stamp.Design, stamp.Dimensions);
+
+        outputSlot.Itemstack?.Attributes?.SetLong(StampAttributes.StampId, stamp.Id);
+        outputSlot.Itemstack?.Attributes?.SetString(StampAttributes.StampTitle, stamp.Title);
+        outputSlot.MarkDirty();
     }
 
     public static void OpenEnvelope(ItemSlot slot, IPlayer opener)
@@ -161,30 +278,28 @@ public class ItemSealableEnvelope : Item
 
     public override bool ConsumeCraftingIngredients(ItemSlot[] slots, ItemSlot outputSlot, GridRecipe matchingRecipe)
     {
-        var code = outputSlot.Itemstack.Collectible.Code.Path;
-        var letterSlot = slots.FirstOrDefault(slot =>
-            !slot.Empty && slot.Itemstack.Collectible.Code.Path.Contains("parchment"));
-        var envelopeSlot = slots.FirstOrDefault(slot =>
-            !slot.Empty && slot.Itemstack.Collectible.Code.Path.Contains("envelope-unsealed"));
-        var stampSlot = slots.FirstOrDefault(slot =>
-            !slot.Empty && slot.Itemstack.Collectible.Code.Path.Contains("sealstamp-engraved"));
-
-        switch (code)
+        if (api.Side == EnumAppSide.Server)
         {
-            case "envelope-unsealed":
-                PutLetterIntoEnvelope(letterSlot, outputSlot);
-                break;
-            case "envelope-sealed":
-                if (api.Side == EnumAppSide.Client)
-                {
-                    // TODO: Call all of this server side to immediately seal without any packet magic
-                    SealEnvelope(envelopeSlot, stampSlot);
-                }
+            var code = outputSlot.Itemstack.Collectible.Code.Path;
+            var letterSlot = slots.FirstOrDefault(slot =>
+                !slot.Empty && slot.Itemstack.Collectible.Code.Path.Contains("parchment"));
+            var envelopeSlot = slots.FirstOrDefault(slot =>
+                !slot.Empty && slot.Itemstack.Collectible.Code.Path.Contains("envelope-unsealed"));
+            var stampSlot = slots.FirstOrDefault(slot =>
+                !slot.Empty && slot.Itemstack.Collectible.Code.Path.Contains("sealstamp-engraved"));
 
-                break;
-            case "envelope-opened":
-                PutLetterIntoEnvelope(letterSlot, outputSlot);
-                break;
+            switch (code)
+            {
+                case "envelope-unsealed":
+                    PutLetterIntoEnvelope(letterSlot, outputSlot);
+                    break;
+                case "envelope-sealed":
+                    SealEnvelope(envelopeSlot, stampSlot, outputSlot);
+                    break;
+                case "envelope-opened":
+                    PutLetterIntoEnvelope(letterSlot, outputSlot);
+                    break;
+            }
         }
 
         return base.ConsumeCraftingIngredients(slots, outputSlot, matchingRecipe);

@@ -22,7 +22,7 @@ public static class BooleanArrayPacker
         return flatArray;
     }
 
-    public static bool[,] Unpack(bool[] input, int dimensions)
+    public static bool[,] Unpack(bool[] input, long dimensions)
     {
         if (input.Length != dimensions * dimensions)
         {
@@ -73,7 +73,7 @@ public static class BooleanArrayPacker
         return result;
     }
 
-    public static bool[,] UnpackFromByteArray(byte[] bytes, int dimensions)
+    public static bool[,] UnpackFromByteArray(byte[] bytes, long dimensions)
     {
         var linearArray = UnpackFromByteArray(bytes);
 
