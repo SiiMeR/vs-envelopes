@@ -2,7 +2,6 @@
 using Envelopes.Util;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
-using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
 using Vintagestory.API.Util;
 using Vintagestory.GameContent;
@@ -52,9 +51,9 @@ public class SetSealColorFromAttributes : CollectibleBehavior, IContainedMeshSou
 
         var shape = GenShape(capi, itemstack);
 
-        var texPositionSource = capi.Tesselator.GetTextureSource(itemstack.Item);
+        var tps = new ShapeTextureSource(capi, shape, "envelopesealsource");
         var cacheKey = GetMeshCacheKey(itemstack);
-        capi.Tesselator.TesselateShape(cacheKey, shape, out var meshData2, texPositionSource);
+        capi.Tesselator.TesselateShape(cacheKey, shape, out var meshData2, tps);
 
         return meshData2;
     }

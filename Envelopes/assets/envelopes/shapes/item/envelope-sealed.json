@@ -9,6 +9,26 @@
     "letter-envelope": [
       12,
       12
+    ],
+    "red": [
+      32,
+      32
+    ],
+    "green": [
+      32,
+      32
+    ],
+    "blue": [
+      32,
+      32
+    ],
+    "black": [
+      32,
+      32
+    ],
+    "uncolored": [
+      32,
+      32
     ]
   },
   "textures": {
@@ -41,8 +61,6 @@
         0.0,
         8.0
       ],
-      "faces": {
-      },
       "children": [
         {
           "name": "envelope",
