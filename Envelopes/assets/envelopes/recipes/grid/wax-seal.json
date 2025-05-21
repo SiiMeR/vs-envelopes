@@ -10,7 +10,9 @@
       },
       "W": {
         type: "item",
-        code: "waxstick-*"
+        code: "waxstick-*",
+        isTool: true,
+        toolDurabilityCost: 1
       },
       "E": {
         type: "item",
