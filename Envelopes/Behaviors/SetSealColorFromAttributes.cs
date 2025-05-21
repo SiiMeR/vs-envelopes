@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Envelopes.Util;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
@@ -69,7 +70,9 @@ public class SetSealColorFromAttributes : CollectibleBehavior, IContainedMeshSou
         }
 
         RemapShapeElementTextures(shape, "wax", color);
+        RemapShapeElementTextures(shape, "wax2", color);
         RemapShapeElementTextures(shape, "waxPiece", color);
+        RemapShapeElementTextures(shape, "waxPiece2", color);
 
         return shape;
     }
@@ -122,6 +125,7 @@ public class SetSealColorFromAttributes : CollectibleBehavior, IContainedMeshSou
     public string GetMeshCacheKey(ItemStack itemstack)
     {
         var color = itemstack.Attributes.GetString(EnvelopeAttributes.WaxColor);
-        return $"{itemstack.Collectible.Code.ToShortString()}-{color ?? "uncolored"}";
+
+        return $"{itemstack.Collectible.Code.ToShortString()}-{color ?? "beeswax-white"}";
     }
 }

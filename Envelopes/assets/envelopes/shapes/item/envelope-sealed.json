@@ -19,8 +19,8 @@
       32
     ],
     "blue": [
-      32,
-      32
+      16,
+      16
     ],
     "black": [
       32,
@@ -29,9 +29,14 @@
     "uncolored": [
       32,
       32
+    ],
+    "beeswax-white": [
+      16,
+      16
     ]
   },
   "textures": {
+    "beeswax-white": "beeswax-white",
     "letter-envelope": "letter-envelope",
     "uncolored": "uncolored",
     "red": "red",
@@ -61,6 +66,8 @@
         0.0,
         8.0
       ],
+      "faces": {
+      },
       "children": [
         {
           "name": "envelope",
@@ -175,14 +182,14 @@
             {
               "name": "wax",
               "from": [
-                4.25,
+                4.05,
                 0.5,
-                2.75
+                2.55
               ],
               "to": [
-                5.75,
-                0.75,
-                3.75
+                5.85,
+                0.7,
+                3.95
               ],
               "autoUnwrap": false,
               "uv": [
@@ -196,12 +203,12 @@
               ],
               "faces": {
                 "north": {
-                  "texture": "#uncolored",
+                  "texture": "#beeswax-white",
                   "uv": [
-                    0,
-                    0,
-                    4,
-                    3
+                    0.0,
+                    0.0,
+                    1.5,
+                    0.5
                   ],
                   "windMode": [
                     -1,
@@ -211,12 +218,12 @@
                   ]
                 },
                 "east": {
-                  "texture": "#uncolored",
+                  "texture": "#beeswax-white",
                   "uv": [
-                    0,
-                    0,
-                    1,
-                    1
+                    0.0,
+                    0.0,
+                    1.0,
+                    0.5
                   ],
                   "windMode": [
                     -1,
@@ -226,12 +233,12 @@
                   ]
                 },
                 "south": {
-                  "texture": "#uncolored",
+                  "texture": "#beeswax-white",
                   "uv": [
-                    1,
-                    1,
-                    3,
-                    2
+                    1.0,
+                    1.0,
+                    2.5,
+                    1.5
                   ],
                   "windMode": [
                     -1,
@@ -241,21 +248,115 @@
                   ]
                 },
                 "west": {
-                  "texture": "#uncolored",
+                  "texture": "#beeswax-white",
                   "uv": [
-                    3,
-                    2,
-                    4,
-                    3
+                    3.0,
+                    2.0,
+                    4.0,
+                    2.5
                   ]
                 },
                 "up": {
-                  "texture": "#uncolored",
+                  "texture": "#beeswax-white",
                   "uv": [
-                    1,
-                    1,
-                    3,
-                    3
+                    1.0,
+                    1.0,
+                    2.5,
+                    2.0
+                  ],
+                  "windMode": [
+                    -1,
+                    -1,
+                    -1,
+                    -1
+                  ]
+                }
+              }
+            },
+            {
+              "name": "wax2",
+              "from": [
+                4.35,
+                0.5,
+                2.35
+              ],
+              "to": [
+                5.55,
+                0.69,
+                4.15
+              ],
+              "autoUnwrap": false,
+              "uv": [
+                0.0,
+                4.0
+              ],
+              "rotationOrigin": [
+                5.0,
+                0.5,
+                2.2
+              ],
+              "faces": {
+                "north": {
+                  "texture": "#beeswax-white",
+                  "uv": [
+                    0.0,
+                    0.0,
+                    1.0,
+                    0.5
+                  ],
+                  "windMode": [
+                    -1,
+                    -1,
+                    -1,
+                    -1
+                  ]
+                },
+                "east": {
+                  "texture": "#beeswax-white",
+                  "uv": [
+                    0.0,
+                    0.0,
+                    1.5,
+                    0.5
+                  ],
+                  "windMode": [
+                    -1,
+                    -1,
+                    -1,
+                    -1
+                  ]
+                },
+                "south": {
+                  "texture": "#beeswax-white",
+                  "uv": [
+                    1.0,
+                    1.0,
+                    2.0,
+                    1.5
+                  ],
+                  "windMode": [
+                    -1,
+                    -1,
+                    -1,
+                    -1
+                  ]
+                },
+                "west": {
+                  "texture": "#beeswax-white",
+                  "uv": [
+                    3.0,
+                    2.0,
+                    4.5,
+                    2.5
+                  ]
+                },
+                "up": {
+                  "texture": "#beeswax-white",
+                  "uv": [
+                    1.0,
+                    1.0,
+                    2.0,
+                    2.5
                   ],
                   "windMode": [
                     -1,

@@ -1,6 +1,6 @@
 {
   code: "waxstick",
-  maxstacksize: 32,
+  maxstacksize: 8,
   durability: 20,
   attributes: {
     color: "{color}",
