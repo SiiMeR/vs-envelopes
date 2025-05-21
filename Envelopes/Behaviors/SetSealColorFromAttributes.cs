@@ -44,19 +44,14 @@ public class SetSealColorFromAttributes : CollectibleBehavior, IContainedMeshSou
             return null;
         }
 
-        if (itemstack.Collectible.Code.Path is not ("envelope-sealed" or "envelope-opened"))
-        {
-            capi.Tesselator.TesselateItem(itemstack.Item, out var meshData);
-            return meshData;
-        }
 
         var shape = GenShape(capi, itemstack);
 
         var tps = new ShapeTextureSource(capi, shape, "envelopesealsource");
         var cacheKey = GetMeshCacheKey(itemstack);
-        capi.Tesselator.TesselateShape(cacheKey, shape, out var meshData2, tps);
+        capi.Tesselator.TesselateShape(cacheKey, shape, out var meshdata, tps);
 
-        return meshData2;
+        return meshdata;
     }
 
     private Shape GenShape(ICoreClientAPI api, ItemStack itemstack)
