@@ -15,17 +15,6 @@ public class SetSealColorFromAttributes : CollectibleBehavior, IContainedMeshSou
 
     private const string MeshRefsCacheKey = "EnvelopeRefs";
 
-    private Dictionary<string, MultiTextureMeshRef?> Meshrefs => ObjectCacheUtil.GetOrCreate(_api,
-        MeshRefsCacheKey, () => new Dictionary<string, MultiTextureMeshRef?>());
-
-    private Dictionary<string, CompositeTexture> _textures = new();
-
-    public override void Initialize(JsonObject properties)
-    {
-        _textures = properties["textures"].AsObject(defaultValue: new Dictionary<string, CompositeTexture>());
-        base.Initialize(properties);
-    }
-
     public override void OnLoaded(ICoreAPI api)
     {
         _api = api;
