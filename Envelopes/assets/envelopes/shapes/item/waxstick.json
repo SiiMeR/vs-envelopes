@@ -1,0 +1,181 @@
+{
+  "editor": {
+    "allAngles": false,
+    "entityTextureMode": false
+  },
+  "textureWidth": 16,
+  "textureHeight": 16,
+  "textureSizes": {
+    "beeswax": [
+      16,
+      16
+    ]
+  },
+  "textures": {
+    "beeswax": "beeswax-white"
+  },
+  "elements": [
+    {
+      "name": "candle",
+      "from": [
+        7.0,
+        0.0,
+        7.0
+      ],
+      "to": [
+        7.9,
+        3.4,
+        7.7
+      ],
+      "rotationOrigin": [
+        7.0,
+        0.0,
+        7.0
+      ],
+      "faces": {
+        "north": {
+          "texture": "#beeswax",
+          "uv": [
+            1.0,
+            12.0,
+            4.0,
+            12.5
+          ],
+          "rotation": 90,
+          "windMode": [
+            -1,
+            -1,
+            -1,
+            -1
+          ]
+        },
+        "east": {
+          "texture": "#beeswax",
+          "uv": [
+            2.0,
+            12.0,
+            2.5,
+            15.0
+          ]
+        },
+        "south": {
+          "texture": "#beeswax",
+          "uv": [
+            5.5,
+            8.5,
+            6.0,
+            11.5
+          ],
+          "autoUv": false
+        },
+        "west": {
+          "texture": "#beeswax",
+          "uv": [
+            11.0,
+            12.0,
+            11.5,
+            15.0
+          ]
+        },
+        "up": {
+          "texture": "#beeswax",
+          "uv": [
+            35.0,
+            -8.0,
+            35.5,
+            -7.5
+          ],
+          "autoUv": false
+        },
+        "down": {
+          "texture": "#beeswax",
+          "uv": [
+            12.0,
+            14.0,
+            12.5,
+            14.5
+          ]
+        }
+      },
+      "children": [
+        {
+          "name": "Cube2",
+          "from": [
+            0.9,
+            3.41,
+            0.7
+          ],
+          "to": [
+            1.54,
+            4.09,
+            1.34
+          ],
+          "rotationOrigin": [
+            0.9,
+            3.4,
+            0.7
+          ],
+          "rotationX": -90.0,
+          "rotationY": -135.0,
+          "faces": {
+            "north": {
+              "texture": "#beeswax",
+              "uv": [
+                0.0,
+                0.5,
+                0.5,
+                1.0
+              ]
+            },
+            "east": {
+              "texture": "#beeswax",
+              "uv": [
+                0.5,
+                0.5,
+                1.0,
+                1.0
+              ]
+            },
+            "south": {
+              "texture": "#beeswax",
+              "uv": [
+                1.0,
+                0.5,
+                1.5,
+                1.0
+              ]
+            },
+            "west": {
+              "texture": "#beeswax",
+              "uv": [
+                1.5,
+                0.5,
+                2.0,
+                1.0
+              ]
+            },
+            "up": {
+              "texture": "#beeswax",
+              "uv": [
+                0.0,
+                0.0,
+                0.5,
+                0.5
+              ]
+            },
+            "down": {
+              "texture": "#beeswax",
+              "uv": [
+                0.0,
+                0.0,
+                0.5,
+                0.5
+              ],
+              "autoUv": false
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

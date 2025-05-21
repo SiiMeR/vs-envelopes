@@ -6,84 +6,382 @@
   "textureWidth": 12,
   "textureHeight": 12,
   "textureSizes": {
-    "letter-envelope": [12,12],
-    "envelope-flap": [20, 8]
+    "letter-envelope": [
+      12,
+      12
+    ],
+    "envelope-flap": [
+      20,
+      8
+    ]
   },
   "textures": {
     "letter-envelope": "letter-envelope",
-    "envelope-flap": "envelope-flap"
+    "envelope-flap": "envelope-flap",
+    "uncolored": "uncolored",
+    "red": "red",
+    "green": "green",
+    "blue": "blue",
+    "black": "black"
   },
   "elements": [
     {
       "name": "origin",
-      "from": [ 8.0, 0.0, 8.0 ],
-      "to": [ 8.0, 0.0, 8.0 ],
-      "uv": [ 0.0, 0.0 ],
-      "rotationOrigin": [ 8.0, 0.0, 8.0 ],
+      "from": [
+        8.0,
+        0.0,
+        8.0
+      ],
+      "to": [
+        8.0,
+        0.0,
+        8.0
+      ],
+      "uv": [
+        0.0,
+        0.0
+      ],
+      "rotationOrigin": [
+        8.0,
+        0.0,
+        8.0
+      ],
       "faces": {
       },
       "children": [
         {
           "name": "flap",
-          "from": [-5.0, 0.6, -2.5],
-          "to": [5.0, 0.7, 0.5],
-          "rotationOrigin": [0.0, 0.6, -2.5],
+          "from": [
+            -5.0,
+            0.6,
+            -2.5
+          ],
+          "to": [
+            5.0,
+            0.7,
+            0.5
+          ],
+          "rotationOrigin": [
+            0.0,
+            0.6,
+            -2.5
+          ],
           "rotationX": -20.0,
           "faces": {
-            "up": { "texture": "#envelope-flap", "uv": [0.0, 0.0, 20.0, 8.0] }
+            "up": {
+              "texture": "#envelope-flap",
+              "uv": [
+                0.0,
+                0.0,
+                20.0,
+                8.0
+              ]
+            }
           },
           "children": [
             {
               "name": "waxPiece",
-              "from": [ 4.25, 0, 2.75 ],
-              "to": [ 5.75, 0.25, 3.25 ],
+              "from": [
+                4.25,
+                0,
+                2.75
+              ],
+              "to": [
+                5.75,
+                0.25,
+                3.25
+              ],
               "autoUnwrap": false,
-              "uv": [ 7.0, 0.0 ],
-              "rotationOrigin": [ 5.0, 0.5, 2.5 ],
+              "uv": [
+                7.0,
+                0.0
+              ],
+              "rotationOrigin": [
+                5.0,
+                0.5,
+                2.5
+              ],
               "faces": {
-                "north": { "texture": "#letter-envelope", "uv": [ 11.0, 1.0, 12.0, 1.5 ], "windMode": [-1,-1,-1,-1] },
-                "east": { "texture": "#letter-envelope", "uv": [ 10.0, 0.0, 11.0, 0.5 ], "windMode": [-1,-1,-1,-1] },
-                "south": { "texture": "#letter-envelope", "uv": [ 10.0, 0.5, 11.0, 1.0 ], "windMode": [-1,-1,-1,-1] },
-                "west": { "texture": "#letter-envelope", "uv": [ 10.0, 1.0, 11.0, 1.5 ] },
-                "up": { "texture": "#letter-envelope", "uv": [ 11.0, 0.0, 12.0, 0.5 ], "windMode": [-1,-1,-1,-1] }
+                "north": {
+                  "texture": "#uncolored",
+                  "uv": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.5
+                  ],
+                  "windMode": [
+                    -1,
+                    -1,
+                    -1,
+                    -1
+                  ]
+                },
+                "east": {
+                  "texture": "#uncolored",
+                  "uv": [
+                    0.0,
+                    0.0,
+                    1.0,
+                    0.5
+                  ],
+                  "windMode": [
+                    -1,
+                    -1,
+                    -1,
+                    -1
+                  ]
+                },
+                "south": {
+                  "texture": "#uncolored",
+                  "uv": [
+                    0.0,
+                    0.5,
+                    1.0,
+                    1.0
+                  ],
+                  "windMode": [
+                    -1,
+                    -1,
+                    -1,
+                    -1
+                  ]
+                },
+                "west": {
+                  "texture": "#uncolored",
+                  "uv": [
+                    0.0,
+                    1.0,
+                    1.0,
+                    1.5
+                  ]
+                },
+                "up": {
+                  "texture": "#uncolored",
+                  "uv": [
+                    1.0,
+                    0.0,
+                    2.0,
+                    0.5
+                  ],
+                  "windMode": [
+                    -1,
+                    -1,
+                    -1,
+                    -1
+                  ]
+                }
               }
-            },
+            }
           ]
         },
         {
           "name": "envelope",
-          "from": [ -5.0, 0.1, -2.5 ],
-          "to": [ 5.0, 0.6, 2.5 ],
+          "from": [
+            -5.0,
+            0.1,
+            -2.5
+          ],
+          "to": [
+            5.0,
+            0.6,
+            2.5
+          ],
           "autoUnwrap": false,
-          "uv": [ 0.0, 1.0 ],
-          "rotationOrigin": [ 0.0, 0.1, 0.0 ],
+          "uv": [
+            0.0,
+            1.0
+          ],
+          "rotationOrigin": [
+            0.0,
+            0.1,
+            0.0
+          ],
           "rotationZ": -1.0,
           "faces": {
-            "north": { "texture": "#letter-envelope", "uv": [ 0.0, 11.5, 10.0, 12.0 ], "windMode": [-1,-1,-1,-1] },
-            "east": { "texture": "#letter-envelope", "uv": [ 5.0, 5.0, 10.0, 5.5 ], "windMode": [-1,-1,-1,-1] },
-            "south": { "texture": "#letter-envelope", "uv": [ 0.0, 11.0, 10.0, 11.5 ], "windMode": [-1,-1,-1,-1] },
-            "west": { "texture": "#letter-envelope", "uv": [ 0.0, 5.0, 5.0, 5.5 ], "windMode": [-1,-1,-1,-1] },
-            "up": { "texture": "#letter-envelope", "uv": [ 0.0, 0.0, 10.0, 5.0 ] },
-            "down": { "texture": "#letter-envelope", "uv": [ 0.0, 5.5, 10.0, 10.5 ], "windMode": [-1,-1,-1,-1] }
+            "north": {
+              "texture": "#letter-envelope",
+              "uv": [
+                0.0,
+                11.5,
+                10.0,
+                12.0
+              ],
+              "windMode": [
+                -1,
+                -1,
+                -1,
+                -1
+              ]
+            },
+            "east": {
+              "texture": "#letter-envelope",
+              "uv": [
+                5.0,
+                5.0,
+                10.0,
+                5.5
+              ],
+              "windMode": [
+                -1,
+                -1,
+                -1,
+                -1
+              ]
+            },
+            "south": {
+              "texture": "#letter-envelope",
+              "uv": [
+                0.0,
+                11.0,
+                10.0,
+                11.5
+              ],
+              "windMode": [
+                -1,
+                -1,
+                -1,
+                -1
+              ]
+            },
+            "west": {
+              "texture": "#letter-envelope",
+              "uv": [
+                0.0,
+                5.0,
+                5.0,
+                5.5
+              ],
+              "windMode": [
+                -1,
+                -1,
+                -1,
+                -1
+              ]
+            },
+            "up": {
+              "texture": "#letter-envelope",
+              "uv": [
+                0.0,
+                0.0,
+                10.0,
+                5.0
+              ]
+            },
+            "down": {
+              "texture": "#letter-envelope",
+              "uv": [
+                0.0,
+                5.5,
+                10.0,
+                10.5
+              ],
+              "windMode": [
+                -1,
+                -1,
+                -1,
+                -1
+              ]
+            }
           },
           "children": [
             {
               "name": "wax",
-              "from": [ 4.25, 0.5, 3.25 ],
-              "to": [ 5.75, 0.75, 3.75 ],
+              "from": [
+                4.25,
+                0.5,
+                3.25
+              ],
+              "to": [
+                5.75,
+                0.75,
+                3.75
+              ],
               "autoUnwrap": false,
-              "uv": [ 7.0, 0.0 ],
-              "rotationOrigin": [ 5.0, 0.5, 2.5 ],
+              "uv": [
+                7.0,
+                0.0
+              ],
+              "rotationOrigin": [
+                5.0,
+                0.5,
+                2.5
+              ],
               "faces": {
-                "north": { "texture": "#letter-envelope", "uv": [ 11.0, 1.0, 12.0, 1.5 ], "windMode": [-1,-1,-1,-1] },
-                "east": { "texture": "#letter-envelope", "uv": [ 10.0, 0.0, 11.0, 0.5 ], "windMode": [-1,-1,-1,-1] },
-                "south": { "texture": "#letter-envelope", "uv": [ 10.0, 0.5, 11.0, 1.0 ], "windMode": [-1,-1,-1,-1] },
-                "west": { "texture": "#letter-envelope", "uv": [ 10.0, 1.0, 11.0, 1.5 ] },
-                "up": { "texture": "#letter-envelope", "uv": [ 11.0, 0.5, 12.0, 1.0 ], "windMode": [-1,-1,-1,-1] }
+                "north": {
+                  "texture": "#uncolored",
+                  "uv": [
+                    1.0,
+                    1.0,
+                    2.0,
+                    1.5
+                  ],
+                  "windMode": [
+                    -1,
+                    -1,
+                    -1,
+                    -1
+                  ]
+                },
+                "east": {
+                  "texture": "#uncolored",
+                  "uv": [
+                    0.0,
+                    0.0,
+                    1.0,
+                    0.5
+                  ],
+                  "windMode": [
+                    -1,
+                    -1,
+                    -1,
+                    -1
+                  ]
+                },
+                "south": {
+                  "texture": "#uncolored",
+                  "uv": [
+                    0.0,
+                    0.5,
+                    1.0,
+                    1.0
+                  ],
+                  "windMode": [
+                    -1,
+                    -1,
+                    -1,
+                    -1
+                  ]
+                },
+                "west": {
+                  "texture": "#uncolored",
+                  "uv": [
+                    0.0,
+                    1.0,
+                    1.0,
+                    1.5
+                  ]
+                },
+                "up": {
+                  "texture": "#uncolored",
+                  "uv": [
+                    0,
+                    0.5,
+                    1,
+                    1.0
+                  ],
+                  "windMode": [
+                    -1,
+                    -1,
+                    -1,
+                    -1
+                  ]
+                }
               }
-            },
+            }
           ]
         }
       ]
     }
-  ]}
+  ]
+}

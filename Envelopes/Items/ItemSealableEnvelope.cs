@@ -208,7 +208,14 @@ public class ItemSealableEnvelope : Item // , IContainedMeshSource
             return;
         }
 
-        var contentsId = slot.Itemstack.Attributes.GetString(EnvelopeAttributes.ContentsId);
+        var envelope = slot.Itemstack;
+        if (envelope == null)
+        {
+            globalApi.Logger.Debug("Envelope moved from slot before opening.");
+            return;
+        }
+
+        var contentsId = envelope.Attributes.GetString(EnvelopeAttributes.ContentsId);
         if (string.IsNullOrEmpty(contentsId))
         {
             globalApi.Logger.Debug("Trying to open an empty envelope.");
@@ -221,19 +228,19 @@ public class ItemSealableEnvelope : Item // , IContainedMeshSource
             throw new InvalidOperationException("The envelopes database has not been initialized yet.");
         }
 
-        var envelope = database.GetEnvelope(contentsId);
-        if (envelope == null)
+        var envelopeContents = database.GetEnvelope(contentsId);
+        if (envelopeContents == null)
         {
             throw new InvalidOperationException("Failed to retrieve envelope contents.");
         }
 
-        using var memoryStream = new MemoryStream(envelope.ItemBlob);
+        using var memoryStream = new MemoryStream(envelopeContents.ItemBlob);
         using var binaryReader = new BinaryReader(memoryStream);
 
         var paper = new ItemStack(globalApi.World.GetItem(new AssetLocation("game:paper-parchment")));
         paper.Attributes.FromBytes(binaryReader);
 
-        var codePath = slot.Itemstack.Collectible.Code.Path;
+        var codePath = envelope.Collectible.Code.Path;
         var nextCode = codePath.Contains("opened")
             ? "envelopes:envelope-opened"
             : codePath.Contains("unsealed")
@@ -243,29 +250,36 @@ public class ItemSealableEnvelope : Item // , IContainedMeshSource
 
         var nextItem = new ItemStack(globalApi.World.GetItem(new AssetLocation(nextCode)));
         // TODO code to handle copying attributes from the old envelope to the new one
-        var stampId = slot.Itemstack?.Attributes?.TryGetLong(StampAttributes.StampId);
+        var stampId = envelope?.Attributes?.TryGetLong(StampAttributes.StampId);
         if (stampId.HasValue)
         {
             nextItem.Attributes?.SetLong(StampAttributes.StampId, stampId.Value);
         }
 
-        var stampTitle = slot.Itemstack?.Attributes?.GetString(StampAttributes.StampTitle);
+        var stampTitle = envelope?.Attributes?.GetString(StampAttributes.StampTitle);
         if (!string.IsNullOrEmpty(stampTitle))
         {
             nextItem.Attributes?.SetString(StampAttributes.StampTitle, stampTitle);
         }
 
-        var from = slot.Itemstack?.Attributes?.GetString(EnvelopeAttributes.From);
+        var from = envelope?.Attributes?.GetString(EnvelopeAttributes.From);
         if (!string.IsNullOrEmpty(from))
         {
             nextItem.Attributes?.SetString(EnvelopeAttributes.From, from);
         }
 
-        var to = slot.Itemstack?.Attributes?.GetString(EnvelopeAttributes.To);
+        var to = envelope?.Attributes?.GetString(EnvelopeAttributes.To);
         if (!string.IsNullOrEmpty(to))
         {
             nextItem.Attributes?.SetString(EnvelopeAttributes.To, to);
         }
+
+        if (nextCode == "envelopes:envelope-opened")
+        {
+            nextItem.Attributes?.SetString(EnvelopeAttributes.WaxColor,
+                envelope?.Attributes?.GetString(EnvelopeAttributes.WaxColor));
+        }
+
 
         if (!opener.InventoryManager.TryGiveItemstack(nextItem, true))
         {
@@ -303,6 +317,26 @@ public class ItemSealableEnvelope : Item // , IContainedMeshSource
         }
 
         return base.ConsumeCraftingIngredients(slots, outputSlot, matchingRecipe);
+    }
+
+    public override void OnCreatedByCrafting(ItemSlot[] allInputslots, ItemSlot outputSlot, GridRecipe byRecipe)
+    {
+        if (outputSlot.Itemstack.Collectible.Code.Path != "envelope-sealed")
+        {
+            base.OnCreatedByCrafting(allInputslots, outputSlot, byRecipe);
+            return;
+        }
+
+        var waxstickSlot = allInputslots.Where(slot => !slot.Empty)
+            .FirstOrDefault(slot => slot.Itemstack.Collectible.Code.Path.Contains("waxstick"));
+        if (waxstickSlot != null)
+        {
+            var waxColor = waxstickSlot.Itemstack.Collectible.Attributes["color"].AsString();
+            outputSlot.Itemstack.Attributes.SetString(EnvelopeAttributes.WaxColor, waxColor);
+            outputSlot.MarkDirty();
+        }
+
+        base.OnCreatedByCrafting(allInputslots, outputSlot, byRecipe);
     }
 
     public override void OnHeldInteractStart(ItemSlot slot, EntityAgent byEntity, BlockSelection blockSel,

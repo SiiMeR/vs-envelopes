@@ -48,3 +48,9 @@ For now, the stamp will be required in the crafting recipe, and from it, attribu
 # 3rd iteration 
 
 The third iteration focuses on adding From/To fields to the envelope. This makes the work of the courier easier, as they can now deliver the letter to the correct recipient.
+
+------
+
+# 4th iteration
+
+The fourth iteration focuses on adding more wax colors to work with. This will be done by adding recipes to combine the wax with a dye.

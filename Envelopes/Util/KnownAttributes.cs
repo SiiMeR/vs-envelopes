@@ -7,6 +7,7 @@ public static class EnvelopeAttributes
     public const string SealerName = "SealerName";
     public const string From = "From";
     public const string To = "To";
+    public const string WaxColor = "WaxColor";
 }
 
 public static class StampAttributes

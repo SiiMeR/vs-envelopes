@@ -26,6 +26,8 @@ public class EnvelopesModSystem : ModSystem
         Api = api;
         ModId = Mod.Info.ModID;
         api.RegisterCollectibleBehaviorClass("Addressable", typeof(AddressableBehavior));
+        api.RegisterCollectibleBehaviorClass("HurtOnConsume", typeof(HurtOnConsume));
+        api.RegisterCollectibleBehaviorClass("SealColorFromAttributes", typeof(SetSealColorFromAttributes));
         api.RegisterItemClass("ItemSealableEnvelope", typeof(ItemSealableEnvelope));
         api.RegisterItemClass("ItemWaxSealStamp", typeof(ItemWaxSealStamp));
         api.RegisterItemClass("ItemWaxStick", typeof(ItemWaxStick));
@@ -92,29 +94,28 @@ public class EnvelopesModSystem : ModSystem
         Directory.GetFiles(modDataPath, "*")
             .Where(file => Path.GetExtension(file) == string.Empty)
             .ToList()
-            .ForEach(
-                path =>
+            .ForEach(path =>
+            {
+                try
                 {
-                    try
-                    {
-                        var contents = File.ReadAllBytes(path);
-                        var fileName = Path.GetFileNameWithoutExtension(path);
+                    var contents = File.ReadAllBytes(path);
+                    var fileName = Path.GetFileNameWithoutExtension(path);
 
-                        var envelope = new EnvelopeContents
-                        {
-                            Id = fileName,
-                            CreatorId = "legacy",
-                            ItemBlob = contents
-                        };
-
-                        envelopeContentsDatabase.InsertEnvelope(envelope);
-                        File.Delete(path);
-                    }
-                    catch (Exception e)
+                    var envelope = new EnvelopeContents
                     {
-                        Api?.Logger.Error("Failed to move old envelope to database", e.Message);
-                    }
-                });
+                        Id = fileName,
+                        CreatorId = "legacy",
+                        ItemBlob = contents
+                    };
+
+                    envelopeContentsDatabase.InsertEnvelope(envelope);
+                    File.Delete(path);
+                }
+                catch (Exception e)
+                {
+                    Api?.Logger.Error("Failed to move old envelope to database", e.Message);
+                }
+            });
     }
 
     private void OnSaveStampDesignPacket(IServerPlayer fromPlayer, SaveStampDesignPacket packet)

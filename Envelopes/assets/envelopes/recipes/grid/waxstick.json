@@ -1,0 +1,147 @@
+[
+  {
+    ingredientPattern: "D,W",
+    ingredients: {
+      "D": {
+        type: "block",
+        code: "game:bowl-fired"
+      },
+      "W": {
+        type: "item",
+        code: "game:beeswax"
+      }
+    },
+    width: 1,
+    height: 2,
+    attributes: {
+      liquidContainerProps: {
+        requiresContent: {
+          type: "item",
+          code: "game:dye-red"
+        },
+        requiresLitres: 0.2,
+        consumeContainer: false
+      }
+    },
+    name: "wax stick red",
+    shapeless: false,
+    output: {
+      type: "item",
+      code: "waxstick-red"
+    }
+  },
+  {
+    ingredientPattern: "D,W",
+    ingredients: {
+      "D": {
+        type: "block",
+        code: "game:bowl-fired"
+      },
+      "W": {
+        type: "item",
+        code: "game:beeswax"
+      }
+    },
+    width: 1,
+    height: 2,
+    attributes: {
+      liquidContainerProps: {
+        requiresContent: {
+          type: "item",
+          code: "game:dye-black"
+        },
+        requiresLitres: 0.2,
+        consumeContainer: false
+      }
+    },
+    name: "wax stick black",
+    shapeless: false,
+    output: {
+      type: "item",
+      code: "waxstick-black"
+    }
+  },
+  {
+    ingredientPattern: "D,W",
+    ingredients: {
+      "D": {
+        type: "block",
+        code: "game:bowl-fired"
+      },
+      "W": {
+        type: "item",
+        code: "game:beeswax"
+      }
+    },
+    width: 1,
+    height: 2,
+    attributes: {
+      liquidContainerProps: {
+        requiresContent: {
+          type: "item",
+          code: "game:dye-green"
+        },
+        requiresLitres: 0.2,
+        consumeContainer: false
+      }
+    },
+    name: "wax stick green",
+    shapeless: false,
+    output: {
+      type: "item",
+      code: "waxstick-green"
+    }
+  },
+  {
+    ingredientPattern: "D,W",
+    ingredients: {
+      "D": {
+        type: "block",
+        code: "game:bowl-fired"
+      },
+      "W": {
+        type: "item",
+        code: "game:beeswax"
+      }
+    },
+    width: 1,
+    height: 2,
+    attributes: {
+      liquidContainerProps: {
+        requiresContent: {
+          type: "item",
+          code: "game:dye-blue"
+        },
+        requiresLitres: 0.2,
+        consumeContainer: false
+      }
+    },
+    name: "wax stick blue",
+    shapeless: false,
+    output: {
+      type: "item",
+      code: "waxstick-blue"
+    }
+  },
+  {
+    ingredientPattern: "W,W",
+    ingredients: {
+      "D": {
+        type: "item",
+        code: "game:beeswax"
+      },
+      "W": {
+        type: "item",
+        code: "game:beeswax"
+      }
+    },
+    width: 1,
+    height: 2,
+    name: "wax stick uncolored",
+    shapeless: false,
+    output: {
+      type: "item",
+      code: "waxstick-uncolored"
+    }
+  }
+]
