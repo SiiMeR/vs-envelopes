@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Envelopes.Util;
-using TabletopGames;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Datastructures;
