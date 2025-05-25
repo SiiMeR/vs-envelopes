@@ -36,7 +36,7 @@
     ]
   },
   "textures": {
-    "beeswax-white": "beeswax-white",
+    "seal-default": "seal-default",
     "letter-envelope": "letter-envelope",
     "envelope-flap": "envelope-flap",
     "uncolored": "uncolored",
@@ -124,7 +124,7 @@
               ],
               "faces": {
                 "north": {
-                  "texture": "#beeswax-white",
+                  "texture": "#seal-default",
                   "uv": [
                     1.125,
                     1.125,
@@ -139,7 +139,7 @@
                   ]
                 },
                 "east": {
-                  "texture": "#beeswax-white",
+                  "texture": "#seal-default",
                   "uv": [
                     0.0,
                     0.0,
@@ -154,7 +154,7 @@
                   ]
                 },
                 "south": {
-                  "texture": "#beeswax-white",
+                  "texture": "#seal-default",
                   "uv": [
                     0.0,
                     0.375,
@@ -169,7 +169,7 @@
                   ]
                 },
                 "west": {
-                  "texture": "#beeswax-white",
+                  "texture": "#seal-default",
                   "uv": [
                     0.0,
                     1.125,
@@ -178,7 +178,7 @@
                   ]
                 },
                 "up": {
-                  "texture": "#beeswax-white",
+                  "texture": "#seal-default",
                   "uv": [
                     1.125,
                     0.0,
@@ -218,7 +218,7 @@
               ],
               "faces": {
                 "north": {
-                  "texture": "#beeswax-white",
+                  "texture": "#seal-default",
                   "uv": [
                     1.125,
                     1.125,
@@ -233,7 +233,7 @@
                   ]
                 },
                 "east": {
-                  "texture": "#beeswax-white",
+                  "texture": "#seal-default",
                   "uv": [
                     0.0,
                     0.0,
@@ -248,7 +248,7 @@
                   ]
                 },
                 "south": {
-                  "texture": "#beeswax-white",
+                  "texture": "#seal-default",
                   "uv": [
                     0.0,
                     0.375,
@@ -263,7 +263,7 @@
                   ]
                 },
                 "west": {
-                  "texture": "#beeswax-white",
+                  "texture": "#seal-default",
                   "uv": [
                     0.0,
                     1.125,
@@ -272,7 +272,7 @@
                   ]
                 },
                 "up": {
-                  "texture": "#beeswax-white",
+                  "texture": "#seal-default",
                   "uv": [
                     1.125,
                     0.0,
@@ -424,7 +424,7 @@
               ],
               "faces": {
                 "north": {
-                  "texture": "#beeswax-white",
+                  "texture": "#seal-default",
                   "uv": [
                     1.125,
                     1.125,
@@ -439,7 +439,7 @@
                   ]
                 },
                 "east": {
-                  "texture": "#beeswax-white",
+                  "texture": "#seal-default",
                   "uv": [
                     0.0,
                     0.0,
@@ -454,7 +454,7 @@
                   ]
                 },
                 "south": {
-                  "texture": "#beeswax-white",
+                  "texture": "#seal-default",
                   "uv": [
                     0.0,
                     0.375,
@@ -469,7 +469,7 @@
                   ]
                 },
                 "west": {
-                  "texture": "#beeswax-white",
+                  "texture": "#seal-default",
                   "uv": [
                     0.0,
                     1.125,
@@ -478,7 +478,7 @@
                   ]
                 },
                 "up": {
-                  "texture": "#beeswax-white",
+                  "texture": "#seal-default",
                   "uv": [
                     0.0,
                     0.375,
@@ -518,7 +518,7 @@
               ],
               "faces": {
                 "north": {
-                  "texture": "#beeswax-white",
+                  "texture": "#seal-default",
                   "uv": [
                     1.125,
                     1.125,
@@ -533,7 +533,7 @@
                   ]
                 },
                 "east": {
-                  "texture": "#beeswax-white",
+                  "texture": "#seal-default",
                   "uv": [
                     0.0,
                     0.0,
@@ -548,7 +548,7 @@
                   ]
                 },
                 "south": {
-                  "texture": "#beeswax-white",
+                  "texture": "#seal-default",
                   "uv": [
                     0.0,
                     0.375,
@@ -563,7 +563,7 @@
                   ]
                 },
                 "west": {
-                  "texture": "#beeswax-white",
+                  "texture": "#seal-default",
                   "uv": [
                     0.0,
                     1.125,
@@ -572,7 +572,7 @@
                   ]
                 },
                 "up": {
-                  "texture": "#beeswax-white",
+                  "texture": "#seal-default",
                   "uv": [
                     0.0,
                     0.375,

@@ -30,13 +30,13 @@
       32,
       32
     ],
-    "beeswax-white": [
+    "seal-default": [
       16,
       16
     ]
   },
   "textures": {
-    "beeswax-white": "beeswax-white",
+    "seal-default": "seal-default",
     "letter-envelope": "letter-envelope",
     "uncolored": "uncolored",
     "red": "red",
@@ -203,7 +203,7 @@
               ],
               "faces": {
                 "north": {
-                  "texture": "#beeswax-white",
+                  "texture": "#seal-default",
                   "uv": [
                     0.0,
                     0.0,
@@ -218,7 +218,7 @@
                   ]
                 },
                 "east": {
-                  "texture": "#beeswax-white",
+                  "texture": "#seal-default",
                   "uv": [
                     0.0,
                     0.0,
@@ -233,7 +233,7 @@
                   ]
                 },
                 "south": {
-                  "texture": "#beeswax-white",
+                  "texture": "#seal-default",
                   "uv": [
                     1.0,
                     1.0,
@@ -248,7 +248,7 @@
                   ]
                 },
                 "west": {
-                  "texture": "#beeswax-white",
+                  "texture": "#seal-default",
                   "uv": [
                     3.0,
                     2.0,
@@ -257,7 +257,7 @@
                   ]
                 },
                 "up": {
-                  "texture": "#beeswax-white",
+                  "texture": "#seal-default",
                   "uv": [
                     1.0,
                     1.0,
@@ -297,7 +297,7 @@
               ],
               "faces": {
                 "north": {
-                  "texture": "#beeswax-white",
+                  "texture": "#seal-default",
                   "uv": [
                     0.0,
                     0.0,
@@ -312,7 +312,7 @@
                   ]
                 },
                 "east": {
-                  "texture": "#beeswax-white",
+                  "texture": "#seal-default",
                   "uv": [
                     0.0,
                     0.0,
@@ -327,7 +327,7 @@
                   ]
                 },
                 "south": {
-                  "texture": "#beeswax-white",
+                  "texture": "#seal-default",
                   "uv": [
                     1.0,
                     1.0,
@@ -342,7 +342,7 @@
                   ]
                 },
                 "west": {
-                  "texture": "#beeswax-white",
+                  "texture": "#seal-default",
                   "uv": [
                     3.0,
                     2.0,
@@ -351,7 +351,7 @@
                   ]
                 },
                 "up": {
-                  "texture": "#beeswax-white",
+                  "texture": "#seal-default",
                   "uv": [
                     1.0,
                     1.0,

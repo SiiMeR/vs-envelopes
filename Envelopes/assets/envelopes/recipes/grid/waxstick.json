@@ -124,6 +124,37 @@
     }
   },
   {
+    ingredientPattern: "D,W",
+    ingredients: {
+      "D": {
+        type: "block",
+        code: "game:bowl-fired"
+      },
+      "W": {
+        type: "item",
+        code: "game:beeswax"
+      }
+    },
+    width: 1,
+    height: 2,
+    attributes: {
+      liquidContainerProps: {
+        requiresContent: {
+          type: "item",
+          code: "game:dye-woad"
+        },
+        requiresLitres: 0.2,
+        consumeContainer: false
+      }
+    },
+    name: "wax stick woad blue",
+    shapeless: false,
+    output: {
+      type: "item",
+      code: "waxstick-blue"
+    }
+  },
+  {
     ingredientPattern: "W,W",
     ingredients: {
       "D": {

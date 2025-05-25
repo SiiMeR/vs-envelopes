@@ -121,6 +121,6 @@ public class SetSealColorFromAttributes : CollectibleBehavior, IContainedMeshSou
     {
         var color = itemstack.Attributes.GetString(EnvelopeAttributes.WaxColor);
 
-        return $"{itemstack.Collectible.Code.ToShortString()}-{color ?? "beeswax-white"}";
+        return $"{itemstack.Collectible.Code.ToShortString()}-{color ?? "seal-default"}";
     }
 }
