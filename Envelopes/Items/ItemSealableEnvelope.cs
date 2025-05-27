@@ -143,7 +143,7 @@ public class ItemSealableEnvelope : Item // , IContainedMeshSource
         letterSlot.MarkDirty();
         using var stream = new MemoryStream();
         using var binaryWriter = new BinaryWriter(stream);
-        letterSlot.Itemstack.Attributes.ToBytes(binaryWriter);
+        letterSlot.Itemstack.ToBytes(binaryWriter);
 
         var ownerId = envelopeSlot.Inventory.openedByPlayerGUIds.FirstOrDefault();
 
@@ -237,8 +237,20 @@ public class ItemSealableEnvelope : Item // , IContainedMeshSource
         using var memoryStream = new MemoryStream(envelopeContents.ItemBlob);
         using var binaryReader = new BinaryReader(memoryStream);
 
-        var paper = new ItemStack(globalApi.World.GetItem(new AssetLocation("game:paper-parchment")));
-        paper.Attributes.FromBytes(binaryReader);
+        ItemStack itemstack;
+        try
+        {
+            itemstack = new ItemStack(binaryReader, globalApi.World);
+        }
+        catch (Exception _)
+        {
+            // fallback path for older envelopes which had paper attributes
+            memoryStream.Seek(0L, SeekOrigin.Begin);
+            itemstack = new ItemStack(globalApi.World.GetItem(new AssetLocation("game:paper-parchment")));
+            itemstack.Attributes.FromBytes(binaryReader);
+        }
+
+        itemstack.StackSize = 1;
 
         var codePath = envelope.Collectible.Code.Path;
         var nextCode = codePath.Contains("opened")
@@ -249,6 +261,7 @@ public class ItemSealableEnvelope : Item // , IContainedMeshSource
 
 
         var nextItem = new ItemStack(globalApi.World.GetItem(new AssetLocation(nextCode)));
+
         // TODO code to handle copying attributes from the old envelope to the new one
         var stampId = envelope?.Attributes?.TryGetLong(StampAttributes.StampId);
         if (stampId.HasValue)
@@ -286,7 +299,7 @@ public class ItemSealableEnvelope : Item // , IContainedMeshSource
             globalApi.World.SpawnItemEntity(nextItem, opener.Entity.SidedPos.XYZ);
         }
 
-        slot.Itemstack = paper;
+        slot.Itemstack = itemstack;
         slot.MarkDirty();
     }
 
@@ -296,7 +309,8 @@ public class ItemSealableEnvelope : Item // , IContainedMeshSource
         {
             var code = outputSlot.Itemstack.Collectible.Code.Path;
             var letterSlot = slots.FirstOrDefault(slot =>
-                !slot.Empty && slot.Itemstack.Collectible.Code.Path.Contains("parchment"));
+                !slot.Empty && (slot.Itemstack.Collectible.Code.Path.Contains("parchment") ||
+                                slot.Itemstack.Collectible.Code.Path.Contains("book")));
             var envelopeSlot = slots.FirstOrDefault(slot =>
                 !slot.Empty && slot.Itemstack.Collectible.Code.Path.Contains("envelope-unsealed"));
             var stampSlot = slots.FirstOrDefault(slot =>

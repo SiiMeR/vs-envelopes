@@ -41,5 +41,49 @@
       code: "envelope-opened",
       quantity: 1
     }
+  },
+  {
+    ingredientPattern: "P,E",
+    ingredients: {
+      "P": {
+        type: "item",
+        code: "game:book-normal-*"
+      },
+      "E": {
+        type: "item",
+        code: "envelope-opened"
+      }
+    },
+    width: 1,
+    height: 2,
+    shapeless: true,
+    copyAttributesFrom: 'E',
+    output: {
+      type: "item",
+      code: "envelope-opened",
+      quantity: 1
+    }
+  },
+  {
+    ingredientPattern: "P,E",
+    ingredients: {
+      "P": {
+        type: "item",
+        code: "game:book-normal-*"
+      },
+      "E": {
+        type: "item",
+        code: "envelope-empty"
+      }
+    },
+    width: 1,
+    height: 2,
+    shapeless: true,
+    copyAttributesFrom: 'E',
+    output: {
+      type: "item",
+      code: "envelope-unsealed",
+      quantity: 1
+    }
   }
 ]
