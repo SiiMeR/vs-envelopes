@@ -18,14 +18,6 @@ public class RenderStampEmblem : CollectibleBehavior, IContainedMeshSource
 
     private Dictionary<string, MultiTextureMeshRef> _meshRefs;
 
-    private Shape? _baseShape;
-
-    private Shape? BaseShape
-    {
-        get => _baseShape?.Clone();
-        set => _baseShape = value;
-    }
-
     public override void OnLoaded(ICoreAPI api)
     {
         _api = api;
@@ -57,23 +49,6 @@ public class RenderStampEmblem : CollectibleBehavior, IContainedMeshSource
     {
     }
 
-    public override void OnHeldInteractStart(ItemSlot slot, EntityAgent byEntity, BlockSelection blockSel,
-        EntitySelection entitySel,
-        bool firstEvent, ref EnumHandHandling handHandling, ref EnumHandling handling)
-    {
-        var item = slot.Itemstack.Attributes.GetString(StampAttributes.StampDesign, string.Empty);
-
-        if (byEntity.Api is ICoreClientAPI capi)
-        {
-            capi.ShowChatMessage("Stamp design: " + item.GetHashCode());
-        }
-
-        Console.WriteLine(item.GetHashCode());
-
-        base.OnHeldInteractStart(slot, byEntity, blockSel, entitySel, firstEvent, ref handHandling, ref handling);
-    }
-
-
     public MeshData? CreateMesh(ItemStack itemstack)
     {
         if (_api is not ICoreClientAPI capi)
@@ -85,39 +60,63 @@ public class RenderStampEmblem : CollectibleBehavior, IContainedMeshSource
         var shape = GenShape(capi, itemstack);
 
         var tps = new ShapeTextureSource(capi, shape, "stampssealsource");
-        capi.Tesselator.TesselateShape(cacheKey, shape, out var meshdata, tps);
+        capi.Tesselator.TesselateShape(cacheKey, shape, out var meshdata,
+            tps);
 
         return meshdata;
     }
 
     private Shape GenShape(ICoreClientAPI api, ItemStack stack)
     {
-        if (BaseShape == null)
-        {
-            var shape = api.TesselatorManager.GetCachedShape(stack.Item.Shape.Base);
-            BaseShape = shape.Clone();
-        }
+        // var cachedShape = api.TesselatorManager.GetCachedShape(stack.Item.Shape.Base).Clone();
+
+        AssetLocation shapeloc = stack.Item.Shape.Base.WithPathAppendixOnce(".json").WithPathPrefixOnce("shapes/");
+        Shape? shape = api.Assets.TryGet(shapeloc)?.ToObject<Shape>();
 
         if (stack.Item.Code.Path.EndsWith("blank"))
         {
             Console.WriteLine("blank one found");
-            return BaseShape;
+            return shape;
         }
 
         var design = ParseDesign(stack);
-        if (design.Length == 0) return BaseShape;
+        if (design.Length == 0) return shape;
 
 
-        var shapeClone = BaseShape;
+        var shapeClone = shape;
         var stamp = shapeClone.GetElementByName("Stamp");
         if (stamp == null) return shapeClone;
+
+        //
+        // var list = new List<ShapeElement>();
+        // var sef = new ShapeElementFace
+        // {
+        //     Texture = "metal_dark",
+        //     Uv = new float[] { 6f, 6f, 8f, 8f }
+        // };
+        // var array = new ShapeElementFace[6];
+        // array[0] = sef;
+        // array[1] = sef;
+        // array[2] = sef;
+        // array[3] = sef;
+        // array[4] = sef;
+        //
+        // // for (int i = 0; i < Constants.GridDimensions; i++)
+        // {
+        //     for (int j = 0; j < Constants.GridDimensions; j++)
+        //     {
+        //         
+        //     }
+        // }
 
         for (var i = 0; i < stamp.Children.Length; i++)
         {
             if (design[i])
             {
+                // Console.WriteLine(JsonUtil.ToString(stamp.Children[i].From));
+                // Console.WriteLine(JsonUtil.ToString(stamp.Children[i].To));
                 foreach (var face in stamp.Children[i].FacesResolved)
-                    face.Texture = "empty";
+                    face.Texture = "empty"; // i just for testing
             }
         }
 
@@ -169,36 +168,18 @@ public class RenderStampEmblem : CollectibleBehavior, IContainedMeshSource
 
     public string GetMeshCacheKey(ItemStack itemstack)
     {
-        // if (itemstack.Collectible.Code.Path.Contains("sealstamp-engraved") &&
-        //     _meshCacheKey != null && _meshCacheKey.EndsWith("0"))
-        // {
-        //     Console.WriteLine("found engraved with 0");
-        //
-        //     var id = itemstack.Attributes.GetLong(StampAttributes.StampId);
-        //     _meshCacheKey = $"{itemstack.Collectible.Code.ToShortString()}-{id}";
-        //     Console.WriteLine(_meshCacheKey);
-        // }
-        //
-        // if (string.IsNullOrEmpty(_meshCacheKey))
-        // {
-        //     var name = itemstack.Attributes.GetString(StampAttributes.StampTitle);
-        //     Console.WriteLine($"no key yet for {name}, id {id}");
-        //
-        //     _meshCacheKey = $"{itemstack.Collectible.Code.ToShortString()}-{id}";
-        //     Console.WriteLine(_meshCacheKey);
-        // }
-
         if (itemstack.Collectible.Code.Path.EndsWith("blank"))
         {
             return $"{itemstack.Collectible.Code.ToShortString()}";
         }
 
-        var stampDesign = itemstack.Attributes.GetString(StampAttributes.StampDesign, string.Empty);
-        if (string.IsNullOrEmpty(stampDesign))
+        var stampId = itemstack.Attributes.GetLong(StampAttributes.StampId);
+        if (stampId == 0L)
         {
-            Console.WriteLine(itemstack.Attributes.ToJsonToken() + " has no stamp design");
+            Console.WriteLine(itemstack.GetName() + " has no stamp ID on side " + _api.Side);
+            return $"{itemstack.Collectible.Code.ToShortString()}";
         }
 
-        return $"{itemstack.Collectible.Code.ToShortString()}-{stampDesign}";
+        return $"{itemstack.Collectible.Code.ToShortString()}-{stampId}";
     }
 }

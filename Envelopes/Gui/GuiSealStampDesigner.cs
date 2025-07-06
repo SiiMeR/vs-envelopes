@@ -9,9 +9,8 @@ public class GuiSealStampDesigner : GuiDialog
 {
     private const int LeftSectionWidth = 400;
     private const int LineHeight = 30;
-    private const int GridDimensions = 24;
 
-    private bool[,] _designState = new bool[GridDimensions, GridDimensions];
+    private bool[,] _designState = new bool[Constants.GridDimensions, Constants.GridDimensions];
 
     private ElementBounds? _gridBounds;
 
@@ -30,7 +29,7 @@ public class GuiSealStampDesigner : GuiDialog
 
     private bool SetupDialog()
     {
-        _designState = new bool[GridDimensions, GridDimensions];
+        _designState = new bool[Constants.GridDimensions, Constants.GridDimensions];
 
         var inputBounds = ElementBounds.Fixed(5.0, GuiStyle.ElementToDialogPadding, LeftSectionWidth, LineHeight);
 
@@ -60,12 +59,12 @@ public class GuiSealStampDesigner : GuiDialog
 
         SingleComposer.BeginChildElements(_gridBounds);
 
-        var toggleSize = _gridBounds.fixedWidth / GridDimensions;
+        var toggleSize = _gridBounds.fixedWidth / Constants.GridDimensions;
         var toggleBounds = ElementBounds.Fixed(0, 0, toggleSize, toggleSize);
 
-        for (var y = 0; y < GridDimensions; y++)
+        for (var y = 0; y < Constants.GridDimensions; y++)
         {
-            for (var x = 0; x < GridDimensions; x++)
+            for (var x = 0; x < Constants.GridDimensions; x++)
             {
                 var shouldDraw = Constants.EditableArea[y, x] == 1;
 
@@ -149,7 +148,7 @@ public class GuiSealStampDesigner : GuiDialog
 
                 EnvelopesModSystem.ClientNetworkChannel?.SendPacket(new SaveStampDesignPacket
                 {
-                    Title = title, Design = BooleanArrayPacker.Pack(_designState), Dimensions = GridDimensions
+                    Title = title, Design = BooleanArrayPacker.Pack(_designState), Dimensions = Constants.GridDimensions
                 });
 
                 TryClose();
@@ -206,7 +205,7 @@ public class GuiSealStampDesigner : GuiDialog
         var x = Convert.ToInt32(posInside.X / toggleSize);
         var y = Convert.ToInt32(posInside.Y / toggleSize);
 
-        if (x < 0 || x >= GridDimensions || y < 0 || y >= GridDimensions)
+        if (x < 0 || x >= Constants.GridDimensions || y < 0 || y >= Constants.GridDimensions)
         {
             base.OnMouseDown(args);
             return;
@@ -258,7 +257,7 @@ public class GuiSealStampDesigner : GuiDialog
         var x = Convert.ToInt32(posInside.X / toggleSize);
         var y = Convert.ToInt32(posInside.Y / toggleSize);
 
-        if (x < 0 || x >= GridDimensions || y < 0 || y >= GridDimensions)
+        if (x < 0 || x >= Constants.GridDimensions || y < 0 || y >= Constants.GridDimensions)
         {
             base.OnMouseMove(args);
             return;

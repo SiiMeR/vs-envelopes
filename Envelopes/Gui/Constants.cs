@@ -2,6 +2,8 @@
 
 public static class Constants
 {
+    public static int GridDimensions = 24;
+
     public static readonly int[,] EditableArea =
     {
         { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
