@@ -28,6 +28,7 @@ public class EnvelopesModSystem : ModSystem
         api.RegisterCollectibleBehaviorClass("Addressable", typeof(AddressableBehavior));
         api.RegisterCollectibleBehaviorClass("HurtOnConsume", typeof(HurtOnConsume));
         api.RegisterCollectibleBehaviorClass("SealColorFromAttributes", typeof(SetSealColorFromAttributes));
+        api.RegisterCollectibleBehaviorClass("RenderStampEmblem", typeof(RenderStampEmblem));
         api.RegisterItemClass("ItemSealableEnvelope", typeof(ItemSealableEnvelope));
         api.RegisterItemClass("ItemWaxSealStamp", typeof(ItemWaxSealStamp));
         api.RegisterItemClass("ItemWaxStick", typeof(ItemWaxStick));
@@ -141,6 +142,10 @@ public class EnvelopesModSystem : ModSystem
 
         nextItem.Attributes.SetLong(StampAttributes.StampId, stampId);
         nextItem.Attributes.SetString(StampAttributes.StampTitle, packet.Title);
+        nextItem.Attributes.SetString(StampAttributes.StampDesign,
+            string.Join(string.Empty, packet.Design.Select(on => on ? 1 : 0)));
+
+        nextItem.Collectible.GetBehavior<RenderStampEmblem>()?.InvalidateMeshCacheKey(nextItem);
 
         if (!fromPlayer.InventoryManager.TryGiveItemstack(nextItem, true))
         {

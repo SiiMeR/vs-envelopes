@@ -14,4 +14,5 @@ public static class StampAttributes
 {
     public const string StampId = "StampId";
     public const string StampTitle = "StampTitle";
+    public const string StampDesign = "StampDesign";
 }

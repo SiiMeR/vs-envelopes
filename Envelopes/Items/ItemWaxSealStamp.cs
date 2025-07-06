@@ -1,23 +1,13 @@
-﻿using System.Collections.Generic;
-using System.Text;
+﻿using System.Text;
 using Envelopes.Gui;
 using Envelopes.Util;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
-using Vintagestory.API.Util;
 
 namespace Envelopes.Items;
 
 public class ItemWaxSealStamp : Item
 {
-    #region Render
-
-    private Dictionary<string, MultiTextureMeshRef> Meshrefs =>
-        ObjectCacheUtil.GetOrCreate(api, "stampmeshrefs",
-            () => new Dictionary<string, MultiTextureMeshRef>());
-
-    #endregion
-
     public override bool ConsumeCraftingIngredients(ItemSlot[] slots, ItemSlot outputSlot, GridRecipe matchingRecipe)
     {
         var code = outputSlot.Itemstack.Collectible.Code.Path;
