@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Envelopes.Gui;
 using Envelopes.Util;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
@@ -68,59 +69,66 @@ public class RenderStampEmblem : CollectibleBehavior, IContainedMeshSource
 
     private Shape GenShape(ICoreClientAPI api, ItemStack stack)
     {
-        // var cachedShape = api.TesselatorManager.GetCachedShape(stack.Item.Shape.Base).Clone();
+        var shapeloc = stack.Item.Shape.Base.WithPathPrefixOnce("shapes/").WithPathAppendixOnce(".json");
+        var shape = api.Assets.TryGet(shapeloc)?.ToObject<Shape>();
 
-        AssetLocation shapeloc = stack.Item.Shape.Base.WithPathAppendixOnce(".json").WithPathPrefixOnce("shapes/");
-        Shape? shape = api.Assets.TryGet(shapeloc)?.ToObject<Shape>();
-
-        if (stack.Item.Code.Path.EndsWith("blank"))
+        if (shape == null)
         {
-            Console.WriteLine("blank one found");
-            return shape;
+            api.Logger.Error("Could not find shape for stamp {0} at {1}", stack.Item.Code, shapeloc);
+            return api.TesselatorManager.GetCachedShape(stack.Item.Shape.Base).Clone();
         }
 
         var design = ParseDesign(stack);
-        if (design.Length == 0) return shape;
 
+        var stamp = shape.GetElementByName("Stamp");
+        if (stamp == null) return shape;
 
-        var shapeClone = shape;
-        var stamp = shapeClone.GetElementByName("Stamp");
-        if (stamp == null) return shapeClone;
-
-        //
-        // var list = new List<ShapeElement>();
-        // var sef = new ShapeElementFace
-        // {
-        //     Texture = "metal_dark",
-        //     Uv = new float[] { 6f, 6f, 8f, 8f }
-        // };
-        // var array = new ShapeElementFace[6];
-        // array[0] = sef;
-        // array[1] = sef;
-        // array[2] = sef;
-        // array[3] = sef;
-        // array[4] = sef;
-        //
-        // // for (int i = 0; i < Constants.GridDimensions; i++)
-        // {
-        //     for (int j = 0; j < Constants.GridDimensions; j++)
-        //     {
-        //         
-        //     }
-        // }
-
-        for (var i = 0; i < stamp.Children.Length; i++)
+        var sef = new ShapeElementFace
         {
-            if (design[i])
+            Texture = "steel",
+            Uv = new[]
             {
-                // Console.WriteLine(JsonUtil.ToString(stamp.Children[i].From));
-                // Console.WriteLine(JsonUtil.ToString(stamp.Children[i].To));
-                foreach (var face in stamp.Children[i].FacesResolved)
-                    face.Texture = "empty"; // i just for testing
+                0.0f,
+                0.0f,
+                0.5f,
+                0.5f
+            }
+        };
+        var array = new ShapeElementFace[6];
+        // array[0] = sef;
+        array[1] = sef;
+        array[2] = sef;
+        array[3] = sef;
+        array[4] = sef;
+        array[5] = sef;
+        var list = new List<ShapeElement>();
+
+        const double cellSize = 0.25;
+        const double yBottom = -0.25;
+        const double yTop = 0.00;
+
+        for (var row = 0; row < Constants.GridDimensions; row++)
+        {
+            for (var col = 0; col < Constants.GridDimensions; col++)
+            {
+                var idx = row * Constants.GridDimensions + col;
+                if (design.Length == 0 || !design[idx])
+                {
+                    var shapeElement = new ShapeElement
+                    {
+                        Name = "StampFace" + idx,
+                        From = new[] { row * cellSize, yBottom, col * cellSize },
+                        To = new[] { row * cellSize + cellSize, yTop, col * cellSize + cellSize },
+                        FacesResolved = array
+                    };
+                    list.Add(shapeElement);
+                }
             }
         }
 
-        return shapeClone;
+        stamp.Children = list.ToArray();
+
+        return shape;
     }
 
     public override void OnBeforeRender(ICoreClientAPI capi, ItemStack itemstack, EnumItemRenderTarget target,
@@ -130,9 +138,6 @@ public class RenderStampEmblem : CollectibleBehavior, IContainedMeshSource
 
         if (!_meshRefs.TryGetValue(key, out var meshref))
         {
-            var id = itemstack.Attributes.GetLong(StampAttributes.StampId);
-            Console.WriteLine("need to gen one for " + id + " will have key " + key);
-
             var mesh = CreateMesh(itemstack);
             meshref = capi.Render.UploadMultiTextureMesh(mesh);
             _meshRefs[key] = meshref;
