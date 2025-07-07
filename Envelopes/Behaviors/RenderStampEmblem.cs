@@ -85,7 +85,7 @@ public class RenderStampEmblem : CollectibleBehavior, IContainedMeshSource
 
         var sef = new ShapeElementFace
         {
-            Texture = "steel",
+            Texture = "metal",
             Uv = new[]
             {
                 0.0f,
