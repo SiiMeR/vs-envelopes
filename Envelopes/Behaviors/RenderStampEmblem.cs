@@ -83,24 +83,15 @@ public class RenderStampEmblem : CollectibleBehavior, IContainedMeshSource
         var stamp = shape.GetElementByName("Stamp");
         if (stamp == null) return shape;
 
-        var sef = new ShapeElementFace
-        {
-            Texture = "metal",
-            Uv = new[]
-            {
-                0.0f,
-                0.0f,
-                0.5f,
-                0.5f
-            }
-        };
+        var metal = new ShapeElementFace { Texture = "metal", Uv = new[] { 0f, 0f, 0.5f, 0.5f } };
+
         var array = new ShapeElementFace[6];
-        // array[0] = sef;
-        array[1] = sef;
-        array[2] = sef;
-        array[3] = sef;
-        array[4] = sef;
-        array[5] = sef;
+        array[0] = metal;
+        array[1] = metal;
+        array[2] = metal;
+        array[3] = metal;
+        // array[4] = metal; no need to render up face
+        array[5] = metal;
         var list = new List<ShapeElement>();
 
         const double cellSize = 0.25;

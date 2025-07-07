@@ -52,32 +52,43 @@
     groundStorageTransform: {
       translation: {
         x: 0,
-        y: -0.35,
+        y: -0.46,
         z: 0
       },
       rotation: {
-        x: 0,
-        y: 0,
-        z: 0
+        x: -43,
+        y: 90,
+        z: -58
       },
-      scale: 0.3
+      scale: 0.25
     }
   },
   "heldRightReadyAnimation": "chiselready",
   tpHandTransform: {
-    // for debugging
     translation: {
-      x: -0.1,
-      y: -0.7,
-      z: -1.1
+      x: -1.8,
+      y: -2,
+      z: -2.1
     },
     rotation: {
-      x: -93,
-      y: -154,
-      z: -97
+      x: -92,
+      y: -1,
+      z: -83
     },
-    scale: 0.87
+    scale: 0.25
   },
+  // for debugging
+  //    translation: {
+  //      x: -0.1,
+  //      y: -0.7,
+  //      z: -1.1
+  //    },
+  //    rotation: {
+  //      x: -93,
+  //      y: -154,
+  //      z: -97
+  //    },
+  //    scale: 0.87
   //  tpHandTransform: {
   //    translation: {
   //      x: -1.4,

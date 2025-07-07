@@ -30,6 +30,20 @@
   attributes: {
     displaycaseable: true,
     shelvable: true,
+    "bookshelveable": true,
+    "onshelfTransform": {
+      "translation": {
+        "x": -0.35,
+        "y": -0.31,
+        "z": 0.1
+      },
+      "rotation": {
+        "x": 90,
+        "y": -11,
+        "z": 82
+      },
+      "scale": 0.75
+    },
     groundStorageTransform: {
       translation: {
         x: 0,

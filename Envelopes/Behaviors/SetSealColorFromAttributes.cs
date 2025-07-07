@@ -54,10 +54,17 @@ public class SetSealColorFromAttributes : CollectibleBehavior, IContainedMeshSou
         return meshdata;
     }
 
-    private Shape GenShape(ICoreClientAPI api, ItemStack itemstack)
+    private Shape GenShape(ICoreClientAPI api, ItemStack stack)
     {
-        var shape = api.TesselatorManager.GetCachedShape(itemstack.Item.Shape.Base).Clone();
-        var color = itemstack.Attributes.GetString(EnvelopeAttributes.WaxColor);
+        var shapeloc = stack.Item.Shape.Base.WithPathPrefixOnce("shapes/").WithPathAppendixOnce(".json");
+        var shape = api.Assets.TryGet(shapeloc)?.ToObject<Shape>();
+        if (shape == null)
+        {
+            api.Logger.Error("Could not find shape for seal {0} at {1}", stack.Item.Code, shapeloc);
+            return api.TesselatorManager.GetCachedShape(stack.Item.Shape.Base).Clone();
+        }
+
+        var color = stack.Attributes.GetString(EnvelopeAttributes.WaxColor);
 
         if (string.IsNullOrEmpty(color))
         {
