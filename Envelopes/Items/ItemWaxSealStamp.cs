@@ -1,5 +1,7 @@
 ﻿using System.Text;
+using Envelopes.Behaviors;
 using Envelopes.Gui;
+using Envelopes.Messages;
 using Envelopes.Util;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
@@ -56,6 +58,12 @@ public class ItemWaxSealStamp : Item
         if (stampTitle == null)
         {
             return heldItemName;
+        }
+
+        if (!string.IsNullOrEmpty(stampTitle) && !attributes.HasAttribute(StampAttributes.StampDesign))
+        {
+            EnvelopesModSystem.ClientNetworkChannel?.SendPacket(new AddStampDesignAttributePacket());
+            RenderStampEmblem.InvalidateMeshCacheKey(itemStack);
         }
 
         heldItemName += $" (“{stampTitle}”)";

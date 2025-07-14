@@ -16,8 +16,6 @@ namespace Envelopes.Items;
 
 public class ItemSealableEnvelope : Item // , IContainedMeshSource
 {
-    private bool[,]? _design;
-
     private void PutLetterIntoEnvelope(ItemSlot? letterSlot, ItemSlot? envelopeSlot)
     {
         if (letterSlot == null || envelopeSlot == null)
@@ -83,8 +81,6 @@ public class ItemSealableEnvelope : Item // , IContainedMeshSource
             api.Logger.Debug($"Unable to seal envelope. Envelope:{contentsId}, Stamp:{stampId}");
             return;
         }
-
-        _design = BooleanArrayPacker.UnpackFromByteArray(stamp.Design, stamp.Dimensions);
 
         outputSlot.Itemstack?.Attributes?.SetLong(StampAttributes.StampId, stamp.Id);
         outputSlot.Itemstack?.Attributes?.SetString(StampAttributes.StampTitle, stamp.Title);

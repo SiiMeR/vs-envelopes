@@ -32,36 +32,67 @@ public class EnvelopesModSystem : ModSystem
         api.RegisterItemClass("ItemSealableEnvelope", typeof(ItemSealableEnvelope));
         api.RegisterItemClass("ItemWaxSealStamp", typeof(ItemWaxSealStamp));
         api.RegisterItemClass("ItemWaxStick", typeof(ItemWaxStick));
+
+        api.Network.RegisterChannel("envelopes")
+            .RegisterMessageType<OpenEnvelopePacket>()
+            .RegisterMessageType<RemapSealerIdPacket>()
+            .RegisterMessageType<SaveStampDesignPacket>()
+            .RegisterMessageType<SetEnvelopeFromToPacket>()
+            .RegisterMessageType<AddStampDesignAttributePacket>();
     }
 
     public override void StartClientSide(ICoreClientAPI api)
     {
-        ClientNetworkChannel = api.Network.RegisterChannel("envelopes")
-            .RegisterMessageType<OpenEnvelopePacket>()
-            .RegisterMessageType<RemapSealerIdPacket>()
-            .RegisterMessageType<SaveStampDesignPacket>()
-            .RegisterMessageType<SetEnvelopeFromToPacket>();
-
+        ClientNetworkChannel = api.Network.GetChannel("envelopes");
         base.StartClientSide(api);
     }
 
     public override void StartServerSide(ICoreServerAPI api)
     {
-        ServerNetworkChannel = api.Network.RegisterChannel("envelopes")
-            .RegisterMessageType<OpenEnvelopePacket>()
-            .RegisterMessageType<RemapSealerIdPacket>()
-            .RegisterMessageType<SaveStampDesignPacket>()
-            .RegisterMessageType<SetEnvelopeFromToPacket>()
+        ServerNetworkChannel = api.Network.GetChannel("envelopes")
             .SetMessageHandler<OpenEnvelopePacket>(OnOpenEnvelopePacket)
             .SetMessageHandler<RemapSealerIdPacket>(OnRemapSealerIdPacket)
             .SetMessageHandler<SaveStampDesignPacket>(OnSaveStampDesignPacket)
-            .SetMessageHandler<SetEnvelopeFromToPacket>(OnSetEnvelopeFromToPacket);
+            .SetMessageHandler<SetEnvelopeFromToPacket>(OnSetEnvelopeFromToPacket)
+            .SetMessageHandler<AddStampDesignAttributePacket>(OnSetStampDesignAttributePacket);
 
         StampDatabase = new StampDatabase();
         EnvelopeDatabase = new EnvelopeContentsDatabase();
         MoveOldEnvelopesToDatabase(EnvelopeDatabase);
 
         base.StartServerSide(api);
+    }
+
+    private void OnSetStampDesignAttributePacket(IServerPlayer fromPlayer, AddStampDesignAttributePacket packet)
+    {
+        var heldItem = fromPlayer.InventoryManager.ActiveHotbarSlot?.Itemstack;
+        if (heldItem == null)
+        {
+            return;
+        }
+
+        if (!heldItem.Attributes.HasAttribute(StampAttributes.StampId))
+        {
+            return;
+        }
+
+        if (heldItem.Attributes.HasAttribute(StampAttributes.StampDesign))
+        {
+            return;
+        }
+
+        var stampId = heldItem.Attributes.GetLong(StampAttributes.StampId);
+        var stamp = StampDatabase?.GetStamp(stampId);
+        if (stamp == null)
+        {
+            return;
+        }
+
+        var design = BooleanArrayPacker.UnpackFromByteArray(stamp.Design);
+        heldItem.Attributes.SetString(StampAttributes.StampDesign,
+            string.Join(string.Empty, design.Select(on => on ? 1 : 0)));
+
+        fromPlayer.InventoryManager.ActiveHotbarSlot?.MarkDirty();
     }
 
     private void OnSetEnvelopeFromToPacket(IServerPlayer fromPlayer, SetEnvelopeFromToPacket packet)
@@ -144,8 +175,6 @@ public class EnvelopesModSystem : ModSystem
         nextItem.Attributes.SetString(StampAttributes.StampTitle, packet.Title);
         nextItem.Attributes.SetString(StampAttributes.StampDesign,
             string.Join(string.Empty, packet.Design.Select(on => on ? 1 : 0)));
-
-        nextItem.Collectible.GetBehavior<RenderStampEmblem>()?.InvalidateMeshCacheKey(nextItem);
 
         if (!fromPlayer.InventoryManager.TryGiveItemstack(nextItem, true))
         {

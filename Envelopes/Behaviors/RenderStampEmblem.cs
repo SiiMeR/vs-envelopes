@@ -17,7 +17,7 @@ public class RenderStampEmblem : CollectibleBehavior, IContainedMeshSource
 
     private const string MeshRefsCacheKey = "StampRefs";
 
-    private Dictionary<string, MultiTextureMeshRef> _meshRefs;
+    private static Dictionary<string, MultiTextureMeshRef> _meshRefs;
 
     public override void OnLoaded(ICoreAPI api)
     {
@@ -27,12 +27,12 @@ public class RenderStampEmblem : CollectibleBehavior, IContainedMeshSource
         base.OnLoaded(api);
     }
 
-    public void InvalidateMeshCacheKey(ItemStack itemstack)
+    public static void InvalidateMeshCacheKey(ItemStack itemstack)
     {
-        var key = GetMeshCacheKey(itemstack);
+        var key = GetMeshCacheKeyFor(itemstack);
         if (_meshRefs.TryGetValue(key, out var m))
         {
-            Console.WriteLine("Threw away mesh for " + key);
+            Console.WriteLine("Envelopes: Threw away mesh for " + key);
             m.Dispose();
             _meshRefs.Remove(key);
         }
@@ -164,6 +164,11 @@ public class RenderStampEmblem : CollectibleBehavior, IContainedMeshSource
 
     public string GetMeshCacheKey(ItemStack itemstack)
     {
+        return GetMeshCacheKeyFor(itemstack);
+    }
+
+    public static string GetMeshCacheKeyFor(ItemStack itemstack)
+    {
         if (itemstack.Collectible.Code.Path.EndsWith("blank"))
         {
             return $"{itemstack.Collectible.Code.ToShortString()}";
@@ -172,7 +177,6 @@ public class RenderStampEmblem : CollectibleBehavior, IContainedMeshSource
         var stampId = itemstack.Attributes.GetLong(StampAttributes.StampId);
         if (stampId == 0L)
         {
-            Console.WriteLine(itemstack.GetName() + " has no stamp ID on side " + _api.Side);
             return $"{itemstack.Collectible.Code.ToShortString()}";
         }
 
