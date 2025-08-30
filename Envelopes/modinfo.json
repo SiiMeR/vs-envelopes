@@ -9,7 +9,7 @@
     "DeanBro"
   ],
   "description": "Adds envelopes to the game, sealable with wax",
-  "version": "1.5.1",
+  "version": "2.0.0",
   "dependencies": {
     "game": ""
   }
