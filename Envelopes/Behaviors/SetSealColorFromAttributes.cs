@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Envelopes.Util;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;

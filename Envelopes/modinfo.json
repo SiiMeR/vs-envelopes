@@ -10,7 +10,7 @@
     "fk.rage"
   ],
   "description": "Adds envelopes to the game, sealable with wax",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "dependencies": {
     "game": ""
   }
