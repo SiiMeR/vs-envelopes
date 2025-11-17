@@ -13,6 +13,7 @@
     },
     width: 1,
     height: 2,
+    copyAttributesFrom: 'E',
     shapeless: true,
     output: {
       type: "item",
