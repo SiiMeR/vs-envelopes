@@ -1,0 +1,26 @@
+{
+  ingredientPattern: "L,F,P",
+  ingredients: {
+    "L": {
+      type: "item",
+      code: "game:hide-pelt-*"
+    },
+    "F": {
+      type: "item",
+      code: "game:flaxfibers",
+      quantity: 3
+    },
+    "P": {
+      type: "item",
+      code: "game:paper-parchment"
+    }
+  },
+  width: 1,
+  height: 3,
+  shapeless: true,
+  output: {
+    type: "item",
+    code: "parcel-empty",
+    quantity: 1
+  }
+}

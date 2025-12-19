@@ -1,0 +1,25 @@
+[
+  {
+    ingredientPattern: "K_,P_",
+    ingredients: {
+      "K": {
+        type: "item",
+        code: "game:knife-*",
+        isTool: true,
+        toolDurabilityCost: 1
+      },
+      "P": {
+        type: "item",
+        code: "parcel-opened"
+      }
+    },
+    width: 2,
+    height: 2,
+    shapeless: true,
+    output: {
+      type: "item",
+      code: "parcel-empty",
+      quantity: 1
+    }
+  }
+]

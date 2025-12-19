@@ -1,0 +1,32 @@
+[
+  {
+    ingredientPattern: "S_,W_,P_",
+    ingredients: {
+      "S": {
+        type: "item",
+        code: "sealstamp-engraved",
+        isTool: true,
+        toolDurabilityCost: 1
+      },
+      "W": {
+        type: "item",
+        code: "waxstick-*",
+        isTool: true,
+        toolDurabilityCost: 1
+      },
+      "P": {
+        type: "item",
+        code: "parcel-unsealed"
+      }
+    },
+    width: 2,
+    height: 3,
+    shapeless: true,
+    copyAttributesFrom: "P",
+    output: {
+      type: "item",
+      code: "parcel-sealed",
+      quantity: 1
+    }
+  }
+]

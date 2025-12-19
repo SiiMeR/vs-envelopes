@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Envelopes.Behaviors;
@@ -29,7 +30,9 @@ public class EnvelopesModSystem : ModSystem
         api.RegisterCollectibleBehaviorClass("HurtOnConsume", typeof(HurtOnConsume));
         api.RegisterCollectibleBehaviorClass("SealColorFromAttributes", typeof(SetSealColorFromAttributes));
         api.RegisterCollectibleBehaviorClass("RenderStampEmblem", typeof(RenderStampEmblem));
+        api.RegisterItemClass("ItemSealableContainer", typeof(ItemSealableContainer));
         api.RegisterItemClass("ItemSealableEnvelope", typeof(ItemSealableEnvelope));
+        api.RegisterItemClass("ItemSealableParcel", typeof(ItemSealableParcel));
         api.RegisterItemClass("ItemWaxSealStamp", typeof(ItemWaxSealStamp));
         api.RegisterItemClass("ItemWaxStick", typeof(ItemWaxStick));
 
@@ -61,6 +64,109 @@ public class EnvelopesModSystem : ModSystem
         MoveOldEnvelopesToDatabase(EnvelopeDatabase);
 
         base.StartServerSide(api);
+    }
+
+    public override void AssetsFinalize(ICoreAPI api)
+    {
+        base.AssetsFinalize(api);
+
+        if (api.Side == EnumAppSide.Server)
+        {
+            RegisterDynamicParcelRecipes(api as ICoreServerAPI);
+        }
+    }
+
+    private void RegisterDynamicParcelRecipes(ICoreServerAPI sapi)
+    {
+        if (sapi == null) return;
+
+        var recipeCount = 0;
+        var parcelEmpty = sapi.World.GetItem(new AssetLocation("envelopes:parcel-empty"));
+        var parcelOpened = sapi.World.GetItem(new AssetLocation("envelopes:parcel-opened"));
+
+        if (parcelEmpty == null || parcelOpened == null)
+        {
+            sapi.Logger.Warning("[Envelopes] Could not find parcel items for dynamic recipe generation");
+            return;
+        }
+
+        foreach (var item in sapi.World.Items)
+        {
+            if (item == null || item.Code == null) continue;
+
+            if (item.Code.Path.Contains("parcel") || item.Code.Path.Contains("envelope")) continue;
+
+            if (item.IsMissing) continue;
+
+            if (CreateParcelRecipe(sapi, item, EnumItemClass.Item, parcelEmpty, "parcel-unsealed"))
+            {
+                recipeCount++;
+            }
+
+            if (CreateParcelRecipe(sapi, item, EnumItemClass.Item, parcelOpened, "parcel-opened"))
+            {
+                recipeCount++;
+            }
+        }
+
+        sapi.Logger.Notification($"[Envelopes] Registered {recipeCount} dynamic parcel recipes");
+    }
+
+    private bool CreateParcelRecipe(ICoreServerAPI sapi, Item item, EnumItemClass collectibleType, Item parcelItem,
+        string outputCode)
+    {
+        var recipe = new GridRecipe
+        {
+            IngredientPattern = "I,P",
+            Height = 2,
+            Width = 1,
+            Shapeless = true
+        };
+
+        var itemIngredient = new CraftingRecipeIngredient
+        {
+            Code = item.Code,
+            Type = collectibleType,
+            Quantity = 1
+        };
+
+        var parcelIngredient = new CraftingRecipeIngredient
+        {
+            Code = parcelItem.Code,
+            Type = EnumItemClass.Item,
+            Quantity = 1
+        };
+
+        var output = new CraftingRecipeIngredient
+        {
+            Code = new AssetLocation("envelopes", outputCode),
+            Type = EnumItemClass.Item,
+            Quantity = 1
+        };
+
+        var resolvedOutput = sapi.World.GetItem(output.Code);
+        if (resolvedOutput == null || resolvedOutput.IsMissing)
+        {
+            return false;
+        }
+
+        recipe.Ingredients = new Dictionary<string, CraftingRecipeIngredient>
+        {
+            { "I", itemIngredient },
+            { "P", parcelIngredient }
+        };
+        recipe.RecipeGroup = 999;
+        recipe.Output = output;
+        recipe.Name = new AssetLocation("envelopes", $"parcel-{item.Code.ToShortString()}-{parcelItem.Code.Path}");
+        recipe.CopyAttributesFrom = "P";
+
+        if (recipe.ResolveIngredients(sapi.World))
+        {
+            sapi.RegisterCraftingRecipe(recipe);
+            return true;
+        }
+
+        return false;
     }
 
     private void OnSetStampDesignAttributePacket(IServerPlayer fromPlayer, AddStampDesignAttributePacket packet)
@@ -192,7 +298,11 @@ public class EnvelopesModSystem : ModSystem
             var contentsId = slot.Itemstack?.Attributes?.GetString(EnvelopeAttributes.ContentsId);
             if (contentsId != null && contentsId == packet.ContentsId)
             {
-                ItemSealableEnvelope.OpenEnvelope(slot, fromplayer);
+                if (slot.Itemstack?.Collectible is ItemSealableContainer container)
+                {
+                    container.OpenContainer(slot, fromplayer);
+                }
+
                 return false;
             }
 
