@@ -39,11 +39,11 @@
     "seal-default": "seal-default",
     "letter-envelope": "letter-envelope",
     "envelope-flap": "envelope-flap",
-    "uncolored": "uncolored",
-    "red": "red",
-    "green": "green",
-    "blue": "blue",
-    "black": "black"
+    "uncolored": "uncoloreddark",
+    "red": "reddark",
+    "green": "greendark",
+    "blue": "bluedark",
+    "black": "blackdark"
   },
   "elements": [
     {

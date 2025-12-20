@@ -12,7 +12,8 @@
     },
     "P": {
       type: "item",
-      code: "game:paper-parchment"
+      code: "game:paper-parchment",
+      quantity: 2
     }
   },
   width: 1,

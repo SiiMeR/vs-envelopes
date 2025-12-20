@@ -156,14 +156,14 @@ public class SetSealColorFromAttributes : CollectibleBehavior, IContainedMeshSou
         }
         catch
         {
-            return System.Array.Empty<bool>();
+            return [];
         }
     }
 
     private string GetStampTextureCacheKey(string design, string waxColor)
     {
         var designHash = GetDesignHash(design);
-        return $"{designHash}-{waxColor ?? "default"}";
+        return $"{designHash}-{waxColor}";
     }
 
     private string GetDesignHash(string design)
