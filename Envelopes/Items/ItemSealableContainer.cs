@@ -179,6 +179,12 @@ public abstract class ItemSealableContainer : Item
             nextItem.Attributes?.SetString(StampAttributes.StampTitle, stampTitle);
         }
 
+        var stampDesign = container?.Attributes?.GetString(StampAttributes.StampDesign);
+        if (!string.IsNullOrEmpty(stampDesign))
+        {
+            nextItem.Attributes?.SetString(StampAttributes.StampDesign, stampDesign);
+        }
+
         var from = container?.Attributes?.GetString(EnvelopeAttributes.From);
         if (!string.IsNullOrEmpty(from))
         {

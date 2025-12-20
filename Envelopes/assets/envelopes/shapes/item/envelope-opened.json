@@ -40,10 +40,16 @@
     "letter-envelope": "letter-envelope",
     "envelope-flap": "envelope-flap",
     "uncolored": "uncoloreddark",
+    "uncoloredimpression": "uncolored",
+    //    "red": "red",
     "red": "reddark",
+    "redimpression": "red",
     "green": "greendark",
+    "greenimpression": "green",
     "blue": "bluedark",
-    "black": "blackdark"
+    "blueimpression": "blue",
+    "black": "blackdark",
+    "blackimpression": "black"
   },
   "elements": [
     {

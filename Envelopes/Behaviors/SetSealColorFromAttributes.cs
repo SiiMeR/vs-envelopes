@@ -184,9 +184,21 @@ public class SetSealColorFromAttributes : CollectibleBehavior, IContainedMeshSou
 
     private void AddStampImpressionGeometry(ICoreClientAPI api, Shape shape, bool[] design, string waxColor)
     {
-        var waxElement = shape.GetElementByName("wax");
-        if (waxElement == null) return;
+        var hasWaxPiece = shape.GetElementByName("waxPiece") != null;
 
+        var waxElementNames = new[] { "wax", "waxPiece" };
+
+        foreach (var elementName in waxElementNames)
+        {
+            var waxElement = shape.GetElementByName(elementName);
+            if (waxElement == null) continue;
+
+            ApplyStampToWaxElement(waxElement, design, waxColor, elementName, hasWaxPiece);
+        }
+    }
+
+    private void ApplyStampToWaxElement(ShapeElement waxElement, bool[] design, string waxColor, string elementName, bool isOpenedEnvelope)
+    {
         const double waxMinX = 0;
         const double waxMaxX = 2;
         const double waxMinZ = 0;
@@ -220,7 +232,20 @@ public class SetSealColorFromAttributes : CollectibleBehavior, IContainedMeshSou
         faces[4] = impressionFace;
         faces[5] = impressionFace;
 
-        for (int row = 0; row < 24; row++)
+        int rowStart, rowEnd;
+        if (isOpenedEnvelope)
+        {
+            bool isWaxPiece = elementName == "waxPiece" || elementName == "waxPiece2";
+            rowStart = isWaxPiece ? 0 : 12;
+            rowEnd = isWaxPiece ? 12 : 24;
+        }
+        else
+        {
+            rowStart = 0;
+            rowEnd = 24;
+        }
+
+        for (int row = rowStart; row < rowEnd; row++)
         {
             for (int col = 0; col < 24; col++)
             {
