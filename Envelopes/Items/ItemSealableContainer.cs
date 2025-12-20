@@ -90,6 +90,13 @@ public abstract class ItemSealableContainer : Item
 
         outputSlot.Itemstack?.Attributes?.SetLong(StampAttributes.StampId, stamp.Id);
         outputSlot.Itemstack?.Attributes?.SetString(StampAttributes.StampTitle, stamp.Title);
+
+        var stampDesign = stampSlot.Itemstack?.Attributes?.GetString(StampAttributes.StampDesign);
+        if (!string.IsNullOrEmpty(stampDesign))
+        {
+            outputSlot.Itemstack?.Attributes?.SetString(StampAttributes.StampDesign, stampDesign);
+        }
+
         outputSlot.MarkDirty();
     }
 

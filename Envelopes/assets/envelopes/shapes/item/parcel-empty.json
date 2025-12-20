@@ -16,7 +16,8 @@
     ]
   },
   "textures": {
-    "map-blank.png": "game:item/lore/map-blank",
+    "map-blank.png": "game:block/wallpaper/pink",
+    //    "map-blank.png": "game:item/lore/map-blank",
     "fibers.png": "game:item/resource/fibers"
   },
   "elements": [

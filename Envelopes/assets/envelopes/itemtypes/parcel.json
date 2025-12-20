@@ -82,21 +82,21 @@
   },
   guiTransform: {
     translation: {
-      x: -1,
-      y: 0,
-      z: 0
+      x: 2,
+      y: 10,
+      z: 3
     },
     rotation: {
-      x: 97,
-      y: 165,
-      z: 51
+      x: -40,
+      y: 111,
+      z: 175
     },
     origin: {
       x: 0.5,
       y: 0,
       z: 0.5
     },
-    scale: 2.8
+    scale: 1.92
   },
   fpHandTransform: {
     rotation: {
@@ -113,21 +113,21 @@
   },
   tpHandTransform: {
     translation: {
-      x: -1.05,
-      y: -0.06,
-      z: -0.63
+      x: -0.72,
+      y: -0.23,
+      z: -0.5
     },
     rotation: {
-      x: -140,
-      y: 5,
-      z: -173
+      x: -89,
+      y: 14,
+      z: -106
     },
     origin: {
       x: 0.5,
       y: 0.1,
       z: 0.5
     },
-    scale: 0.7
+    scale: 0.65
   },
   groundTransform: {
     translation: {
@@ -146,5 +146,8 @@
       z: 0.5
     },
     scale: 3.2
-  }
+  },
+  heldTpIdleAnimation: "holdbothhandslarge",
+  heldRightReadyAnimation: "heldblockready",
+  heldTpUseAnimation: "twohandplaceblock"
 }
