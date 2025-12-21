@@ -40,10 +40,16 @@
     "letter-envelope": "letter-envelope",
     "envelope-flap": "envelope-flap",
     "uncolored": "uncoloreddark",
+    "uncoloredimpression": "uncolored",
+    //    "red": "red",
     "red": "reddark",
+    "redimpression": "red",
     "green": "greendark",
+    "greenimpression": "green",
     "blue": "bluedark",
-    "black": "blackdark"
+    "blueimpression": "blue",
+    "black": "blackdark",
+    "blackimpression": "black"
   },
   "elements": [
     {
@@ -82,6 +88,10 @@
             0.65,
             0.5
           ],
+          "uv": [
+            0.0,
+            0.0
+          ],
           "rotationOrigin": [
             0.0,
             0.6,
@@ -94,8 +104,23 @@
               "uv": [
                 0.0,
                 0.0,
-                20.0,
-                8.0
+                10.0,
+                3.0
+              ]
+            },
+            "down": {
+              "texture": "#envelope-flap",
+              "uv": [
+                0.0,
+                0.0,
+                10.0,
+                3.0
+              ],
+              "windMode": [
+                -1,
+                -1,
+                -1,
+                -1
               ]
             }
           },

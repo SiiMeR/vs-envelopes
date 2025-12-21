@@ -148,7 +148,7 @@ public class SetSealColorFromAttributes : CollectibleBehavior, IContainedMeshSou
 
     private bool[] ParseDesignString(string designString)
     {
-        if (string.IsNullOrEmpty(designString)) return System.Array.Empty<bool>();
+        if (string.IsNullOrEmpty(designString)) return [];
 
         try
         {
@@ -184,23 +184,36 @@ public class SetSealColorFromAttributes : CollectibleBehavior, IContainedMeshSou
 
     private void AddStampImpressionGeometry(ICoreClientAPI api, Shape shape, bool[] design, string waxColor)
     {
-        var waxElement = shape.GetElementByName("wax");
-        if (waxElement == null) return;
+        var hasWaxPiece = shape.GetElementByName("waxPiece") != null;
 
+        var waxElementNames = new[] { "wax", "waxPiece" };
+
+        foreach (var elementName in waxElementNames)
+        {
+            var waxElement = shape.GetElementByName(elementName);
+            if (waxElement == null) continue;
+
+            ApplyStampToWaxElement(waxElement, design, waxColor, elementName, hasWaxPiece);
+        }
+    }
+
+    private void ApplyStampToWaxElement(ShapeElement waxElement, bool[] design, string waxColor, string elementName,
+        bool isOpenedEnvelope)
+    {
         const double waxMinX = 0;
         const double waxMaxX = 2;
         const double waxMinZ = 0;
         const double waxMaxZ = 1.4;
         const double waxTopY = 0.1;
 
-        double waxWidth = waxMaxX - waxMinX;
-        double waxDepth = waxMaxZ - waxMinZ;
-        double waxCenterX = (waxMinX + waxMaxX) / 2.0;
-        double waxCenterZ = (waxMinZ + waxMaxZ) / 2.0;
+        var waxWidth = waxMaxX - waxMinX;
+        var waxDepth = waxMaxZ - waxMinZ;
+        var waxCenterX = (waxMinX + waxMaxX) / 2.0;
+        var waxCenterZ = (waxMinZ + waxMaxZ) / 2.0;
 
-        double stampDiameter = Math.Min(waxWidth, waxDepth) * 0.95;
-        double cellSize = stampDiameter / 24.0;
-        double gridOffset = stampDiameter / 2.0;
+        var stampDiameter = Math.Min(waxWidth, waxDepth) * 0.95;
+        var cellSize = stampDiameter / 24.0;
+        var gridOffset = stampDiameter / 2.0;
 
         var impressionTexture = waxColor + "impression";
 
@@ -220,35 +233,51 @@ public class SetSealColorFromAttributes : CollectibleBehavior, IContainedMeshSou
         faces[4] = impressionFace;
         faces[5] = impressionFace;
 
-        for (int row = 0; row < 24; row++)
+        int rowStart, rowEnd;
+        double zOffset = 0;
+        if (isOpenedEnvelope)
         {
-            for (int col = 0; col < 24; col++)
+            var isWaxPiece = elementName is "waxPiece" or "waxPiece2";
+            rowStart = isWaxPiece ? 0 : 12;
+            rowEnd = isWaxPiece ? 12 : 24;
+
+            zOffset = isWaxPiece ? -(waxDepth - 1) / 2 : (waxDepth - 2.8) / 2;
+        }
+        else
+        {
+            rowStart = 0;
+            rowEnd = 24;
+        }
+
+        for (var row = rowStart; row < rowEnd; row++)
+        {
+            for (var col = 0; col < 24; col++)
             {
-                int idx = row * 24 + col;
+                var idx = row * 24 + col;
                 if (idx < design.Length && design[idx])
                 {
-                    double dx = (col - 11.5) / 12.0;
-                    double dz = (row - 11.5) / 12.0;
+                    var dx = (col - 11.5) / 12.0;
+                    var dz = (row - 11.5) / 12.0;
                     if (dx * dx + dz * dz > 1.0) continue;
 
-                    double xStart = waxCenterX - gridOffset + (col * cellSize);
-                    double zStart = waxCenterZ - gridOffset + (row * cellSize);
+                    var xStart = waxCenterX - gridOffset + (col * cellSize);
+                    var zStart = waxCenterZ - gridOffset + (row * cellSize) + zOffset;
 
                     var element = new ShapeElement
                     {
                         Name = $"StampImpression{idx}",
-                        From = new[]
-                        {
+                        From =
+                        [
                             xStart,
-                            waxTopY + 0.07,
+                            waxTopY + 0.05,
                             zStart
-                        },
-                        To = new[]
-                        {
+                        ],
+                        To =
+                        [
                             xStart + cellSize,
-                            waxTopY + 0.17,
+                            waxTopY + 0.23,
                             zStart + cellSize
-                        },
+                        ],
                         FacesResolved = faces
                     };
                     impressionElements.Add(element);
@@ -258,7 +287,7 @@ public class SetSealColorFromAttributes : CollectibleBehavior, IContainedMeshSou
 
         if (impressionElements.Count > 0)
         {
-            var existingChildren = waxElement.Children?.ToList() ?? new List<ShapeElement>();
+            var existingChildren = waxElement.Children?.ToList() ?? [];
             existingChildren.AddRange(impressionElements);
             waxElement.Children = existingChildren.ToArray();
         }
