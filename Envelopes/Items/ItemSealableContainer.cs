@@ -197,10 +197,10 @@ public abstract class ItemSealableContainer : Item
             nextItem.Attributes?.SetString(EnvelopeAttributes.To, to);
         }
 
-        if (nextCode == GetOpenedItemCode())
+        var waxColor = container?.Attributes?.GetString(EnvelopeAttributes.WaxColor);
+        if (!string.IsNullOrEmpty(waxColor))
         {
-            nextItem.Attributes?.SetString(EnvelopeAttributes.WaxColor,
-                container?.Attributes?.GetString(EnvelopeAttributes.WaxColor));
+            nextItem.Attributes?.SetString(EnvelopeAttributes.WaxColor, waxColor);
         }
 
         if (!opener.InventoryManager.TryGiveItemstack(nextItem, true))
