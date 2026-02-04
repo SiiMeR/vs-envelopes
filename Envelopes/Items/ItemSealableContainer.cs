@@ -251,6 +251,18 @@ public abstract class ItemSealableContainer : Item
         return base.ConsumeCraftingIngredients(slots, outputSlot, matchingRecipe);
     }
 
+    public override bool MatchesForCrafting(ItemStack inputStack, GridRecipe gridRecipe,
+        CraftingRecipeIngredient ingredient)
+    {
+        if (gridRecipe.Output.ResolvedItemstack?.Collectible?.Code?.Path?.Contains("empty") == true
+            && !string.IsNullOrEmpty(inputStack.Attributes.GetString(EnvelopeAttributes.ContentsId)))
+        {
+            return false;
+        }
+
+        return base.MatchesForCrafting(inputStack, gridRecipe, ingredient);
+    }
+
     public override void OnCreatedByCrafting(ItemSlot[] allInputslots, ItemSlot outputSlot, GridRecipe byRecipe)
     {
         if (!outputSlot.Itemstack.Collectible.Code.Path.Contains("sealed") ||

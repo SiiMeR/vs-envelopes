@@ -11,8 +11,8 @@
     "rddex",
     "Purplep_"
   ],
-  "description": "Adds envelopes to the game, sealable with wax",
-  "version": "2.4.1",
+  "description": "Adds envelopes and parcels to the game, sealable with wax",
+  "version": "2.5.0",
   "dependencies": {
     "game": ""
   }
