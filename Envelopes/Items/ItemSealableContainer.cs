@@ -159,7 +159,7 @@ public abstract class ItemSealableContainer : Item
 
         var codePath = container.Collectible.Code.Path;
         var nextCode = codePath.Contains("opened")
-            ? GetEmptyItemCode()
+            ? GetOpenedItemCode()
             : codePath.Contains("unsealed")
                 ? GetEmptyItemCode()
                 : GetOpenedItemCode();
@@ -203,12 +203,12 @@ public abstract class ItemSealableContainer : Item
             nextItem.Attributes?.SetString(EnvelopeAttributes.WaxColor, waxColor);
         }
 
-        if (!opener.InventoryManager.TryGiveItemstack(nextItem, true))
+        if (!opener.InventoryManager.TryGiveItemstack(itemstack, true))
         {
-            globalApi.World.SpawnItemEntity(nextItem, opener.Entity.SidedPos.XYZ);
+            globalApi.World.SpawnItemEntity(itemstack, opener.Entity.SidedPos.XYZ);
         }
 
-        slot.Itemstack = itemstack;
+        slot.Itemstack = nextItem;
         slot.MarkDirty();
     }
 
