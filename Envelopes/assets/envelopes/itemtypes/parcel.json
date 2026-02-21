@@ -47,7 +47,7 @@
     groundStorageTransform: {
       translation: {
         x: 0,
-        y: -0.18,
+        y: -0.175,
         z: 0
       },
       rotation: {
@@ -55,7 +55,7 @@
         y: 0,
         z: 0
       },
-      scale: 0.7
+      scale: 0.65
     }
   },
   variantgroups: [
