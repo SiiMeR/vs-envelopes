@@ -275,7 +275,7 @@ public class SetSealColorFromAttributes : CollectibleBehavior, IContainedMeshSou
         const double waxMaxX = 2;
         const double waxMinZ = 0;
         const double waxMaxZ = 1.4;
-        const double waxTopY = 0.1;
+        var waxTopY = waxElement.To[1] - waxElement.From[1] - 0.18;
 
         var waxWidth = waxMaxX - waxMinX;
         var waxDepth = waxMaxZ - waxMinZ;

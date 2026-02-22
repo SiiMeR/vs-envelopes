@@ -103,118 +103,114 @@ public abstract class ItemSealableContainer : Item
     public virtual void OpenContainer(ItemSlot slot, IPlayer opener)
     {
         var globalApi = EnvelopesModSystem.Api;
-        if (globalApi == null)
-        {
-            return;
-        }
-
-        if (opener.Entity.World.Side != EnumAppSide.Server)
-        {
-            return;
-        }
+        if (globalApi == null) return;
+        if (opener.Entity.World.Side != EnumAppSide.Server) return;
 
         var container = slot.Itemstack;
-        if (container == null)
-        {
-            globalApi.Logger.Debug($"{GetContainerType()} moved from slot before opening.");
-            return;
-        }
-
-        var contentsId = container.Attributes.GetString(EnvelopeAttributes.ContentsId);
-        if (string.IsNullOrEmpty(contentsId))
-        {
-            globalApi.Logger.Debug($"Trying to open an empty {GetContainerType()}.");
-            return;
-        }
-
-        var database = EnvelopesModSystem.EnvelopeDatabase;
-        if (database == null)
-        {
-            throw new InvalidOperationException("The envelopes database has not been initialized yet.");
-        }
-
-        var envelopeContents = database.GetEnvelope(contentsId);
-        if (envelopeContents == null)
-        {
-            throw new InvalidOperationException($"Failed to retrieve {GetContainerType()} contents.");
-        }
-
-        using var memoryStream = new MemoryStream(envelopeContents.ItemBlob);
-        using var binaryReader = new BinaryReader(memoryStream);
-
-        ItemStack itemstack;
-        try
-        {
-            itemstack = new ItemStack(binaryReader, globalApi.World);
-        }
-        catch (Exception _)
-        {
-            // fallback path for older envelopes which had paper attributes
-            memoryStream.Seek(0L, SeekOrigin.Begin);
-            itemstack = new ItemStack(globalApi.World.GetItem(new AssetLocation("game:paper-parchment")));
-            itemstack.Attributes.FromBytes(binaryReader);
-        }
+        if (container == null) return;
 
         var codePath = container.Collectible.Code.Path;
-        var nextCode = codePath.Contains("opened")
-            ? GetOpenedItemCode()
-            : codePath.Contains("unsealed") || codePath.Contains("empty")
-                ? GetEmptyItemCode()
-                : GetOpenedItemCode();
+        var emptyPath = new AssetLocation(GetEmptyItemCode()).Path;
+        var openedPath = new AssetLocation(GetOpenedItemCode()).Path;
 
-        var nextItem = new ItemStack(globalApi.World.GetItem(new AssetLocation(nextCode)));
-
-        // Copy attributes from the old container to the new one
-        var stampId = container?.Attributes?.TryGetLong(StampAttributes.StampId);
-        if (stampId.HasValue)
+        if (codePath == emptyPath || codePath == openedPath)
         {
-            nextItem.Attributes?.SetLong(StampAttributes.StampId, stampId.Value);
+            var contentsId = container.Attributes.GetString(EnvelopeAttributes.ContentsId);
+            if (string.IsNullOrEmpty(contentsId)) return;
+
+            var envelopeContents = EnvelopesModSystem.EnvelopeDatabase?.GetEnvelope(contentsId);
+            if (envelopeContents == null) return;
+
+            using var ms = new MemoryStream(envelopeContents.ItemBlob);
+            using var br = new BinaryReader(ms);
+            ItemStack itemstack;
+            try
+            {
+                itemstack = new ItemStack(br, globalApi.World);
+            }
+            catch (Exception _)
+            {
+                ms.Seek(0L, SeekOrigin.Begin);
+                itemstack = new ItemStack(globalApi.World.GetItem(new AssetLocation("game:paper-parchment")));
+                itemstack.Attributes.FromBytes(br);
+            }
+
+            if (!opener.InventoryManager.TryGiveItemstack(itemstack, true))
+                globalApi.World.SpawnItemEntity(itemstack, opener.Entity.SidedPos.XYZ);
+
+            container.Attributes.RemoveAttribute(EnvelopeAttributes.ContentsId);
+            container.Attributes.RemoveAttribute(EnvelopeAttributes.ContentsCode);
+            container.Attributes.RemoveAttribute(EnvelopeAttributes.ContentsStackSize);
+            globalApi.Event.EnqueueMainThreadTask(() =>
+                globalApi.World.PlaySoundAt(new AssetLocation("game:sounds/held/bookclose*"), opener.Entity, null, true, 16f, 1f),
+                "envelope-sound");
+            slot.MarkDirty();
+            return;
         }
 
-        var stampTitle = container?.Attributes?.GetString(StampAttributes.StampTitle);
-        if (!string.IsNullOrEmpty(stampTitle))
+        var nextItem = new ItemStack(globalApi.World.GetItem(new AssetLocation(GetEmptyItemCode())));
+        CopyContainerAttributes(container, nextItem);
+
+        var contentsId2 = container.Attributes.GetString(EnvelopeAttributes.ContentsId);
+        if (!string.IsNullOrEmpty(contentsId2))
         {
-            nextItem.Attributes?.SetString(StampAttributes.StampTitle, stampTitle);
+            var envelopeContents = EnvelopesModSystem.EnvelopeDatabase?.GetEnvelope(contentsId2);
+            if (envelopeContents != null)
+            {
+                using var ms = new MemoryStream(envelopeContents.ItemBlob);
+                using var br = new BinaryReader(ms);
+                ItemStack itemstack;
+                try
+                {
+                    itemstack = new ItemStack(br, globalApi.World);
+                }
+                catch (Exception _)
+                {
+                    ms.Seek(0L, SeekOrigin.Begin);
+                    itemstack = new ItemStack(globalApi.World.GetItem(new AssetLocation("game:paper-parchment")));
+                    itemstack.Attributes.FromBytes(br);
+                }
+                nextItem.Attributes.SetString(EnvelopeAttributes.ContentsId, contentsId2);
+                nextItem.Attributes.SetString(EnvelopeAttributes.ContentsCode, itemstack.Collectible.Code.ToString());
+                nextItem.Attributes.SetInt(EnvelopeAttributes.ContentsStackSize, itemstack.StackSize);
+            }
+            else
+            {
+                var contentsCode = container.Attributes.GetString(EnvelopeAttributes.ContentsCode);
+                if (!string.IsNullOrEmpty(contentsCode))
+                {
+                    nextItem.Attributes.SetString(EnvelopeAttributes.ContentsCode, contentsCode);
+                    nextItem.Attributes.SetInt(EnvelopeAttributes.ContentsStackSize, container.Attributes.GetInt(EnvelopeAttributes.ContentsStackSize, 1));
+                }
+            }
         }
 
-        var stampDesign = container?.Attributes?.GetString(StampAttributes.StampDesign);
-        if (!string.IsNullOrEmpty(stampDesign))
-        {
-            nextItem.Attributes?.SetString(StampAttributes.StampDesign, stampDesign);
-        }
-
-        var from = container?.Attributes?.GetString(EnvelopeAttributes.From);
-        if (!string.IsNullOrEmpty(from))
-        {
-            nextItem.Attributes?.SetString(EnvelopeAttributes.From, from);
-        }
-
-        var to = container?.Attributes?.GetString(EnvelopeAttributes.To);
-        if (!string.IsNullOrEmpty(to))
-        {
-            nextItem.Attributes?.SetString(EnvelopeAttributes.To, to);
-        }
-
-        var waxColor = container?.Attributes?.GetString(EnvelopeAttributes.WaxColor);
-        if (!string.IsNullOrEmpty(waxColor))
-        {
-            nextItem.Attributes?.SetString(EnvelopeAttributes.WaxColor, waxColor);
-        }
-
-        if (!opener.InventoryManager.TryGiveItemstack(itemstack, true))
-        {
-            globalApi.World.SpawnItemEntity(itemstack, opener.Entity.SidedPos.XYZ);
-        }
-
-        var wasSealed = codePath.Contains("sealed") && !codePath.Contains("unsealed");
-        if (!wasSealed)
-        {
-            globalApi.World.PlaySoundAt(new AssetLocation("game:sounds/held/bookclose*"),
-                opener.Entity, null, true, 16f, 1f);
-        }
-
+        globalApi.Event.EnqueueMainThreadTask(() =>
+            globalApi.World.PlaySoundAt(new AssetLocation("game:sounds/held/bookclose*"), opener.Entity, null, true, 16f, 1f),
+            "envelope-sound");
         slot.Itemstack = nextItem;
         slot.MarkDirty();
+    }
+
+    private void CopyContainerAttributes(ItemStack from, ItemStack to)
+    {
+        var stampId = from.Attributes.TryGetLong(StampAttributes.StampId);
+        if (stampId.HasValue) to.Attributes.SetLong(StampAttributes.StampId, stampId.Value);
+
+        var stampTitle = from.Attributes.GetString(StampAttributes.StampTitle);
+        if (!string.IsNullOrEmpty(stampTitle)) to.Attributes.SetString(StampAttributes.StampTitle, stampTitle);
+
+        var stampDesign = from.Attributes.GetString(StampAttributes.StampDesign);
+        if (!string.IsNullOrEmpty(stampDesign)) to.Attributes.SetString(StampAttributes.StampDesign, stampDesign);
+
+        var fromAttr = from.Attributes.GetString(EnvelopeAttributes.From);
+        if (!string.IsNullOrEmpty(fromAttr)) to.Attributes.SetString(EnvelopeAttributes.From, fromAttr);
+
+        var toAttr = from.Attributes.GetString(EnvelopeAttributes.To);
+        if (!string.IsNullOrEmpty(toAttr)) to.Attributes.SetString(EnvelopeAttributes.To, toAttr);
+
+        var waxColor = from.Attributes.GetString(EnvelopeAttributes.WaxColor);
+        if (!string.IsNullOrEmpty(waxColor)) to.Attributes.SetString(EnvelopeAttributes.WaxColor, waxColor);
     }
 
     public override bool ConsumeCraftingIngredients(ItemSlot[] slots, ItemSlot outputSlot, GridRecipe matchingRecipe)

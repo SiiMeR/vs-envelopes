@@ -192,21 +192,21 @@ public class EnvelopesModSystem : ModSystem
 
     private void OnOpenEnvelopePacket(IServerPlayer fromplayer, OpenEnvelopePacket packet)
     {
-        fromplayer.Entity.WalkInventory(slot =>
+        Api?.Event.EnqueueMainThreadTask(() =>
         {
-            var contentsId = slot.Itemstack?.Attributes?.GetString(EnvelopeAttributes.ContentsId);
-            if (contentsId != null && contentsId == packet.ContentsId)
+            fromplayer.Entity.WalkInventory(slot =>
             {
-                if (slot.Itemstack?.Collectible is ItemSealableContainer container)
+                var contentsId = slot.Itemstack?.Attributes?.GetString(EnvelopeAttributes.ContentsId);
+                if (contentsId != null && contentsId == packet.ContentsId)
                 {
-                    container.OpenContainer(slot, fromplayer);
+                    if (slot.Itemstack?.Collectible is ItemSealableContainer container)
+                        container.OpenContainer(slot, fromplayer);
+                    return false;
                 }
 
-                return false;
-            }
-
-            return true;
-        });
+                return true;
+            });
+        }, "open-envelope");
     }
 
     private void OnRemapSealerIdPacket(IServerPlayer fromplayer, RemapSealerIdPacket packet)

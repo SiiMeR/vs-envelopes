@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using Envelopes.Database;
@@ -23,87 +22,6 @@ public class ItemSealableParcel : ItemSealableContainer, IContainedInteractable
     protected override bool CanContainItem(ItemSlot itemSlot)
     {
         return itemSlot?.Itemstack?.Collectible != null;
-    }
-
-    public override void OpenContainer(ItemSlot slot, IPlayer opener)
-    {
-        if (opener.Entity.World.Side != EnumAppSide.Server) return;
-
-        var codePath = slot.Itemstack?.Collectible?.Code?.Path;
-
-        if (codePath == "parcel-unsealed")
-        {
-            var contentsId = slot.Itemstack.Attributes.GetString(EnvelopeAttributes.ContentsId);
-            if (string.IsNullOrEmpty(contentsId)) return;
-
-            var envelopeContents = EnvelopesModSystem.EnvelopeDatabase?.GetEnvelope(contentsId);
-            if (envelopeContents == null) return;
-
-            using var memoryStream = new MemoryStream(envelopeContents.ItemBlob);
-            using var binaryReader = new BinaryReader(memoryStream);
-            ItemStack itemStack;
-            try
-            {
-                itemStack = new ItemStack(binaryReader, api.World);
-            }
-            catch (Exception)
-            {
-                memoryStream.Seek(0L, SeekOrigin.Begin);
-                itemStack = new ItemStack(api.World.GetItem(new AssetLocation("game:paper-parchment")));
-                itemStack.Attributes.FromBytes(binaryReader);
-            }
-
-            var nextItem = new ItemStack(api.World.GetItem(new AssetLocation("envelopes:parcel-empty")));
-            nextItem.Attributes.SetString(EnvelopeAttributes.ContentsId, contentsId);
-            nextItem.Attributes.SetString(EnvelopeAttributes.ContentsCode, itemStack.Collectible.Code.ToString());
-            nextItem.Attributes.SetInt(EnvelopeAttributes.ContentsStackSize, itemStack.StackSize);
-
-            api.World.PlaySoundAt(new AssetLocation("game:sounds/held/bookturn*"), opener.Entity, null, true, 16f, 1f);
-
-            slot.Itemstack = nextItem;
-            slot.MarkDirty();
-            return;
-        }
-
-        if (codePath is "parcel-empty" or "parcel-opened")
-        {
-            var contentsId = slot.Itemstack.Attributes.GetString(EnvelopeAttributes.ContentsId);
-            if (string.IsNullOrEmpty(contentsId)) return;
-
-            var database = EnvelopesModSystem.EnvelopeDatabase;
-            if (database == null) return;
-
-            var envelopeContents = database.GetEnvelope(contentsId);
-            if (envelopeContents == null) return;
-
-            using var memoryStream = new MemoryStream(envelopeContents.ItemBlob);
-            using var binaryReader = new BinaryReader(memoryStream);
-            ItemStack itemStack;
-            try
-            {
-                itemStack = new ItemStack(binaryReader, api.World);
-            }
-            catch (Exception)
-            {
-                memoryStream.Seek(0L, SeekOrigin.Begin);
-                itemStack = new ItemStack(api.World.GetItem(new AssetLocation("game:paper-parchment")));
-                itemStack.Attributes.FromBytes(binaryReader);
-            }
-
-            if (!opener.InventoryManager.TryGiveItemstack(itemStack, true))
-                api.World.SpawnItemEntity(itemStack, opener.Entity.SidedPos.XYZ);
-
-            slot.Itemstack.Attributes.RemoveAttribute(EnvelopeAttributes.ContentsId);
-            slot.Itemstack.Attributes.RemoveAttribute(EnvelopeAttributes.ContentsCode);
-            slot.Itemstack.Attributes.RemoveAttribute(EnvelopeAttributes.ContentsStackSize);
-
-            api.World.PlaySoundAt(new AssetLocation("game:sounds/held/bookturn*"), opener.Entity, null, true, 16f, 1f);
-
-            slot.MarkDirty();
-            return;
-        }
-
-        base.OpenContainer(slot, opener);
     }
 
     public override string GetHeldItemName(ItemStack itemStack)
@@ -223,8 +141,10 @@ public class ItemSealableParcel : ItemSealableContainer, IContainedInteractable
                     be.MarkDirty();
                     heldSlot.TakeOut(heldItem.StackSize);
                     heldSlot.MarkDirty();
-                    be.Api.World.PlaySoundAt(new AssetLocation("game:sounds/player/collect1"),
-                        be.Pos.X + 0.5, be.Pos.Y + 0.5, be.Pos.Z + 0.5, null, true, 16f, 1f);
+                    be.Api.Event.EnqueueMainThreadTask(() =>
+                        be.Api.World.PlaySoundAt(new AssetLocation("game:sounds/player/collect1"),
+                            be.Pos.X + 0.5, be.Pos.Y + 0.5, be.Pos.Z + 0.5, null, true, 16f, 1f),
+                        "parcel-sound");
                 }
             }
 
@@ -259,8 +179,10 @@ public class ItemSealableParcel : ItemSealableContainer, IContainedInteractable
                     be.MarkDirty();
                     heldSlot.TakeOut(1);
                     heldSlot.MarkDirty();
-                    be.Api.World.PlaySoundAt(new AssetLocation("game:sounds/held/bookclose*"),
-                        be.Pos.X + 0.5, be.Pos.Y + 0.5, be.Pos.Z + 0.5, null, true, 16f, 1f);
+                    be.Api.Event.EnqueueMainThreadTask(() =>
+                        be.Api.World.PlaySoundAt(new AssetLocation("game:sounds/held/bookclose*"),
+                            be.Pos.X + 0.5, be.Pos.Y + 0.5, be.Pos.Z + 0.5, null, true, 16f, 1f),
+                        "parcel-sound");
                 }
 
                 return true;
