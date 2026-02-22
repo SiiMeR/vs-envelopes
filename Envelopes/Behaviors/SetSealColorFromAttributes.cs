@@ -59,7 +59,7 @@ public class SetSealColorFromAttributes : CollectibleBehavior, IContainedMeshSou
 
     private Shape GenShape(ICoreClientAPI api, ItemStack stack)
     {
-        var shapeloc = stack.Item.Shape.Base.WithPathPrefixOnce("shapes/").WithPathAppendixOnce(".json");
+        var shapeloc = stack.Item.Shape.Base.Clone().WithPathPrefixOnce("shapes/").WithPathAppendixOnce(".json");
         var shape = api.Assets.TryGet(shapeloc)?.ToObject<Shape>();
         if (shape == null)
         {
@@ -131,19 +131,90 @@ public class SetSealColorFromAttributes : CollectibleBehavior, IContainedMeshSou
 
     public MeshData? GenMesh(ItemStack itemstack, ITextureAtlasAPI targetAtlas, BlockPos atBlockPos)
     {
-        return CreateMesh(itemstack);
+        var mesh = CreateMesh(itemstack);
+        if (mesh == null) return null;
+
+        var contentsCode = itemstack.Attributes.GetString(EnvelopeAttributes.ContentsCode);
+        if (!string.IsNullOrEmpty(contentsCode) && _api is ICoreClientAPI capi)
+        {
+            var loc = new AssetLocation(contentsCode);
+            MeshData? contentMesh = null;
+
+            try
+            {
+                var item = capi.World.GetItem(loc);
+                if (item is { IsMissing: false })
+                {
+                    var textures = item.Textures.ToDictionary(kv => kv.Key, kv => kv.Value.Base);
+                    var texSource = new ContainedTextureSource(capi, capi.BlockTextureAtlas, textures,
+                        $"parcel contents {item.Code}");
+                    capi.Tesselator.TesselateItem(item, out contentMesh, texSource);
+                }
+                else
+                {
+                    var block = capi.World.GetBlock(loc);
+                    if (block is { IsMissing: false } && block.BlockId != 0)
+                        capi.Tesselator.TesselateBlock(block, out contentMesh);
+                }
+            }
+            catch (Exception)
+            {
+                contentMesh = null;
+            }
+
+            if (contentMesh != null)
+            {
+                var (minBound, maxBound) = GetMeshBounds(contentMesh);
+                var centerX = (minBound.X + maxBound.X) * 0.5f;
+                var centerY = (minBound.Y + maxBound.Y) * 0.5f;
+                var centerZ = (minBound.Z + maxBound.Z) * 0.5f;
+                var maxDim = Math.Max(maxBound.X - minBound.X,
+                    Math.Max(maxBound.Y - minBound.Y, maxBound.Z - minBound.Z));
+
+                if (maxDim > 0)
+                {
+                    var scale = 0.36f / maxDim;
+                    contentMesh.Scale(new Vec3f(centerX, centerY, centerZ), scale, scale, scale);
+                    var scaledMinY = centerY + (minBound.Y - centerY) * scale;
+                    contentMesh.Translate(0.5f - centerX, 0.05f - scaledMinY, 0.5f - centerZ);
+                }
+
+                mesh.AddMeshData(contentMesh);
+            }
+        }
+
+        return mesh;
     }
 
     public string GetMeshCacheKey(ItemStack itemstack)
     {
         var color = itemstack.Attributes.GetString(EnvelopeAttributes.WaxColor);
         var stampDesign = itemstack.Attributes.GetString(StampAttributes.StampDesign);
+        var contentsCode = itemstack.Attributes.GetString(EnvelopeAttributes.ContentsCode) ?? string.Empty;
 
         var stampHash = string.IsNullOrEmpty(stampDesign)
             ? "nostamp"
             : GetDesignHash(stampDesign);
 
-        return $"{itemstack.Collectible.Code.ToShortString()}-{color ?? "seal-default"}-{stampHash}";
+        return $"{itemstack.Collectible.Code.ToShortString()}-{color ?? "seal-default"}-{stampHash}-{contentsCode}";
+    }
+
+    private static (Vec3f min, Vec3f max) GetMeshBounds(MeshData mesh)
+    {
+        var min = new Vec3f(float.MaxValue, float.MaxValue, float.MaxValue);
+        var max = new Vec3f(float.MinValue, float.MinValue, float.MinValue);
+        var xyz = mesh.xyz;
+        for (var i = 0; i < mesh.VerticesCount * 3; i += 3)
+        {
+            if (xyz[i] < min.X) min.X = xyz[i];
+            if (xyz[i + 1] < min.Y) min.Y = xyz[i + 1];
+            if (xyz[i + 2] < min.Z) min.Z = xyz[i + 2];
+            if (xyz[i] > max.X) max.X = xyz[i];
+            if (xyz[i + 1] > max.Y) max.Y = xyz[i + 1];
+            if (xyz[i + 2] > max.Z) max.Z = xyz[i + 2];
+        }
+
+        return (min, max);
     }
 
     private bool[] ParseDesignString(string designString)

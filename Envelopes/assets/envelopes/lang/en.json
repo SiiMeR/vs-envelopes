@@ -27,6 +27,7 @@
   "envelope-sealbroken": "The seal has been broken.",
   "envelope-sealedby": "Sealed by",
   "envelope-emblem": "Emblem",
+  "parcel-wrapwithparchment": "Wrap parcel with parchment",
   "open-parcel": "Open parcel",
   "open-parcel-confirmation": "Are you sure you wish to unseal this parcel?",
   "parcel-hascontents": "The parcel contains an item.",

@@ -1,0 +1,45 @@
+[
+  {
+    ingredientPattern: "P,E",
+    ingredients: {
+      "P": {
+        type: "item",
+        code: "game:paper-parchment"
+      },
+      "E": {
+        type: "item",
+        code: "parcel-empty"
+      }
+    },
+    width: 1,
+    height: 2,
+    shapeless: true,
+    output: {
+      type: "item",
+      code: "parcel-unsealed",
+      quantity: 1
+    }
+  },
+  {
+    ingredientPattern: "P,E",
+    ingredients: {
+      "P": {
+        type: "item",
+        code: "game:paper-parchment"
+      },
+      "E": {
+        type: "item",
+        code: "parcel-opened"
+      }
+    },
+    width: 1,
+    height: 2,
+    shapeless: true,
+    copyAttributesFrom: "E",
+    output: {
+      type: "item",
+      code: "parcel-unsealed",
+      quantity: 1
+    }
+  }
+]

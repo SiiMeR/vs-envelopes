@@ -3,6 +3,8 @@
 public static class EnvelopeAttributes
 {
     public const string ContentsId = "ContentsId";
+    public const string ContentsCode = "ContentsCode";
+    public const string ContentsStackSize = "ContentsStackSize";
     public const string SealerId = "SealerId";
     public const string SealerName = "SealerName";
     public const string From = "From";

@@ -100,7 +100,7 @@ public abstract class ItemSealableContainer : Item
         outputSlot.MarkDirty();
     }
 
-    public void OpenContainer(ItemSlot slot, IPlayer opener)
+    public virtual void OpenContainer(ItemSlot slot, IPlayer opener)
     {
         var globalApi = EnvelopesModSystem.Api;
         if (globalApi == null)
@@ -155,12 +155,10 @@ public abstract class ItemSealableContainer : Item
             itemstack.Attributes.FromBytes(binaryReader);
         }
 
-        itemstack.StackSize = 1;
-
         var codePath = container.Collectible.Code.Path;
         var nextCode = codePath.Contains("opened")
             ? GetOpenedItemCode()
-            : codePath.Contains("unsealed")
+            : codePath.Contains("unsealed") || codePath.Contains("empty")
                 ? GetEmptyItemCode()
                 : GetOpenedItemCode();
 
@@ -206,6 +204,13 @@ public abstract class ItemSealableContainer : Item
         if (!opener.InventoryManager.TryGiveItemstack(itemstack, true))
         {
             globalApi.World.SpawnItemEntity(itemstack, opener.Entity.SidedPos.XYZ);
+        }
+
+        var wasSealed = codePath.Contains("sealed") && !codePath.Contains("unsealed");
+        if (!wasSealed)
+        {
+            globalApi.World.PlaySoundAt(new AssetLocation("game:sounds/held/bookclose*"),
+                opener.Entity, null, true, 16f, 1f);
         }
 
         slot.Itemstack = nextItem;

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using HarmonyLib;
 using Envelopes.Behaviors;
 using Envelopes.Database;
 using Envelopes.Items;
@@ -23,6 +25,7 @@ public class EnvelopesModSystem : ModSystem
 
     public override void Start(ICoreAPI api)
     {
+        new Harmony(Mod.Info.ModID).PatchAll(Assembly.GetExecutingAssembly());
         Api = api;
         ModId = Mod.Info.ModID;
         api.RegisterCollectibleBehaviorClass("Addressable", typeof(AddressableBehavior));
