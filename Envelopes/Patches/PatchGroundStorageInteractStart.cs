@@ -1,3 +1,4 @@
+using System.Linq;
 using HarmonyLib;
 using Vintagestory.API.Common;
 using Vintagestory.API.Client;
@@ -5,6 +6,30 @@ using Vintagestory.API.MathTools;
 using Vintagestory.GameContent;
 
 namespace Envelopes.Patches;
+
+[HarmonyPatch(typeof(Block), "TryPlaceBlock")]
+public static class PatchBlockTryPlaceOnGroundStorage
+{
+    [HarmonyPrefix]
+    public static bool Prefix(IWorldAccessor world, IPlayer byPlayer, BlockSelection blockSel, ref bool __result)
+    {
+        if (!byPlayer.Entity.Controls.ShiftKey) return true;
+
+        var clickedPos = blockSel.DidOffset
+            ? blockSel.Position.AddCopy(blockSel.Face.Opposite)
+            : blockSel.Position;
+
+        if (world.BlockAccessor.GetBlockEntity(clickedPos) is not BlockEntityGroundStorage be) return true;
+
+        if (be.Inventory.Any(slot => !slot.Empty && slot.Itemstack?.Collectible is IContainedInteractable))
+        {
+            __result = false;
+            return false;
+        }
+
+        return true;
+    }
+}
 
 [HarmonyPatch(typeof(BlockEntityGroundStorage), "OnPlayerInteractStart")]
 public static class PatchGroundStorageInteractStart

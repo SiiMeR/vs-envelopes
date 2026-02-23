@@ -139,10 +139,9 @@ public abstract class ItemSealableContainer : Item
                 globalApi.World.SpawnItemEntity(itemstack, opener.Entity.SidedPos.XYZ);
 
             container.Attributes.RemoveAttribute(EnvelopeAttributes.ContentsId);
-            container.Attributes.RemoveAttribute(EnvelopeAttributes.ContentsCode);
-            container.Attributes.RemoveAttribute(EnvelopeAttributes.ContentsStackSize);
             globalApi.Event.EnqueueMainThreadTask(() =>
-                globalApi.World.PlaySoundAt(new AssetLocation("game:sounds/held/bookclose*"), opener.Entity, null, true, 16f, 1f),
+                    globalApi.World.PlaySoundAt(new AssetLocation("game:sounds/held/bookclose*"), opener.Entity, null,
+                        true, 16f, 1f),
                 "envelope-sound");
             slot.MarkDirty();
             return;
@@ -153,46 +152,17 @@ public abstract class ItemSealableContainer : Item
 
         var contentsId2 = container.Attributes.GetString(EnvelopeAttributes.ContentsId);
         if (!string.IsNullOrEmpty(contentsId2))
-        {
-            var envelopeContents = EnvelopesModSystem.EnvelopeDatabase?.GetEnvelope(contentsId2);
-            if (envelopeContents != null)
-            {
-                using var ms = new MemoryStream(envelopeContents.ItemBlob);
-                using var br = new BinaryReader(ms);
-                ItemStack itemstack;
-                try
-                {
-                    itemstack = new ItemStack(br, globalApi.World);
-                }
-                catch (Exception _)
-                {
-                    ms.Seek(0L, SeekOrigin.Begin);
-                    itemstack = new ItemStack(globalApi.World.GetItem(new AssetLocation("game:paper-parchment")));
-                    itemstack.Attributes.FromBytes(br);
-                }
-                nextItem.Attributes.SetString(EnvelopeAttributes.ContentsId, contentsId2);
-                nextItem.Attributes.SetString(EnvelopeAttributes.ContentsCode, itemstack.Collectible.Code.ToString());
-                nextItem.Attributes.SetInt(EnvelopeAttributes.ContentsStackSize, itemstack.StackSize);
-            }
-            else
-            {
-                var contentsCode = container.Attributes.GetString(EnvelopeAttributes.ContentsCode);
-                if (!string.IsNullOrEmpty(contentsCode))
-                {
-                    nextItem.Attributes.SetString(EnvelopeAttributes.ContentsCode, contentsCode);
-                    nextItem.Attributes.SetInt(EnvelopeAttributes.ContentsStackSize, container.Attributes.GetInt(EnvelopeAttributes.ContentsStackSize, 1));
-                }
-            }
-        }
+            nextItem.Attributes.SetString(EnvelopeAttributes.ContentsId, contentsId2);
 
         globalApi.Event.EnqueueMainThreadTask(() =>
-            globalApi.World.PlaySoundAt(new AssetLocation("game:sounds/held/bookclose*"), opener.Entity, null, true, 16f, 1f),
+                globalApi.World.PlaySoundAt(new AssetLocation("game:sounds/held/bookclose*"), opener.Entity, null, true,
+                    16f, 1f),
             "envelope-sound");
         slot.Itemstack = nextItem;
         slot.MarkDirty();
     }
 
-    private void CopyContainerAttributes(ItemStack from, ItemStack to)
+    protected void CopyContainerAttributes(ItemStack from, ItemStack to)
     {
         var stampId = from.Attributes.TryGetLong(StampAttributes.StampId);
         if (stampId.HasValue) to.Attributes.SetLong(StampAttributes.StampId, stampId.Value);
@@ -234,17 +204,15 @@ public abstract class ItemSealableContainer : Item
 
             if (code.Contains("unsealed"))
             {
-                // When crafting item + empty/opened parcel -> unsealed parcel
-                PutItemIntoContainer(itemSlot, outputSlot);
+                if (string.IsNullOrEmpty(outputSlot.Itemstack?.Attributes?.GetString(EnvelopeAttributes.ContentsId)))
+                    PutItemIntoContainer(itemSlot, outputSlot);
             }
             else if (code.Contains("sealed") && !code.Contains("unsealed"))
             {
-                // When sealing an unsealed parcel with wax
                 SealContainer(containerSlot, stampSlot, outputSlot);
             }
             else if (code.Contains("opened"))
             {
-                // When adding item to an already opened parcel
                 PutItemIntoContainer(itemSlot, outputSlot);
             }
         }
@@ -256,7 +224,8 @@ public abstract class ItemSealableContainer : Item
         CraftingRecipeIngredient ingredient)
     {
         if (gridRecipe.Output.ResolvedItemstack?.Collectible?.Code?.Path?.Contains("empty") == true
-            && !string.IsNullOrEmpty(inputStack.Attributes.GetString(EnvelopeAttributes.ContentsId)))
+            && (!string.IsNullOrEmpty(inputStack.Attributes.GetString(EnvelopeAttributes.ContentsId))
+                || inputStack.Attributes.GetBytes(EnvelopeAttributes.VisibleContent)?.Length > 0))
         {
             return false;
         }

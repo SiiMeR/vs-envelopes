@@ -80,18 +80,53 @@
   shape: {
     base: "item/parcel-{state}"
   },
+  creativeinventoryStacksByType: {
+    "parcel-sealed": [
+      {
+        tabs: [
+          "general",
+          "envelopes"
+        ],
+        stacks: [
+          {
+            type: "item",
+            code: "envelopes:parcel-sealed",
+            attributes: {
+              WaxColor: "red"
+            }
+          }
+        ]
+      }
+    ]
+  },
   creativeinventory: {
     "general": [
-      "*"
+      "*-empty",
+      "*-unsealed",
+      "*-opened"
     ],
     "envelopes": [
-      "*"
+      "*-empty",
+      "*-unsealed",
+      "*-opened"
     ]
   },
   guiTransform: {
-    translation: { x: 5, y: 12, z: 3 },
-    rotation: { x: -38, y: -71, z: -180 },
-    origin: { x: 0.5, y: 0, z: 0.5 },
+    translation: {
+      x: 5,
+      y: 12,
+      z: 3
+    },
+    rotation: {
+      x: -38,
+      y: -71,
+      z: -180
+    },
+    origin: {
+      x: 0.5,
+      y: 0,
+      z: 0.5
+    },
     scale: 1.75
   },
   fpHandTransform: {

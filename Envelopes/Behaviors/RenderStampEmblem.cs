@@ -32,7 +32,6 @@ public class RenderStampEmblem : CollectibleBehavior, IContainedMeshSource
         var key = GetMeshCacheKeyFor(itemstack);
         if (_meshRefs.TryGetValue(key, out var m))
         {
-            Console.WriteLine("Envelopes: Threw away mesh for " + key);
             m.Dispose();
             _meshRefs.Remove(key);
         }

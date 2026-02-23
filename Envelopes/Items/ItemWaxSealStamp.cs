@@ -1,10 +1,13 @@
-﻿using System.Text;
+using System.Linq;
+using System.Text;
 using Envelopes.Behaviors;
 using Envelopes.Gui;
 using Envelopes.Messages;
 using Envelopes.Util;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
+using Vintagestory.API.MathTools;
+using Vintagestory.GameContent;
 
 namespace Envelopes.Items;
 
@@ -22,24 +25,19 @@ public class ItemWaxSealStamp : Item
     }
 
     public override void OnHeldInteractStart(ItemSlot slot, EntityAgent byEntity, BlockSelection blockSel,
-        EntitySelection entitySel,
-        bool firstEvent, ref EnumHandHandling handling)
+        EntitySelection entitySel, bool firstEvent, ref EnumHandHandling handling)
     {
-        if (api.Side == EnumAppSide.Server)
-        {
-            base.OnHeldInteractStart(slot, byEntity, blockSel, entitySel, firstEvent, ref handling);
-            return;
-        }
-
-        if (byEntity.Controls.ShiftKey)
-        {
-            base.OnHeldInteractStart(slot, byEntity, blockSel, entitySel, firstEvent, ref handling);
-            return;
-        }
-
-
         var alreadyEngraved = slot.Itemstack.Collectible.Code.Path.Contains("engraved");
-        if (firstEvent && !alreadyEngraved)
+
+        if (alreadyEngraved && firstEvent
+            && byEntity.LeftHandItemSlot?.Itemstack?.Collectible?.Code?.Path?.StartsWith("waxstick") == true
+            && blockSel != null && GetUnsealedParcelSlot(blockSel.Position) != null)
+        {
+            handling = EnumHandHandling.PreventDefault;
+            return;
+        }
+
+        if (firstEvent && !alreadyEngraved && api.Side != EnumAppSide.Server)
         {
             var dialog = new GuiSealStampDesigner(EnvelopesModSystem.Api as ICoreClientAPI);
             dialog.TryOpen(true);
@@ -47,6 +45,63 @@ public class ItemWaxSealStamp : Item
         }
 
         base.OnHeldInteractStart(slot, byEntity, blockSel, entitySel, firstEvent, ref handling);
+    }
+
+    public override bool OnHeldInteractStep(float secondsUsed, ItemSlot slot, EntityAgent byEntity,
+        BlockSelection blockSel, EntitySelection entitySel)
+    {
+        if (!slot.Itemstack.Collectible.Code.Path.Contains("engraved")) return false;
+        if (byEntity.LeftHandItemSlot?.Itemstack?.Collectible?.Code?.Path?.StartsWith("waxstick") != true) return false;
+        if (blockSel == null) return false;
+        return GetUnsealedParcelSlot(blockSel.Position) != null && secondsUsed < 1.0f;
+    }
+
+    public override void OnHeldInteractStop(float secondsUsed, ItemSlot slot, EntityAgent byEntity,
+        BlockSelection blockSel, EntitySelection entitySel)
+    {
+        if (secondsUsed < 1.0f) return;
+        if (api.Side != EnumAppSide.Server) return;
+        if (blockSel == null) return;
+
+        var targetSlot = GetUnsealedParcelSlot(blockSel.Position);
+        if (targetSlot == null) return;
+
+        var contentsId = targetSlot.Itemstack.Attributes.GetString(EnvelopeAttributes.ContentsId);
+        if (string.IsNullOrEmpty(contentsId)) return;
+
+        var waxSlot = byEntity.LeftHandItemSlot;
+        if (waxSlot?.Itemstack?.Collectible?.Code?.Path?.StartsWith("waxstick") != true) return;
+
+        var waxColor = waxSlot.Itemstack.Collectible.Attributes["color"].AsString();
+        var nextStack = new ItemStack(api.World.GetItem(new AssetLocation("envelopes:parcel-sealed")));
+        nextStack.Attributes.SetString(EnvelopeAttributes.ContentsId, contentsId);
+        nextStack.Attributes.SetString(EnvelopeAttributes.WaxColor, waxColor);
+
+        var stampId = slot.Itemstack.Attributes.TryGetLong(StampAttributes.StampId);
+        if (stampId.HasValue) nextStack.Attributes.SetLong(StampAttributes.StampId, stampId.Value);
+        var stampTitle = slot.Itemstack.Attributes.GetString(StampAttributes.StampTitle);
+        if (!string.IsNullOrEmpty(stampTitle)) nextStack.Attributes.SetString(StampAttributes.StampTitle, stampTitle);
+        var stampDesign = slot.Itemstack.Attributes.GetString(StampAttributes.StampDesign);
+        if (!string.IsNullOrEmpty(stampDesign))
+            nextStack.Attributes.SetString(StampAttributes.StampDesign, stampDesign);
+
+        waxSlot.Itemstack.Collectible.DamageItem(api.World, byEntity, waxSlot, 1);
+        waxSlot.MarkDirty();
+
+        targetSlot.Itemstack = nextStack;
+        targetSlot.MarkDirty();
+
+        (api.World.BlockAccessor.GetBlockEntity(blockSel.Position) as BlockEntityContainer)?.MarkDirty();
+
+        api.World.PlaySoundAt(new AssetLocation("game:sounds/held/bookclose*"), byEntity, null, true, 16f, 1f);
+    }
+
+    private ItemSlot? GetUnsealedParcelSlot(BlockPos pos)
+    {
+        var be = api.World.BlockAccessor.GetBlockEntity<BlockEntityGroundStorage>(pos);
+        return be?.Inventory.FirstOrDefault(s =>
+            s.Itemstack?.Collectible?.Code?.Path == "parcel-unsealed"
+            && !string.IsNullOrEmpty(s.Itemstack.Attributes.GetString(EnvelopeAttributes.ContentsId)));
     }
 
     public override string GetHeldItemName(ItemStack itemStack)
@@ -66,7 +121,7 @@ public class ItemWaxSealStamp : Item
             RenderStampEmblem.InvalidateMeshCacheKey(itemStack);
         }
 
-        heldItemName += $" (“{stampTitle}”)";
+        heldItemName += $" (\"{stampTitle}\")";
 
         return heldItemName;
     }

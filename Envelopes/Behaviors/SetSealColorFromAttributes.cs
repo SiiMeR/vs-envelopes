@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -134,25 +135,36 @@ public class SetSealColorFromAttributes : CollectibleBehavior, IContainedMeshSou
         var mesh = CreateMesh(itemstack);
         if (mesh == null) return null;
 
-        var contentsCode = itemstack.Attributes.GetString(EnvelopeAttributes.ContentsCode);
-        if (!string.IsNullOrEmpty(contentsCode) && _api is ICoreClientAPI capi)
+        var contentsBlob = itemstack.Attributes.GetBytes(EnvelopeAttributes.VisibleContent);
+        if (contentsBlob?.Length > 0 && itemstack.Collectible.Code.Path == "parcel-empty" && _api is ICoreClientAPI capi)
         {
-            var loc = new AssetLocation(contentsCode);
             MeshData? contentMesh = null;
 
             try
             {
-                var item = capi.World.GetItem(loc);
+                using var ms = new MemoryStream(contentsBlob);
+                using var br = new BinaryReader(ms);
+                var containedStack = new ItemStack(br, capi.World);
+
+                var item = containedStack.Item;
                 if (item is { IsMissing: false })
                 {
-                    var textures = item.Textures.ToDictionary(kv => kv.Key, kv => kv.Value.Base);
-                    var texSource = new ContainedTextureSource(capi, capi.BlockTextureAtlas, textures,
-                        $"parcel contents {item.Code}");
-                    capi.Tesselator.TesselateItem(item, out contentMesh, texSource);
+                    var meshSource = item.CollectibleBehaviors?.OfType<IContainedMeshSource>().FirstOrDefault();
+                    if (meshSource != null)
+                    {
+                        contentMesh = meshSource.GenMesh(containedStack, targetAtlas, atBlockPos);
+                    }
+                    else
+                    {
+                        var textures = item.Textures.ToDictionary(kv => kv.Key, kv => kv.Value.Base);
+                        var texSource = new ContainedTextureSource(capi, capi.BlockTextureAtlas, textures,
+                            $"parcel contents {item.Code}");
+                        capi.Tesselator.TesselateItem(item, out contentMesh, texSource);
+                    }
                 }
                 else
                 {
-                    var block = capi.World.GetBlock(loc);
+                    var block = containedStack.Block;
                     if (block is { IsMissing: false } && block.BlockId != 0)
                         capi.Tesselator.TesselateBlock(block, out contentMesh);
                 }
@@ -190,13 +202,20 @@ public class SetSealColorFromAttributes : CollectibleBehavior, IContainedMeshSou
     {
         var color = itemstack.Attributes.GetString(EnvelopeAttributes.WaxColor);
         var stampDesign = itemstack.Attributes.GetString(StampAttributes.StampDesign);
-        var contentsCode = itemstack.Attributes.GetString(EnvelopeAttributes.ContentsCode) ?? string.Empty;
+        var contentsBlob = itemstack.Attributes.GetBytes(EnvelopeAttributes.VisibleContent);
 
-        var stampHash = string.IsNullOrEmpty(stampDesign)
-            ? "nostamp"
-            : GetDesignHash(stampDesign);
+        var stampHash = string.IsNullOrEmpty(stampDesign) ? "nostamp" : GetDesignHash(stampDesign);
+        var contentsHash = contentsBlob?.Length > 0 ? GetBytesHash(contentsBlob) : string.Empty;
 
-        return $"{itemstack.Collectible.Code.ToShortString()}-{color ?? "seal-default"}-{stampHash}-{contentsCode}";
+        return $"{itemstack.Collectible.Code.ToShortString()}-{color ?? "seal-default"}-{stampHash}-{contentsHash}";
+    }
+
+    private static string GetBytesHash(byte[] bytes)
+    {
+        var h = 0L;
+        for (var i = 0; i < bytes.Length; i++)
+            h = h * 31 + bytes[i];
+        return h.ToString("X16");
     }
 
     private static (Vec3f min, Vec3f max) GetMeshBounds(MeshData mesh)

@@ -50,14 +50,6 @@
     "reddark": [
       16,
       16
-    ],
-    "red2": [
-      16,
-      16
-    ],
-    "red3": [
-      16,
-      16
     ]
   },
   "textures": {
@@ -726,7 +718,7 @@
           ],
           "faces": {
             "north": {
-              "texture": "#red3",
+              "texture": "#red",
               "uv": [
                 0.0,
                 0.0,
@@ -736,7 +728,7 @@
               "autoUv": false
             },
             "east": {
-              "texture": "#red3",
+              "texture": "#red",
               "uv": [
                 0.0,
                 0.0,
@@ -746,7 +738,7 @@
               "autoUv": false
             },
             "south": {
-              "texture": "#red3",
+              "texture": "#red",
               "uv": [
                 0.0,
                 0.0,
@@ -756,7 +748,7 @@
               "autoUv": false
             },
             "west": {
-              "texture": "#red3",
+              "texture": "#red",
               "uv": [
                 0.0,
                 0.0,
@@ -766,7 +758,7 @@
               "autoUv": false
             },
             "up": {
-              "texture": "#red3",
+              "texture": "#red",
               "uv": [
                 0.0,
                 0.0,
@@ -776,7 +768,7 @@
               "autoUv": false
             },
             "down": {
-              "texture": "#red3",
+              "texture": "#red",
               "uv": [
                 0.0,
                 0.0,
@@ -807,7 +799,7 @@
           ],
           "faces": {
             "north": {
-              "texture": "#red2",
+              "texture": "#red",
               "uv": [
                 0.0,
                 0.0,
@@ -817,7 +809,7 @@
               "autoUv": false
             },
             "east": {
-              "texture": "#red2",
+              "texture": "#red",
               "uv": [
                 0.0,
                 0.0,
@@ -827,7 +819,7 @@
               "autoUv": false
             },
             "south": {
-              "texture": "#red2",
+              "texture": "#red",
               "uv": [
                 0.0,
                 0.0,
@@ -837,7 +829,7 @@
               "autoUv": false
             },
             "west": {
-              "texture": "#red2",
+              "texture": "#red",
               "uv": [
                 0.0,
                 0.0,
@@ -847,7 +839,7 @@
               "autoUv": false
             },
             "up": {
-              "texture": "#red2",
+              "texture": "#red",
               "uv": [
                 0.0,
                 0.0,
@@ -857,7 +849,7 @@
               "autoUv": false
             },
             "down": {
-              "texture": "#red2",
+              "texture": "#red",
               "uv": [
                 0.0,
                 0.0,

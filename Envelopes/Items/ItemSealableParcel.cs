@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Envelopes.Database;
 using Envelopes.Messages;
 using Envelopes.Util;
@@ -26,26 +28,30 @@ public class ItemSealableParcel : ItemSealableContainer, IContainedInteractable
 
     public override string GetHeldItemName(ItemStack itemStack)
     {
-        if (itemStack.Collectible?.Code?.Path == "parcel-empty"
-            && !string.IsNullOrEmpty(itemStack.Attributes.GetString(EnvelopeAttributes.ContentsId)))
+        if (itemStack.Collectible?.Code?.Path == "parcel-empty")
         {
-            var contentsCode = itemStack.Attributes.GetString(EnvelopeAttributes.ContentsCode);
-            if (!string.IsNullOrEmpty(contentsCode))
+            var blob = itemStack.Attributes.GetBytes(EnvelopeAttributes.VisibleContent);
+            if (blob?.Length > 0)
             {
-                var loc = new AssetLocation(contentsCode);
-                var stackSize = itemStack.Attributes.GetInt(EnvelopeAttributes.ContentsStackSize, 1);
-                var countPrefix = stackSize > 1 ? $"{stackSize}x " : "";
-                var item = api.World.GetItem(loc);
-                if (item != null && !item.IsMissing)
-                    return
-                        $"{Lang.Get("envelopes:item-parcel-unsealed")} (contains {countPrefix}{item.GetHeldItemName(new ItemStack(item))})";
-                var block = api.World.GetBlock(loc);
-                if (block != null && !block.IsMissing)
-                    return
-                        $"{Lang.Get("envelopes:item-parcel-unsealed")} (contains {countPrefix}{block.GetHeldItemName(new ItemStack(block))})";
+                try
+                {
+                    using var ms = new MemoryStream(blob);
+                    using var br = new BinaryReader(ms);
+                    var contained = new ItemStack(br, api.World);
+                    if (contained.Collectible != null && !contained.Collectible.IsMissing)
+                    {
+                        var prefix = contained.StackSize > 1 ? $"{contained.StackSize}x " : "";
+                        return
+                            $"{Lang.Get("envelopes:item-parcel-unsealed")} (contains {prefix}{contained.Collectible.GetHeldItemName(contained)})";
+                    }
+                }
+                catch
+                {
+                }
             }
 
-            return Lang.Get("envelopes:item-parcel-unsealed");
+            if (!string.IsNullOrEmpty(itemStack.Attributes.GetString(EnvelopeAttributes.ContentsId)))
+                return Lang.Get("envelopes:item-parcel-unsealed");
         }
 
         return base.GetHeldItemName(itemStack);
@@ -73,11 +79,111 @@ public class ItemSealableParcel : ItemSealableContainer, IContainedInteractable
         base.OnHeldInteractStart(slot, byEntity, blockSel, entitySel, firstEvent, ref handling);
     }
 
+    public override void OpenContainer(ItemSlot slot, IPlayer opener)
+    {
+        if (opener.Entity.World.Side != EnumAppSide.Server) return;
+
+        var container = slot.Itemstack;
+        if (container == null) return;
+
+        var codePath = container.Collectible.Code.Path;
+        var emptyPath = new AssetLocation(GetEmptyItemCode()).Path;
+        var openedPath = new AssetLocation(GetOpenedItemCode()).Path;
+
+        if (codePath == emptyPath || codePath == openedPath)
+        {
+            var blob = container.Attributes.GetBytes(EnvelopeAttributes.VisibleContent);
+            var contentsId = container.Attributes.GetString(EnvelopeAttributes.ContentsId);
+
+            if (blob?.Length > 0 && string.IsNullOrEmpty(contentsId))
+            {
+                using var ms = new MemoryStream(blob);
+                using var br = new BinaryReader(ms);
+                ItemStack itemstack;
+                try
+                {
+                    itemstack = new ItemStack(br, api.World);
+                }
+                catch
+                {
+                    ms.Seek(0, SeekOrigin.Begin);
+                    itemstack = new ItemStack(api.World.GetItem(new AssetLocation("game:paper-parchment")));
+                    itemstack.Attributes.FromBytes(br);
+                }
+
+                if (!opener.InventoryManager.TryGiveItemstack(itemstack, true))
+                    api.World.SpawnItemEntity(itemstack, opener.Entity.SidedPos.XYZ);
+
+                container.Attributes.RemoveAttribute(EnvelopeAttributes.VisibleContent);
+                api.Event.EnqueueMainThreadTask(() =>
+                        api.World.PlaySoundAt(new AssetLocation("game:sounds/held/bookclose*"), opener.Entity, null,
+                            true, 16f, 1f),
+                    "envelope-sound");
+                slot.MarkDirty();
+                return;
+            }
+
+            base.OpenContainer(slot, opener);
+            if (container.Attributes.GetString(EnvelopeAttributes.ContentsId) == null)
+            {
+                container.Attributes.RemoveAttribute(EnvelopeAttributes.VisibleContent);
+                slot.MarkDirty();
+            }
+
+            return;
+        }
+
+        var globalApi = EnvelopesModSystem.Api;
+        if (globalApi == null) return;
+
+        var id = container.Attributes.GetString(EnvelopeAttributes.ContentsId);
+        var nextItem = new ItemStack(globalApi.World.GetItem(new AssetLocation(GetEmptyItemCode())));
+
+        if (!string.IsNullOrEmpty(id))
+        {
+            nextItem.Attributes.SetString(EnvelopeAttributes.ContentsId, id);
+            var dbBlob = EnvelopesModSystem.EnvelopeDatabase?.GetEnvelope(id)?.ItemBlob;
+            if (dbBlob != null)
+                nextItem.Attributes.SetBytes(EnvelopeAttributes.VisibleContent, dbBlob);
+        }
+
+        globalApi.Event.EnqueueMainThreadTask(() =>
+                globalApi.World.PlaySoundAt(new AssetLocation("game:sounds/held/bookclose*"), opener.Entity, null, true,
+                    16f, 1f),
+            "envelope-sound");
+        slot.Itemstack = nextItem;
+        slot.MarkDirty();
+    }
+
+    public override bool ConsumeCraftingIngredients(ItemSlot[] slots, ItemSlot outputSlot, GridRecipe matchingRecipe)
+    {
+        if (api.Side == EnumAppSide.Server
+            && outputSlot.Itemstack?.Collectible?.Code?.Path?.Contains("unsealed") == true)
+        {
+            var blob = outputSlot.Itemstack.Attributes.GetBytes(EnvelopeAttributes.VisibleContent);
+            if (blob?.Length > 0 &&
+                string.IsNullOrEmpty(outputSlot.Itemstack.Attributes.GetString(EnvelopeAttributes.ContentsId)))
+            {
+                var ownerId = slots.FirstOrDefault(s => !s.Empty)?.Inventory?.openedByPlayerGUIds?.FirstOrDefault();
+                var id = EnvelopesModSystem.EnvelopeDatabase?.InsertEnvelope(new EnvelopeContents
+                    { CreatorId = ownerId ?? "unknown", ItemBlob = blob });
+                if (id != null)
+                {
+                    outputSlot.Itemstack.Attributes.SetString(EnvelopeAttributes.ContentsId, id);
+                    outputSlot.Itemstack.Attributes.RemoveAttribute(EnvelopeAttributes.VisibleContent);
+                }
+            }
+        }
+
+        return base.ConsumeCraftingIngredients(slots, outputSlot, matchingRecipe);
+    }
+
     public override WorldInteraction[] GetHeldInteractionHelp(ItemSlot inSlot)
     {
         var interactions = new List<WorldInteraction>();
         var code = inSlot.Itemstack?.Collectible?.Code?.Path;
-        var hasContents = !string.IsNullOrEmpty(inSlot.Itemstack?.Attributes?.GetString(EnvelopeAttributes.ContentsId));
+        var hasContents = !string.IsNullOrEmpty(inSlot.Itemstack?.Attributes?.GetString(EnvelopeAttributes.ContentsId))
+                          || inSlot.Itemstack?.Attributes?.GetBytes(EnvelopeAttributes.VisibleContent)?.Length > 0;
 
         if (code == "parcel-empty" && hasContents)
         {
@@ -107,8 +213,9 @@ public class ItemSealableParcel : ItemSealableContainer, IContainedInteractable
         if (heldSlot == null) return false;
 
         var heldItem = heldSlot.Itemstack;
+        var visibleContent = slot.Itemstack.Attributes.GetBytes(EnvelopeAttributes.VisibleContent);
         var contentsId = slot.Itemstack.Attributes.GetString(EnvelopeAttributes.ContentsId);
-        var hasItem = !string.IsNullOrEmpty(contentsId);
+        var hasItem = visibleContent?.Length > 0 || !string.IsNullOrEmpty(contentsId);
 
         if (!hasItem && (code == "parcel-empty" || code == "parcel-opened"))
         {
@@ -120,32 +227,21 @@ public class ItemSealableParcel : ItemSealableContainer, IContainedInteractable
 
             if (be.Api.Side == EnumAppSide.Server)
             {
-                var database = EnvelopesModSystem.EnvelopeDatabase;
-                if (database != null)
-                {
-                    using var stream = new MemoryStream();
-                    using var writer = new BinaryWriter(stream);
-                    heldItem.ToBytes(writer);
-                    var id = database.InsertEnvelope(new EnvelopeContents
-                        { CreatorId = byPlayer.PlayerUID, ItemBlob = stream.ToArray() });
+                if (code != "parcel-empty")
+                    slot.Itemstack = new ItemStack(be.Api.World.GetItem(new AssetLocation("envelopes:parcel-empty")));
 
-                    if (code != "parcel-empty")
-                        slot.Itemstack =
-                            new ItemStack(be.Api.World.GetItem(new AssetLocation("envelopes:parcel-empty")));
-
-                    slot.Itemstack.Attributes.SetString(EnvelopeAttributes.ContentsId, id);
-                    slot.Itemstack.Attributes.SetString(EnvelopeAttributes.ContentsCode,
-                        heldItem.Collectible.Code.ToString());
-                    slot.Itemstack.Attributes.SetInt(EnvelopeAttributes.ContentsStackSize, heldItem.StackSize);
-                    slot.MarkDirty();
-                    be.MarkDirty();
-                    heldSlot.TakeOut(heldItem.StackSize);
-                    heldSlot.MarkDirty();
-                    be.Api.Event.EnqueueMainThreadTask(() =>
+                using var stream = new MemoryStream();
+                using var writer = new BinaryWriter(stream);
+                heldItem.ToBytes(writer);
+                slot.Itemstack.Attributes.SetBytes(EnvelopeAttributes.VisibleContent, stream.ToArray());
+                slot.MarkDirty();
+                be.MarkDirty();
+                heldSlot.TakeOut(heldItem.StackSize);
+                heldSlot.MarkDirty();
+                be.Api.Event.EnqueueMainThreadTask(() =>
                         be.Api.World.PlaySoundAt(new AssetLocation("game:sounds/player/collect1"),
                             be.Pos.X + 0.5, be.Pos.Y + 0.5, be.Pos.Z + 0.5, null, true, 16f, 1f),
-                        "parcel-sound");
-                }
+                    "parcel-sound");
             }
 
             return true;
@@ -172,16 +268,33 @@ public class ItemSealableParcel : ItemSealableContainer, IContainedInteractable
             {
                 if (be.Api.Side == EnumAppSide.Server)
                 {
-                    slot.Itemstack =
-                        new ItemStack(be.Api.World.GetItem(new AssetLocation("envelopes:parcel-unsealed")));
-                    slot.Itemstack.Attributes.SetString(EnvelopeAttributes.ContentsId, contentsId);
+                    var database = EnvelopesModSystem.EnvelopeDatabase;
+                    if (visibleContent?.Length > 0 && database != null)
+                    {
+                        var id = database.InsertEnvelope(new EnvelopeContents
+                            { CreatorId = byPlayer.PlayerUID, ItemBlob = visibleContent });
+                        slot.Itemstack =
+                            new ItemStack(be.Api.World.GetItem(new AssetLocation("envelopes:parcel-unsealed")));
+                        slot.Itemstack.Attributes.SetString(EnvelopeAttributes.ContentsId, id);
+                    }
+                    else if (!string.IsNullOrEmpty(contentsId))
+                    {
+                        slot.Itemstack =
+                            new ItemStack(be.Api.World.GetItem(new AssetLocation("envelopes:parcel-unsealed")));
+                        slot.Itemstack.Attributes.SetString(EnvelopeAttributes.ContentsId, contentsId);
+                    }
+                    else
+                    {
+                        return true;
+                    }
+
                     slot.MarkDirty();
                     be.MarkDirty();
                     heldSlot.TakeOut(1);
                     heldSlot.MarkDirty();
                     be.Api.Event.EnqueueMainThreadTask(() =>
-                        be.Api.World.PlaySoundAt(new AssetLocation("game:sounds/held/bookclose*"),
-                            be.Pos.X + 0.5, be.Pos.Y + 0.5, be.Pos.Z + 0.5, null, true, 16f, 1f),
+                            be.Api.World.PlaySoundAt(new AssetLocation("game:sounds/held/bookclose*"),
+                                be.Pos.X + 0.5, be.Pos.Y + 0.5, be.Pos.Z + 0.5, null, true, 16f, 1f),
                         "parcel-sound");
                 }
 
