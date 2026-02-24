@@ -31,7 +31,7 @@ public class ItemWaxSealStamp : Item
 
         if (alreadyEngraved && firstEvent
             && byEntity.LeftHandItemSlot?.Itemstack?.Collectible?.Code?.Path?.StartsWith("waxstick") == true
-            && blockSel != null && GetUnsealedParcelSlot(blockSel.Position) != null)
+            && blockSel != null && GetUnsealedContainerSlot(blockSel.Position) != null)
         {
             handling = EnumHandHandling.PreventDefault;
             return;
@@ -53,7 +53,7 @@ public class ItemWaxSealStamp : Item
         if (!slot.Itemstack.Collectible.Code.Path.Contains("engraved")) return false;
         if (byEntity.LeftHandItemSlot?.Itemstack?.Collectible?.Code?.Path?.StartsWith("waxstick") != true) return false;
         if (blockSel == null) return false;
-        return GetUnsealedParcelSlot(blockSel.Position) != null && secondsUsed < 1.0f;
+        return GetUnsealedContainerSlot(blockSel.Position) != null && secondsUsed < 1.0f;
     }
 
     public override void OnHeldInteractStop(float secondsUsed, ItemSlot slot, EntityAgent byEntity,
@@ -63,17 +63,19 @@ public class ItemWaxSealStamp : Item
         if (api.Side != EnumAppSide.Server) return;
         if (blockSel == null) return;
 
-        var targetSlot = GetUnsealedParcelSlot(blockSel.Position);
+        var targetSlot = GetUnsealedContainerSlot(blockSel.Position);
         if (targetSlot == null) return;
 
         var contentsId = targetSlot.Itemstack.Attributes.GetString(EnvelopeAttributes.ContentsId);
-        if (string.IsNullOrEmpty(contentsId)) return;
 
         var waxSlot = byEntity.LeftHandItemSlot;
         if (waxSlot?.Itemstack?.Collectible?.Code?.Path?.StartsWith("waxstick") != true) return;
 
         var waxColor = waxSlot.Itemstack.Collectible.Attributes["color"].AsString();
-        var nextStack = new ItemStack(api.World.GetItem(new AssetLocation("envelopes:parcel-sealed")));
+        var unsealedCode = targetSlot.Itemstack.Collectible.Code;
+        var sealedCode = new AssetLocation(unsealedCode.Domain, unsealedCode.Path.Replace("-unsealed", "-sealed"));
+        var nextStack = new ItemStack(api.World.GetItem(sealedCode));
+        (targetSlot.Itemstack.Collectible as ItemSealableContainer)?.CopyContainerAttributes(targetSlot.Itemstack, nextStack);
         nextStack.Attributes.SetString(EnvelopeAttributes.ContentsId, contentsId);
         nextStack.Attributes.SetString(EnvelopeAttributes.WaxColor, waxColor);
 
@@ -96,12 +98,12 @@ public class ItemWaxSealStamp : Item
         api.World.PlaySoundAt(new AssetLocation("game:sounds/held/bookclose*"), byEntity, null, true, 16f, 1f);
     }
 
-    private ItemSlot? GetUnsealedParcelSlot(BlockPos pos)
+    private ItemSlot? GetUnsealedContainerSlot(BlockPos pos)
     {
         var be = api.World.BlockAccessor.GetBlockEntity<BlockEntityGroundStorage>(pos);
         return be?.Inventory.FirstOrDefault(s =>
-            s.Itemstack?.Collectible?.Code?.Path == "parcel-unsealed"
-            && !string.IsNullOrEmpty(s.Itemstack.Attributes.GetString(EnvelopeAttributes.ContentsId)));
+            s.Itemstack?.Collectible is ItemSealableContainer
+            && s.Itemstack.Collectible.Code?.Path?.Contains("-unsealed") == true);
     }
 
     public override string GetHeldItemName(ItemStack itemStack)

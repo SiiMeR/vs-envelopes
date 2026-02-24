@@ -13,7 +13,7 @@ using Vintagestory.GameContent;
 
 namespace Envelopes.Items;
 
-public class ItemSealableParcel : ItemSealableContainer, IContainedInteractable
+public class ItemSealableParcel : ItemSealableContainer
 {
     protected override string GetEmptyItemCode() => "envelopes:parcel-empty";
     protected override string GetUnsealedItemCode() => "envelopes:parcel-unsealed";
@@ -62,15 +62,21 @@ public class ItemSealableParcel : ItemSealableContainer, IContainedInteractable
     {
         var code = slot.Itemstack?.Collectible?.Code?.Path;
         var contentsId = slot.Itemstack?.Attributes?.GetString(EnvelopeAttributes.ContentsId);
+        var hasVisibleContent = slot.Itemstack?.Attributes?.GetBytes(EnvelopeAttributes.VisibleContent)?.Length > 0;
 
-        if (code == "parcel-empty" && !string.IsNullOrEmpty(contentsId)
-                                   && !byEntity.Controls.ShiftKey && !byEntity.Controls.CtrlKey)
+        if (code == "parcel-empty" && !byEntity.Controls.ShiftKey && !byEntity.Controls.CtrlKey
+            && (!string.IsNullOrEmpty(contentsId) || hasVisibleContent))
         {
             handling = EnumHandHandling.Handled;
-            if (api.Side == EnumAppSide.Client)
+            if (!string.IsNullOrEmpty(contentsId) && api.Side == EnumAppSide.Client)
             {
                 EnvelopesModSystem.ClientNetworkChannel?.SendPacket(
                     new OpenEnvelopePacket { ContentsId = contentsId });
+            }
+            else if (hasVisibleContent && api.Side == EnumAppSide.Server
+                     && (byEntity as EntityPlayer)?.Player is IPlayer player)
+            {
+                OpenContainer(slot, player);
             }
 
             return;
@@ -203,7 +209,7 @@ public class ItemSealableParcel : ItemSealableContainer, IContainedInteractable
         return interactions.ToArray().Append(base.GetHeldInteractionHelp(inSlot));
     }
 
-    public bool OnContainedInteractStart(BlockEntityContainer be, ItemSlot slot, IPlayer byPlayer,
+    public override bool OnContainedInteractStart(BlockEntityContainer be, ItemSlot slot, IPlayer byPlayer,
         BlockSelection blockSel)
     {
         if (slot.Itemstack == null) return false;
@@ -307,11 +313,9 @@ public class ItemSealableParcel : ItemSealableContainer, IContainedInteractable
         return false;
     }
 
-    public bool OnContainedInteractStep(float secondsUsed, BlockEntityContainer be, ItemSlot slot, IPlayer byPlayer,
-        BlockSelection blockSel) => false;
+    public override bool OnContainedInteractStep(float secondsUsed, BlockEntityContainer be, ItemSlot slot,
+        IPlayer byPlayer, BlockSelection blockSel) => false;
 
-    public void OnContainedInteractStop(float secondsUsed, BlockEntityContainer be, ItemSlot slot, IPlayer byPlayer,
-        BlockSelection blockSel)
-    {
-    }
+    public override void OnContainedInteractStop(float secondsUsed, BlockEntityContainer be, ItemSlot slot,
+        IPlayer byPlayer, BlockSelection blockSel) { }
 }

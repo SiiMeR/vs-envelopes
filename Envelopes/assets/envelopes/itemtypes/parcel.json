@@ -80,35 +80,12 @@
   shape: {
     base: "item/parcel-{state}"
   },
-  creativeinventoryStacksByType: {
-    "parcel-sealed": [
-      {
-        tabs: [
-          "general",
-          "envelopes"
-        ],
-        stacks: [
-          {
-            type: "item",
-            code: "envelopes:parcel-sealed",
-            attributes: {
-              WaxColor: "red"
-            }
-          }
-        ]
-      }
-    ]
-  },
   creativeinventory: {
     "general": [
-      "*-empty",
-      "*-unsealed",
-      "*-opened"
+      "*"
     ],
     "envelopes": [
-      "*-empty",
-      "*-unsealed",
-      "*-opened"
+      "*"
     ]
   },
   guiTransform: {

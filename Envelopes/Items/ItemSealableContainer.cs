@@ -14,7 +14,7 @@ using Vintagestory.GameContent;
 
 namespace Envelopes.Items;
 
-public abstract class ItemSealableContainer : Item
+public abstract class ItemSealableContainer : Item, IContainedInteractable
 {
     protected abstract string GetEmptyItemCode();
     protected abstract string GetUnsealedItemCode();
@@ -162,7 +162,7 @@ public abstract class ItemSealableContainer : Item
         slot.MarkDirty();
     }
 
-    protected void CopyContainerAttributes(ItemStack from, ItemStack to)
+    public void CopyContainerAttributes(ItemStack from, ItemStack to)
     {
         var stampId = from.Attributes.TryGetLong(StampAttributes.StampId);
         if (stampId.HasValue) to.Attributes.SetLong(StampAttributes.StampId, stampId.Value);
@@ -379,11 +379,19 @@ public abstract class ItemSealableContainer : Item
             inSlot.MarkDirty();
         }
 
-        // backwards compatibility for older envelopes
         var sealerName = inSlot.Itemstack?.Attributes?.GetString(EnvelopeAttributes.SealerName);
         if (!string.IsNullOrEmpty(sealerName))
         {
             dsc.AppendLine($"{Lang.Get($"{EnvelopesModSystem.ModId}:{GetContainerType()}-sealedby")}: {sealerName}");
         }
     }
+
+    public virtual bool OnContainedInteractStart(BlockEntityContainer be, ItemSlot slot, IPlayer byPlayer,
+        BlockSelection blockSel) => false;
+
+    public virtual bool OnContainedInteractStep(float secondsUsed, BlockEntityContainer be, ItemSlot slot,
+        IPlayer byPlayer, BlockSelection blockSel) => false;
+
+    public virtual void OnContainedInteractStop(float secondsUsed, BlockEntityContainer be, ItemSlot slot,
+        IPlayer byPlayer, BlockSelection blockSel) { }
 }
