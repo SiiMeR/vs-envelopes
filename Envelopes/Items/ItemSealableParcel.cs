@@ -68,15 +68,10 @@ public class ItemSealableParcel : ItemSealableContainer
             && (!string.IsNullOrEmpty(contentsId) || hasVisibleContent))
         {
             handling = EnumHandHandling.Handled;
-            if (!string.IsNullOrEmpty(contentsId) && api.Side == EnumAppSide.Client)
+            if (api.Side == EnumAppSide.Client)
             {
                 EnvelopesModSystem.ClientNetworkChannel?.SendPacket(
-                    new OpenEnvelopePacket { ContentsId = contentsId });
-            }
-            else if (hasVisibleContent && api.Side == EnumAppSide.Server
-                     && (byEntity as EntityPlayer)?.Player is IPlayer player)
-            {
-                OpenContainer(slot, player);
+                    new OpenEnvelopePacket { ContentsId = contentsId ?? "" });
             }
 
             return;
@@ -147,7 +142,6 @@ public class ItemSealableParcel : ItemSealableContainer
 
         if (!string.IsNullOrEmpty(id))
         {
-            nextItem.Attributes.SetString(EnvelopeAttributes.ContentsId, id);
             var dbBlob = EnvelopesModSystem.EnvelopeDatabase?.GetEnvelope(id)?.ItemBlob;
             if (dbBlob != null)
                 nextItem.Attributes.SetBytes(EnvelopeAttributes.VisibleContent, dbBlob);

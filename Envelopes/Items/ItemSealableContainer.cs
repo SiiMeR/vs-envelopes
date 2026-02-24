@@ -42,9 +42,11 @@ public abstract class ItemSealableContainer : Item, IContainedInteractable
         }
 
         itemSlot.MarkDirty();
+        var toStore = itemSlot.Itemstack.Clone();
+        toStore.StackSize = 1;
         using var stream = new MemoryStream();
         using var binaryWriter = new BinaryWriter(stream);
-        itemSlot.Itemstack.ToBytes(binaryWriter);
+        toStore.ToBytes(binaryWriter);
 
         var ownerId = containerSlot.Inventory.openedByPlayerGUIds.FirstOrDefault();
 
@@ -109,56 +111,49 @@ public abstract class ItemSealableContainer : Item, IContainedInteractable
         var container = slot.Itemstack;
         if (container == null) return;
 
-        var codePath = container.Collectible.Code.Path;
-        var emptyPath = new AssetLocation(GetEmptyItemCode()).Path;
-        var openedPath = new AssetLocation(GetOpenedItemCode()).Path;
+        var contentsId = container.Attributes.GetString(EnvelopeAttributes.ContentsId);
+        if (string.IsNullOrEmpty(contentsId)) return;
 
-        if (codePath == emptyPath || codePath == openedPath)
+        var envelopeContents = EnvelopesModSystem.EnvelopeDatabase?.GetEnvelope(contentsId);
+        if (envelopeContents == null) return;
+
+        using var ms = new MemoryStream(envelopeContents.ItemBlob);
+        using var br = new BinaryReader(ms);
+        ItemStack itemstack;
+        try
         {
-            var contentsId = container.Attributes.GetString(EnvelopeAttributes.ContentsId);
-            if (string.IsNullOrEmpty(contentsId)) return;
-
-            var envelopeContents = EnvelopesModSystem.EnvelopeDatabase?.GetEnvelope(contentsId);
-            if (envelopeContents == null) return;
-
-            using var ms = new MemoryStream(envelopeContents.ItemBlob);
-            using var br = new BinaryReader(ms);
-            ItemStack itemstack;
-            try
-            {
-                itemstack = new ItemStack(br, globalApi.World);
-            }
-            catch (Exception _)
-            {
-                ms.Seek(0L, SeekOrigin.Begin);
-                itemstack = new ItemStack(globalApi.World.GetItem(new AssetLocation("game:paper-parchment")));
-                itemstack.Attributes.FromBytes(br);
-            }
-
-            if (!opener.InventoryManager.TryGiveItemstack(itemstack, true))
-                globalApi.World.SpawnItemEntity(itemstack, opener.Entity.SidedPos.XYZ);
-
-            container.Attributes.RemoveAttribute(EnvelopeAttributes.ContentsId);
-            globalApi.Event.EnqueueMainThreadTask(() =>
-                    globalApi.World.PlaySoundAt(new AssetLocation("game:sounds/held/bookclose*"), opener.Entity, null,
-                        true, 16f, 1f),
-                "envelope-sound");
-            slot.MarkDirty();
-            return;
+            itemstack = new ItemStack(br, globalApi.World);
+        }
+        catch (Exception _)
+        {
+            ms.Seek(0L, SeekOrigin.Begin);
+            itemstack = new ItemStack(globalApi.World.GetItem(new AssetLocation("game:paper-parchment")));
+            itemstack.Attributes.FromBytes(br);
         }
 
-        var nextItem = new ItemStack(globalApi.World.GetItem(new AssetLocation(GetEmptyItemCode())));
-        CopyContainerAttributes(container, nextItem);
+        if (!opener.InventoryManager.TryGiveItemstack(itemstack, true))
+            globalApi.World.SpawnItemEntity(itemstack, opener.Entity.SidedPos.XYZ);
 
-        var contentsId2 = container.Attributes.GetString(EnvelopeAttributes.ContentsId);
-        if (!string.IsNullOrEmpty(contentsId2))
-            nextItem.Attributes.SetString(EnvelopeAttributes.ContentsId, contentsId2);
+        var codePath = container.Collectible.Code.Path;
+        if (codePath == new AssetLocation(GetSealedItemCode()).Path)
+        {
+            var nextItem = new ItemStack(globalApi.World.GetItem(new AssetLocation(GetOpenedItemCode())));
+            CopyContainerAttributes(container, nextItem);
+            slot.Itemstack = nextItem;
+        }
+        else if (codePath == new AssetLocation(GetUnsealedItemCode()).Path)
+        {
+            slot.Itemstack = new ItemStack(globalApi.World.GetItem(new AssetLocation(GetEmptyItemCode())));
+        }
+        else
+        {
+            container.Attributes.RemoveAttribute(EnvelopeAttributes.ContentsId);
+        }
 
         globalApi.Event.EnqueueMainThreadTask(() =>
                 globalApi.World.PlaySoundAt(new AssetLocation("game:sounds/held/bookclose*"), opener.Entity, null, true,
                     16f, 1f),
             "envelope-sound");
-        slot.Itemstack = nextItem;
         slot.MarkDirty();
     }
 
