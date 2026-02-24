@@ -194,18 +194,27 @@ public class EnvelopesModSystem : ModSystem
     {
         Api?.Event.EnqueueMainThreadTask(() =>
         {
-            fromplayer.Entity.WalkInventory(slot =>
+            if (!string.IsNullOrEmpty(packet.ContentsId))
             {
-                var contentsId = slot.Itemstack?.Attributes?.GetString(EnvelopeAttributes.ContentsId);
-                if (contentsId != null && contentsId == packet.ContentsId)
+                fromplayer.Entity.WalkInventory(slot =>
                 {
-                    if (slot.Itemstack?.Collectible is ItemSealableContainer container)
-                        container.OpenContainer(slot, fromplayer);
-                    return false;
-                }
+                    var contentsId = slot.Itemstack?.Attributes?.GetString(EnvelopeAttributes.ContentsId);
+                    if (contentsId != null && contentsId == packet.ContentsId)
+                    {
+                        if (slot.Itemstack?.Collectible is ItemSealableContainer container)
+                            container.OpenContainer(slot, fromplayer);
+                        return false;
+                    }
 
-                return true;
-            });
+                    return true;
+                });
+            }
+            else
+            {
+                var slot = fromplayer.InventoryManager.ActiveHotbarSlot;
+                if (slot?.Itemstack?.Collectible is ItemSealableContainer container)
+                    container.OpenContainer(slot, fromplayer);
+            }
         }, "open-envelope");
     }
 

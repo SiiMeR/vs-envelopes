@@ -264,33 +264,22 @@ public abstract class ItemSealableContainer : Item, IContainedInteractable
             return;
         }
 
-        var contentsId = slot.Itemstack.Attributes.GetString(EnvelopeAttributes.ContentsId);
-        if (string.IsNullOrEmpty(contentsId))
-        {
-            base.OnHeldInteractStart(slot, byEntity, blockSel, entitySel, firstEvent, ref handling);
-            return;
-        }
-
         var code = slot.Itemstack.Collectible.Code.Path;
         if (code.Contains("sealed") && !code.Contains("unsealed"))
         {
             if (api.Side == EnumAppSide.Client)
             {
+                var contentsId = slot.Itemstack.Attributes.GetString(EnvelopeAttributes.ContentsId) ?? "";
                 GuiDialogConfirm? confirmationDialog = null;
                 var dialog = confirmationDialog;
                 confirmationDialog = new GuiDialogConfirm(api as ICoreClientAPI, Lang.Get(
                         $"{EnvelopesModSystem.ModId}:open-{GetContainerType()}-confirmation"),
                     ok =>
                     {
-                        if (!ok)
-                        {
-                            return;
-                        }
-
+                        if (!ok) return;
                         dialog?.TryClose();
                         EnvelopesModSystem.ClientNetworkChannel?.SendPacket(new OpenEnvelopePacket
                             { ContentsId = contentsId });
-
                         api.Event.EnqueueMainThreadTask((() =>
                             {
                                 var sealedHandled = EnumHandHandling.Handled;
@@ -310,6 +299,7 @@ public abstract class ItemSealableContainer : Item, IContainedInteractable
             handling = EnumHandHandling.Handled;
             if (api.Side == EnumAppSide.Client)
             {
+                var contentsId = slot.Itemstack.Attributes.GetString(EnvelopeAttributes.ContentsId) ?? "";
                 EnvelopesModSystem.ClientNetworkChannel?.SendPacket(new OpenEnvelopePacket
                     { ContentsId = contentsId });
             }
@@ -322,21 +312,34 @@ public abstract class ItemSealableContainer : Item, IContainedInteractable
 
     public override WorldInteraction[] GetHeldInteractionHelp(ItemSlot inSlot)
     {
-        return ObjectCacheUtil.GetOrCreate<WorldInteraction[]>(api, $"{GetContainerType()}Interactions", () =>
+        var code = inSlot.Itemstack.Collectible.Code.Path;
+        var interactions = new List<WorldInteraction>();
+
+        if (code.Contains("unsealed") || code.Contains("sealed"))
         {
-            var interactions = new List<WorldInteraction>();
-            var code = inSlot.Itemstack.Collectible.Code.Path;
-            if (code.Contains("unsealed") || code.Contains("sealed"))
+            interactions.Add(new WorldInteraction
+            {
+                ActionLangCode = $"{EnvelopesModSystem.ModId}:open-{GetContainerType()}",
+                MouseButton = EnumMouseButton.Right
+            });
+        }
+
+        if (code.Contains("unsealed"))
+        {
+            var stamp = api.World.GetItem(new AssetLocation("envelopes:sealstamp-engraved"));
+            if (stamp != null)
             {
                 interactions.Add(new WorldInteraction
                 {
-                    ActionLangCode = $"{EnvelopesModSystem.ModId}:open-{GetContainerType()}",
-                    MouseButton = EnumMouseButton.Right
+                    ActionLangCode = $"{EnvelopesModSystem.ModId}:heldhelp-sealwithstamp",
+                    MouseButton = EnumMouseButton.Right,
+                    HotKeyCodes = new[] { "shift" },
+                    Itemstacks = new[] { new ItemStack(stamp) }
                 });
             }
+        }
 
-            return interactions.ToArray().Append(base.GetHeldInteractionHelp(inSlot));
-        });
+        return interactions.ToArray().Append(base.GetHeldInteractionHelp(inSlot));
     }
 
     public override void GetHeldItemInfo(ItemSlot inSlot, StringBuilder dsc, IWorldAccessor world, bool withDebugInfo)
@@ -393,5 +396,7 @@ public abstract class ItemSealableContainer : Item, IContainedInteractable
         IPlayer byPlayer, BlockSelection blockSel) => false;
 
     public virtual void OnContainedInteractStop(float secondsUsed, BlockEntityContainer be, ItemSlot slot,
-        IPlayer byPlayer, BlockSelection blockSel) { }
+        IPlayer byPlayer, BlockSelection blockSel)
+    {
+    }
 }

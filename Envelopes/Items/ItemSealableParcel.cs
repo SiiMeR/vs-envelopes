@@ -191,7 +191,7 @@ public class ItemSealableParcel : ItemSealableContainer
         var hasContents = !string.IsNullOrEmpty(inSlot.Itemstack?.Attributes?.GetString(EnvelopeAttributes.ContentsId))
                           || inSlot.Itemstack?.Attributes?.GetBytes(EnvelopeAttributes.VisibleContent)?.Length > 0;
 
-        if (code == "parcel-empty" && hasContents)
+        if (code == "parcel-empty")
         {
             var parchment = api.World.GetItem(new AssetLocation("game:paper-parchment"));
             if (parchment != null)
