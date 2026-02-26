@@ -19,7 +19,7 @@ public class AddressableBehavior : CollectibleBehavior
         EntitySelection entitySel,
         bool firstEvent, ref EnumHandHandling handHandling, ref EnumHandling handling)
     {
-        if (byEntity?.Controls?.Sprint == false)
+        if (byEntity?.Controls?.Sprint == false || slot.Itemstack?.Collectible?.Code?.Path?.Contains("empty") == true)
         {
             base.OnHeldInteractStart(slot, byEntity, blockSel, entitySel, firstEvent, ref handHandling, ref handling);
             return;
@@ -98,6 +98,11 @@ public class AddressableBehavior : CollectibleBehavior
                         if (activeHotbarSlot == null)
                         {
                             return wi.Itemstacks;
+                        }
+
+                        if (activeHotbarSlot.Itemstack?.Collectible?.Code?.Path?.Contains("empty") == true)
+                        {
+                            return null;
                         }
 
                         return (!activeHotbarSlot.Itemstack.Attributes.HasAttribute(EnvelopeAttributes.From) &&

@@ -29,7 +29,7 @@
   "envelope-emblem": "Emblem",
   "heldhelp-sealinworld": "(Hold while looking at container) Seal with wax",
   "heldhelp-sealwithstamp": "(Hold) Seal envelope or parcel with wax",
-  "parcel-wrapwithparchment": "Wrap parcel with parchment",
+  "parcel-wrapwithparchment": "(While on ground) Wrap parcel with parchment",
   "open-parcel": "Open parcel",
   "open-parcel-confirmation": "Are you sure you wish to unseal this parcel?",
   "parcel-hascontents": "The parcel contains an item.",

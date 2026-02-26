@@ -269,6 +269,7 @@ public class ItemSealableParcel : ItemSealableContainer
                 if (be.Api.Side == EnumAppSide.Server)
                 {
                     var database = EnvelopesModSystem.EnvelopeDatabase;
+                    var prev = slot.Itemstack;
                     if (visibleContent?.Length > 0 && database != null)
                     {
                         var id = database.InsertEnvelope(new EnvelopeContents
@@ -288,6 +289,7 @@ public class ItemSealableParcel : ItemSealableContainer
                         return true;
                     }
 
+                    CopyContainerAttributes(prev, slot.Itemstack);
                     slot.MarkDirty();
                     be.MarkDirty();
                     heldSlot.TakeOut(1);
