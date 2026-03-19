@@ -13,7 +13,7 @@ public static class PatchBlockTryPlaceOnGroundStorage
     [HarmonyPrefix]
     public static bool Prefix(IWorldAccessor world, IPlayer byPlayer, BlockSelection blockSel, ref bool __result)
     {
-        if (!byPlayer.Entity.Controls.ShiftKey) return true;
+        if (byPlayer == null || !byPlayer.Entity.Controls.ShiftKey) return true;
 
         var clickedPos = blockSel.DidOffset
             ? blockSel.Position.AddCopy(blockSel.Face.Opposite)
