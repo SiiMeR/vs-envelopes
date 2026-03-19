@@ -117,7 +117,13 @@
         "red",
         "black",
         "blue",
-        "green"
+        "green",
+        "yellow",
+        "purple",
+        "orange",
+        "gray",
+        "pink",
+        "white"
       ]
     }
   ],

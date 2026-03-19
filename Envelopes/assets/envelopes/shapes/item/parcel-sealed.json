@@ -65,7 +65,19 @@
     "blue": "bluedark",
     "blueimpression": "blue",
     "black": "blackdark",
-    "blackimpression": "black"
+    "blackimpression": "black",
+    "yellow": "yellowdark",
+    "yellowimpression": "yellow",
+    "purple": "purpledark",
+    "purpleimpression": "purple",
+    "orange": "orangedark",
+    "orangeimpression": "orange",
+    "gray": "graydark",
+    "grayimpression": "gray",
+    "pink": "pinkdark",
+    "pinkimpression": "pink",
+    "white": "whitedark",
+    "whiteimpression": "white"
   },
   "elements": [
     {
