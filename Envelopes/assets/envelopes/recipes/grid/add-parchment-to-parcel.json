@@ -17,7 +17,8 @@
     output: {
       type: "item",
       code: "parcel-unsealed",
-      quantity: 1
+      quantity: 1,
+      copyAttributesFrom: "E"
     }
   }
 ]
