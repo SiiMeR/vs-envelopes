@@ -1,0 +1,95 @@
+{
+  code: "signetring",
+  class: "ItemSignetRing",
+  maxstacksize: 1,
+  variantgroups: [
+    {
+      code: "metal",
+      states: [
+        "copper",
+        "tinbronze",
+        "bismuthbronze",
+        "blackbronze",
+        "gold",
+        "silver",
+        "electrum",
+        "iron",
+        "steel",
+        "meteoriciron"
+      ]
+    }
+  ],
+  creativeinventory: {
+    general: [
+      "*"
+    ],
+    envelopes: [
+      "*"
+    ]
+  },
+  storageFlags: 128,
+  attributes: {
+    clothescategory: "arm"
+  },
+  textures: {
+    "seraph": {
+      base: "game:block/transparent"
+    },
+    "metal": {
+      base: "game:block/metal/ingot/{metal}"
+    },
+    "engraving": {
+      base: "game:item/tool/material/gold"
+    }
+  },
+  shape: {
+    base: "entity/humanoid/seraph/clothing/arm/signetring"
+  },
+  behaviors: [
+    {
+      name: "RenderStampEmblem",
+      properties: {
+        faceUp: true
+      }
+    }
+  ],
+  guiTransform: {
+    translation: {
+      x: 90,
+      y: 89,
+      z: 0
+    },
+    scale: 12
+  },
+  tpHandTransform: {
+    translation: {
+      x: -0.7,
+      y: -0.8,
+      z: 0.2
+    },
+    rotation: {
+      x: -180,
+      y: 19,
+      z: 14
+    },
+    scale: 2.8699
+  },
+  groundTransform: {
+    translation: {
+      x: 0,
+      y: 0.02,
+      z: 0
+    },
+    rotation: {
+      x: 102,
+      y: 0,
+      z: 0
+    },
+    origin: {
+      x: 0.5,
+      y: 0.5,
+      z: 0.5
+    },
+    scale: 1.0
+  }
+}

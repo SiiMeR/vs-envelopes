@@ -38,7 +38,7 @@ public class ItemWaxSealStamp : Item
             return;
         }
 
-        if (firstEvent && !alreadyEngraved && blockSel == null && api.Side != EnumAppSide.Server)
+        if (firstEvent && !alreadyEngraved && !byEntity.Controls.ShiftKey && api.Side != EnumAppSide.Server)
         {
             var dialog = new GuiSealStampDesigner(EnvelopesModSystem.Api as ICoreClientAPI);
             dialog.TryOpen(true);
@@ -100,7 +100,7 @@ public class ItemWaxSealStamp : Item
         api.World.PlaySoundAt(new AssetLocation("game:sounds/held/bookclose*"), byEntity, null, true, 16f, 1f);
     }
 
-    private ItemSlot? GetUnsealedContainerSlot(BlockSelection blockSel)
+    protected ItemSlot? GetUnsealedContainerSlot(BlockSelection blockSel)
     {
         var be = api.World.BlockAccessor.GetBlockEntity<BlockEntityGroundStorage>(blockSel.Position);
         var slot = be?.GetSlotAt(blockSel);

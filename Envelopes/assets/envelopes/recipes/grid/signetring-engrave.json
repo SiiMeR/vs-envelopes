@@ -1,0 +1,17 @@
+{
+  ingredientPattern: "IHCS",
+  ingredients: {
+    "I": { type: "item", code: "game:ingot-*", name: "metal" },
+    "H": { type: "item", code: "game:hammer-*", isTool: true },
+    "C": { type: "item", code: "game:chisel-*", isTool: true },
+    "S": { type: "item", code: "envelopes:sealstamp-engraved" }
+  },
+  width: 2,
+  height: 2,
+  shapeless: true,
+  output: {
+    type: "item",
+    code: "envelopes:signetring-{metal}",
+    quantity: 1
+  }
+}

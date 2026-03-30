@@ -1,0 +1,1178 @@
+{
+  "editor": {
+    "backDropShape": "C:/Users/User/AppData/Roaming/VSLGameVersions/1.21.5/assets/game/shapes/entity/humanoid/seraph",
+    "allAngles": true,
+    "entityTextureMode": false
+  },
+  "textureWidth": 16,
+  "textureHeight": 16,
+  "textureSizes": {
+    "metal": [
+      16,
+      16
+    ],
+    "engraving": [
+      16,
+      16
+    ]
+  },
+  "textures": {
+    "metal": "game:block/metal/plate/steel",
+    "engraving": "game:item/tool/material/gold"
+  },
+  "elements": [
+    {
+      "name": "RingAnchor",
+      "stepParentName": "LowerArmR",
+      "from": [
+        -0.9,
+        0.7,
+        -0.9
+      ],
+      "to": [
+        -0.9,
+        0.7,
+        -0.9
+      ],
+      "rotationOrigin": [
+        -0.9,
+        0.7,
+        0.7
+      ],
+      "rotationX": -9.0,
+      "rotationY": -89.0,
+      "rotationZ": 90.0,
+      "faces": {
+        "north": {
+          "texture": "#null",
+          "uv": [
+            0.0,
+            0.0,
+            0.5,
+            0.5
+          ],
+          "enabled": false
+        },
+        "east": {
+          "texture": "#null",
+          "uv": [
+            0.0,
+            0.0,
+            0.5,
+            0.5
+          ],
+          "enabled": false
+        },
+        "south": {
+          "texture": "#null",
+          "uv": [
+            0.0,
+            0.0,
+            0.5,
+            0.5
+          ],
+          "enabled": false
+        },
+        "west": {
+          "texture": "#null",
+          "uv": [
+            0.0,
+            0.0,
+            0.5,
+            0.5
+          ],
+          "enabled": false
+        },
+        "up": {
+          "texture": "#null",
+          "uv": [
+            0.0,
+            0.0,
+            0.5,
+            0.5
+          ],
+          "enabled": false
+        },
+        "down": {
+          "texture": "#null",
+          "uv": [
+            0.0,
+            0.0,
+            0.5,
+            0.5
+          ],
+          "enabled": false
+        }
+      },
+      "children": [
+        {
+          "name": "RingRight",
+          "from": [
+            -0.2,
+            -1.5,
+            1.8
+          ],
+          "to": [
+            0.2,
+            -1.3,
+            2.2
+          ],
+          "rotationOrigin": [
+            -0.1,
+            0.5,
+            2.1
+          ],
+          "rotationX": 90.0,
+          "faces": {
+            "north": {
+              "texture": "#metal",
+              "uv": [
+                0.0,
+                0.0,
+                0.5,
+                0.5
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "east": {
+              "texture": "#metal",
+              "uv": [
+                2.0,
+                3.0,
+                3.5,
+                3.5
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "south": {
+              "texture": "#metal",
+              "uv": [
+                0.0,
+                0.0,
+                0.5,
+                0.5
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "west": {
+              "texture": "#metal",
+              "uv": [
+                2.5,
+                4.0,
+                4.0,
+                4.5
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "up": {
+              "texture": "#metal",
+              "uv": [
+                2.0,
+                3.0,
+                3.5,
+                4.5
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "down": {
+              "texture": "#metal",
+              "uv": [
+                0.0,
+                0.0,
+                0.5,
+                0.5
+              ],
+              "rotation": 180,
+              "autoUv": false,
+              "snapUv": false
+            }
+          }
+        },
+        {
+          "name": "Stamp",
+          "from": [
+            -0.3,
+            0.78,
+            -0.35
+          ],
+          "to": [
+            0.3,
+            0.98,
+            0.25
+          ],
+          "rotationOrigin": [
+            0.0,
+            0.0,
+            -0.05
+          ],
+          "rotationY": -45.0,
+          "faces": {
+            "north": {
+              "texture": "#engraving",
+              "uv": [
+                0.0,
+                0.0,
+                4.0,
+                1.0
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "east": {
+              "texture": "#engraving",
+              "uv": [
+                0.0,
+                0.0,
+                4.0,
+                1.0
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "south": {
+              "texture": "#engraving",
+              "uv": [
+                0.0,
+                0.0,
+                4.0,
+                1.0
+              ],
+              "autoUv": false,
+              "snapUv": false,
+              "windMode": [
+                -1,
+                -1,
+                -1,
+                -1
+              ]
+            },
+            "west": {
+              "texture": "#engraving",
+              "uv": [
+                0.0,
+                0.0,
+                4.0,
+                1.0
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "up": {
+              "texture": "#engraving",
+              "uv": [
+                0.0,
+                0.0,
+                4.0,
+                4.0
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "down": {
+              "texture": "#engraving",
+              "uv": [
+                1.0,
+                2.0,
+                3.5,
+                4.5
+              ],
+              "rotation": 180,
+              "autoUv": false,
+              "snapUv": false
+            }
+          }
+        },
+        {
+          "name": "StampBotLeft",
+          "from": [
+            -0.4,
+            0.774,
+            -0.25
+          ],
+          "to": [
+            -0.3,
+            1.022,
+            0.15
+          ],
+          "rotationOrigin": [
+            0.0,
+            0.0,
+            -0.05
+          ],
+          "rotationY": -45.0,
+          "faces": {
+            "north": {
+              "texture": "#metal",
+              "uv": [
+                0.0,
+                0.0,
+                4.0,
+                1.0
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "east": {
+              "texture": "#metal",
+              "uv": [
+                0.0,
+                0.0,
+                4.0,
+                1.0
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "south": {
+              "texture": "#metal",
+              "uv": [
+                0.0,
+                0.0,
+                4.0,
+                1.0
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "west": {
+              "texture": "#metal",
+              "uv": [
+                0.5,
+                2.5,
+                2.0,
+                3.5
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "up": {
+              "texture": "#metal",
+              "uv": [
+                2.0,
+                3.0,
+                3.5,
+                3.5
+              ],
+              "rotation": 90,
+              "autoUv": false,
+              "snapUv": false
+            },
+            "down": {
+              "texture": "#metal",
+              "uv": [
+                1.0,
+                3.5,
+                2.5,
+                4.0
+              ],
+              "rotation": 270,
+              "autoUv": false,
+              "snapUv": false
+            }
+          }
+        },
+        {
+          "name": "StampTopRight",
+          "from": [
+            0.3,
+            0.776,
+            -0.25
+          ],
+          "to": [
+            0.4,
+            1.024,
+            0.15
+          ],
+          "rotationOrigin": [
+            0.0,
+            0.0,
+            -0.05
+          ],
+          "rotationY": -45.0,
+          "faces": {
+            "north": {
+              "texture": "#metal",
+              "uv": [
+                0.0,
+                0.0,
+                4.0,
+                1.0
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "east": {
+              "texture": "#metal",
+              "uv": [
+                6.0,
+                2.0,
+                7.5,
+                3.0
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "south": {
+              "texture": "#metal",
+              "uv": [
+                0.0,
+                0.0,
+                4.0,
+                1.0
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "west": {
+              "texture": "#metal",
+              "uv": [
+                0.0,
+                0.0,
+                4.0,
+                1.0
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "up": {
+              "texture": "#metal",
+              "uv": [
+                2.5,
+                2.0,
+                4.0,
+                2.5
+              ],
+              "rotation": 90,
+              "autoUv": false,
+              "snapUv": false
+            },
+            "down": {
+              "texture": "#metal",
+              "uv": [
+                1.0,
+                2.0,
+                2.5,
+                2.5
+              ],
+              "rotation": 270,
+              "autoUv": false,
+              "snapUv": false
+            }
+          }
+        },
+        {
+          "name": "StampTop",
+          "from": [
+            0.3243,
+            0.775,
+            -0.1914
+          ],
+          "to": [
+            0.4243,
+            1.025,
+            0.0906
+          ],
+          "rotationOrigin": [
+            0.0293,
+            0.001,
+            -0.0414
+          ],
+          "faces": {
+            "north": {
+              "texture": "#metal",
+              "uv": [
+                0.0,
+                0.0,
+                4.0,
+                1.0
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "east": {
+              "texture": "#metal",
+              "uv": [
+                5.5,
+                1.5,
+                6.5,
+                2.5
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "south": {
+              "texture": "#metal",
+              "uv": [
+                0.0,
+                0.0,
+                4.0,
+                1.0
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "west": {
+              "texture": "#metal",
+              "uv": [
+                0.0,
+                0.0,
+                4.0,
+                1.0
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "up": {
+              "texture": "#metal",
+              "uv": [
+                3.0,
+                2.0,
+                4.0,
+                2.5
+              ],
+              "rotation": 90,
+              "autoUv": false,
+              "snapUv": false
+            },
+            "down": {
+              "texture": "#metal",
+              "uv": [
+                2.5,
+                3.0,
+                3.5,
+                3.5
+              ],
+              "rotation": 270,
+              "autoUv": false,
+              "snapUv": false
+            }
+          }
+        },
+        {
+          "name": "StampBottom",
+          "from": [
+            -0.4243,
+            0.775,
+            -0.1914
+          ],
+          "to": [
+            -0.3243,
+            1.025,
+            0.0906
+          ],
+          "rotationOrigin": [
+            -0.7193,
+            0.001,
+            -0.0414
+          ],
+          "faces": {
+            "north": {
+              "texture": "#metal",
+              "uv": [
+                0.0,
+                0.0,
+                4.0,
+                1.0
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "east": {
+              "texture": "#metal",
+              "uv": [
+                0.0,
+                0.0,
+                4.0,
+                1.0
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "south": {
+              "texture": "#metal",
+              "uv": [
+                0.0,
+                0.0,
+                4.0,
+                1.0
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "west": {
+              "texture": "#metal",
+              "uv": [
+                1.0,
+                3.0,
+                2.0,
+                4.0
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "up": {
+              "texture": "#metal",
+              "uv": [
+                1.0,
+                1.5,
+                2.0,
+                2.0
+              ],
+              "rotation": 90,
+              "autoUv": false,
+              "snapUv": false
+            },
+            "down": {
+              "texture": "#metal",
+              "uv": [
+                3.0,
+                3.0,
+                4.0,
+                3.5
+              ],
+              "rotation": 270,
+              "autoUv": false,
+              "snapUv": false
+            }
+          }
+        },
+        {
+          "name": "StampLeft",
+          "from": [
+            0.3043,
+            0.775,
+            -0.2295
+          ],
+          "to": [
+            0.4043,
+            1.025,
+            0.0525
+          ],
+          "rotationOrigin": [
+            0.0094,
+            0.001,
+            -0.0793
+          ],
+          "rotationY": 89.9802,
+          "faces": {
+            "north": {
+              "texture": "#metal",
+              "uv": [
+                0.0,
+                0.0,
+                4.0,
+                1.0
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "east": {
+              "texture": "#metal",
+              "uv": [
+                2.0,
+                3.5,
+                3.0,
+                4.5
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "south": {
+              "texture": "#metal",
+              "uv": [
+                0.0,
+                0.0,
+                4.0,
+                1.0
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "west": {
+              "texture": "#metal",
+              "uv": [
+                0.0,
+                0.0,
+                4.0,
+                1.0
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "up": {
+              "texture": "#metal",
+              "uv": [
+                2.5,
+                2.5,
+                3.5,
+                3.0
+              ],
+              "rotation": 90,
+              "autoUv": false,
+              "snapUv": false
+            },
+            "down": {
+              "texture": "#metal",
+              "uv": [
+                3.0,
+                3.5,
+                4.0,
+                4.0
+              ],
+              "rotation": 270,
+              "autoUv": false,
+              "snapUv": false
+            }
+          }
+        },
+        {
+          "name": "StampRight",
+          "from": [
+            0.3046,
+            0.775,
+            0.5191
+          ],
+          "to": [
+            0.4046,
+            1.025,
+            0.8011
+          ],
+          "rotationOrigin": [
+            0.0094,
+            0.001,
+            0.6693
+          ],
+          "rotationY": 89.9802,
+          "faces": {
+            "north": {
+              "texture": "#metal",
+              "uv": [
+                0.0,
+                0.0,
+                4.0,
+                1.0
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "east": {
+              "texture": "#metal",
+              "uv": [
+                0.0,
+                0.0,
+                4.0,
+                1.0
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "south": {
+              "texture": "#metal",
+              "uv": [
+                0.0,
+                0.0,
+                4.0,
+                1.0
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "west": {
+              "texture": "#metal",
+              "uv": [
+                3.5,
+                1.0,
+                4.5,
+                2.0
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "up": {
+              "texture": "#metal",
+              "uv": [
+                1.0,
+                1.0,
+                2.0,
+                1.5
+              ],
+              "rotation": 90,
+              "autoUv": false,
+              "snapUv": false
+            },
+            "down": {
+              "texture": "#metal",
+              "uv": [
+                2.0,
+                3.5,
+                3.0,
+                4.0
+              ],
+              "rotation": 270,
+              "autoUv": false,
+              "snapUv": false
+            }
+          }
+        },
+        {
+          "name": "StampTopLeft",
+          "from": [
+            -0.2,
+            0.774,
+            -0.45
+          ],
+          "to": [
+            0.2,
+            1.022,
+            -0.35
+          ],
+          "rotationOrigin": [
+            0.0,
+            0.0,
+            -0.05
+          ],
+          "rotationY": -45.0,
+          "faces": {
+            "north": {
+              "texture": "#metal",
+              "uv": [
+                1.5,
+                1.5,
+                3.0,
+                2.5
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "east": {
+              "texture": "#metal",
+              "uv": [
+                0.0,
+                0.0,
+                4.0,
+                1.0
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "south": {
+              "texture": "#metal",
+              "uv": [
+                0.0,
+                0.0,
+                4.0,
+                1.0
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "west": {
+              "texture": "#metal",
+              "uv": [
+                0.0,
+                0.0,
+                4.0,
+                1.0
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "up": {
+              "texture": "#metal",
+              "uv": [
+                2.5,
+                3.5,
+                4.0,
+                4.0
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "down": {
+              "texture": "#metal",
+              "uv": [
+                3.5,
+                2.5,
+                5.0,
+                3.0
+              ],
+              "rotation": 180,
+              "autoUv": false,
+              "snapUv": false
+            }
+          }
+        },
+        {
+          "name": "StampBotRight",
+          "from": [
+            -0.2,
+            0.774,
+            0.25
+          ],
+          "to": [
+            0.2,
+            1.022,
+            0.35
+          ],
+          "rotationOrigin": [
+            0.0,
+            0.0,
+            -0.05
+          ],
+          "rotationY": -45.0,
+          "faces": {
+            "north": {
+              "texture": "#metal",
+              "uv": [
+                0.0,
+                0.0,
+                4.0,
+                1.0
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "east": {
+              "texture": "#metal",
+              "uv": [
+                0.0,
+                0.0,
+                4.0,
+                1.0
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "south": {
+              "texture": "#metal",
+              "uv": [
+                1.5,
+                2.5,
+                3.0,
+                3.5
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "west": {
+              "texture": "#metal",
+              "uv": [
+                0.0,
+                0.0,
+                4.0,
+                1.0
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "up": {
+              "texture": "#metal",
+              "uv": [
+                2.5,
+                3.0,
+                4.0,
+                3.5
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "down": {
+              "texture": "#metal",
+              "uv": [
+                2.5,
+                2.0,
+                4.0,
+                2.5
+              ],
+              "rotation": 180,
+              "autoUv": false,
+              "snapUv": false
+            }
+          }
+        },
+        {
+          "name": "RingRight2",
+          "from": [
+            -0.2,
+            -1.5,
+            1.3
+          ],
+          "to": [
+            0.2,
+            -1.3,
+            1.7
+          ],
+          "rotationOrigin": [
+            -0.1,
+            0.5,
+            1.6
+          ],
+          "rotationX": 90.0,
+          "faces": {
+            "north": {
+              "texture": "#metal",
+              "uv": [
+                0.0,
+                0.0,
+                0.5,
+                0.5
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "east": {
+              "texture": "#metal",
+              "uv": [
+                2.0,
+                3.0,
+                3.5,
+                3.5
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "south": {
+              "texture": "#metal",
+              "uv": [
+                0.0,
+                0.0,
+                0.5,
+                0.5
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "west": {
+              "texture": "#metal",
+              "uv": [
+                1.5,
+                4.5,
+                3.0,
+                5.0
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "up": {
+              "texture": "#metal",
+              "uv": [
+                0.0,
+                0.0,
+                0.5,
+                0.5
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "down": {
+              "texture": "#metal",
+              "uv": [
+                3.0,
+                3.0,
+                4.5,
+                4.5
+              ],
+              "rotation": 180,
+              "autoUv": false,
+              "snapUv": false
+            }
+          }
+        },
+        {
+          "name": "RingRight3",
+          "from": [
+            -0.2,
+            0.2,
+            -0.4
+          ],
+          "to": [
+            0.2,
+            0.4,
+            0.3
+          ],
+          "rotationOrigin": [
+            0.0,
+            0.2,
+            -0.4
+          ],
+          "faces": {
+            "north": {
+              "texture": "#metal",
+              "uv": [
+                3.5,
+                2.0,
+                4.5,
+                3.5
+              ],
+              "rotation": 90,
+              "autoUv": false,
+              "snapUv": false
+            },
+            "east": {
+              "texture": "#metal",
+              "uv": [
+                2.5,
+                2.0,
+                5.0,
+                2.5
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "south": {
+              "texture": "#metal",
+              "uv": [
+                3.5,
+                3.0,
+                4.5,
+                4.5
+              ],
+              "rotation": 90,
+              "autoUv": false,
+              "snapUv": false
+            },
+            "west": {
+              "texture": "#metal",
+              "uv": [
+                1.5,
+                4.0,
+                4.0,
+                4.5
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "up": {
+              "texture": "#metal",
+              "uv": [
+                0.0,
+                0.0,
+                0.5,
+                0.5
+              ],
+              "autoUv": false,
+              "snapUv": false
+            },
+            "down": {
+              "texture": "#metal",
+              "uv": [
+                2.5,
+                3.0,
+                5.0,
+                4.5
+              ],
+              "rotation": 270,
+              "autoUv": false,
+              "snapUv": false
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
