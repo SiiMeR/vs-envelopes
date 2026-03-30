@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Envelopes.Behaviors;
 using Envelopes.Gui;
 using Envelopes.Util;
 using Vintagestory.API.Client;
+using Vintagestory.API.Config;
 using Vintagestory.API.Util;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
@@ -16,7 +18,7 @@ public class ItemSignetRing : ItemWaxSealStamp, IAttachableToEntity, IWearableSh
 {
     protected override bool ShouldOpenEditor => false;
 
-    private static readonly AssetLocation EntityShapeLoc = new AssetLocation("envelopes:entity/humanoid/seraph/clothing/arm/signetring");
+    private readonly AssetLocation _entityShapeLoc = new AssetLocation("envelopes:entity/humanoid/seraph/clothing/arm/signetring");
 
     int IAttachableToEntity.RequiresBehindSlots { get; set; }
 
@@ -25,7 +27,7 @@ public class ItemSignetRing : ItemWaxSealStamp, IAttachableToEntity, IWearableSh
     string IAttachableToEntity.GetCategoryCode(ItemStack stack) => "arm";
 
     CompositeShape IAttachableToEntity.GetAttachedShape(ItemStack stack, string slotCode) =>
-        new CompositeShape { Base = EntityShapeLoc };
+        new CompositeShape { Base = _entityShapeLoc };
 
     string[] IAttachableToEntity.GetDisableElements(ItemStack stack) => null;
 
@@ -39,15 +41,25 @@ public class ItemSignetRing : ItemWaxSealStamp, IAttachableToEntity, IWearableSh
         var metal = stack.Collectible.Variant?["metal"];
         if (metal != null)
             shape.Textures["metal"] = new AssetLocation($"game:block/metal/ingot/{metal}");
+
+        var engravingMetal = stack.Attributes.GetString(StampAttributes.EngravingMetal) ?? "gold";
+        shape.Textures["engraving"] = new AssetLocation($"game:item/tool/material/{engravingMetal}");
     }
 
     Shape IWearableShapeSupplier.GetShape(ItemStack stack, Entity forEntity, string texturePrefixCode)
     {
-        var shapeLoc = EntityShapeLoc.CopyWithPathPrefixAndAppendixOnce("shapes/", ".json");
+        var shapeLoc = _entityShapeLoc.CopyWithPathPrefixAndAppendixOnce("shapes/", ".json");
         var shape = forEntity.World.Api.Assets.TryGet(shapeLoc)?.ToObject<Shape>();
         if (shape == null) return null;
 
-        shape.ResolveReferences(forEntity.World.Logger, EntityShapeLoc.ToString());
+        shape.ResolveReferences(forEntity.World.Logger, _entityShapeLoc.ToString());
+
+        var metal = stack.Collectible.Variant?["metal"];
+        if (metal != null)
+            shape.Textures["metal"] = new AssetLocation($"game:block/metal/ingot/{metal}");
+
+        var engravingMetal = stack.Attributes.GetString(StampAttributes.EngravingMetal) ?? "gold";
+        shape.Textures["engraving"] = new AssetLocation($"game:item/tool/material/{engravingMetal}");
 
         var stamp = shape.GetElementByName("Stamp");
         if (stamp == null) return shape;
@@ -160,9 +172,21 @@ public class ItemSignetRing : ItemWaxSealStamp, IAttachableToEntity, IWearableSh
                 var design = attrs.GetString(StampAttributes.StampDesign);
                 if (design != null)
                     outputSlot.Itemstack.Attributes.SetString(StampAttributes.StampDesign, design);
+                var engravingMetal = attrs.GetString(StampAttributes.EngravingMetal);
+                if (engravingMetal != null)
+                    outputSlot.Itemstack.Attributes.SetString(StampAttributes.EngravingMetal, engravingMetal);
                 break;
             }
         }
         return false;
+    }
+
+    public override void GetHeldItemInfo(ItemSlot inSlot, StringBuilder dsc, IWorldAccessor world, bool withDebugInfo)
+    {
+        var metal = inSlot.Itemstack.Collectible.Variant?["metal"];
+        if (metal != null)
+            dsc.AppendLine(Lang.Get("envelopes:stamp-bodymetal", Lang.Get($"material-{metal}")));
+
+        base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);
     }
 }

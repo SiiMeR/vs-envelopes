@@ -6,6 +6,7 @@ using Envelopes.Messages;
 using Envelopes.Util;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
+using Vintagestory.API.Config;
 using Vintagestory.API.Util;
 using Vintagestory.GameContent;
 
@@ -20,6 +21,22 @@ public class ItemWaxSealStamp : Item
         if (code.Contains("sealstamp-engraved") && outputSlot.Itemstack.Attributes.TryGetInt("durability").HasValue)
         {
             outputSlot.Itemstack.Attributes.SetInt("durability", 200);
+        }
+
+        var engravingStack = matchingRecipe.GetInputStackForPatternCode("E", slots);
+        if (engravingStack != null)
+        {
+            var engravingMetal = engravingStack.Collectible.Variant?["metal"];
+            if (engravingMetal != null)
+                outputSlot.Itemstack.Attributes.SetString(StampAttributes.EngravingMetal, engravingMetal);
+        }
+
+        var stampStack = matchingRecipe.GetInputStackForPatternCode("S", slots);
+        if (stampStack?.Collectible is ItemWaxSealStamp)
+        {
+            var engravingMetal = stampStack.Attributes.GetString(StampAttributes.EngravingMetal);
+            if (engravingMetal != null)
+                outputSlot.Itemstack.Attributes.SetString(StampAttributes.EngravingMetal, engravingMetal);
         }
 
         return base.ConsumeCraftingIngredients(slots, outputSlot, matchingRecipe);
@@ -159,10 +176,12 @@ public class ItemWaxSealStamp : Item
         base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);
 
         var attributes = inSlot.Itemstack.Attributes;
+        var engravingMetal = attributes.GetString(StampAttributes.EngravingMetal);
+        if (engravingMetal != null)
+            dsc.AppendLine(Lang.Get($"envelopes:stamp-engravingmetal", Lang.Get($"material-{engravingMetal}")));
+
         var stampId = attributes.TryGetLong(StampAttributes.StampId);
         if (stampId != null)
-        {
             dsc.AppendLine($"<font color=\"orange\">ID: {stampId}</font>");
-        }
     }
 }

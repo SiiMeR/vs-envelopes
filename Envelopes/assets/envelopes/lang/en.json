@@ -51,6 +51,8 @@
   "item-signetring-*": "Signet ring",
   "item-sealstamp-blank": "Wax seal stamp (blank)",
   "item-sealstamp-engraved": "Wax seal stamp",
+  "stamp-bodymetal": "Ring metal: {0}",
+  "stamp-engravingmetal": "Engraving: {0}",
   "stampdesigner-title": "Create a new wax seal stamp",
   "stampdesigner-title-placeholder": "Enter a title for your stamp",
   "stampdesigner-btn-create": "Create",

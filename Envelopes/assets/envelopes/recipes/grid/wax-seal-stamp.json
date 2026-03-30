@@ -1,5 +1,5 @@
-﻿{
-  ingredientPattern: "S,I",
+{
+  ingredientPattern: "SIE,_H_,_C_",
   ingredients: {
     "S": {
       type: "item",
@@ -9,10 +9,25 @@
       type: "item",
       name: "ingot",
       code: "game:ingot-*"
+    },
+    "E": {
+      type: "item",
+      name: "engraving",
+      code: "game:ingot-*"
+    },
+    "H": {
+      type: "item",
+      code: "game:hammer-*",
+      isTool: true
+    },
+    "C": {
+      type: "item",
+      code: "game:chisel-*",
+      isTool: true
     }
   },
-  width: 1,
-  height: 2,
+  width: 3,
+  height: 3,
   shapeless: true,
   output: {
     type: "item",

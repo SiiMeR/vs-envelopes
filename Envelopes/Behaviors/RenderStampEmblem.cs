@@ -89,6 +89,9 @@ public class RenderStampEmblem : CollectibleBehavior, IContainedMeshSource
         if (metalVariant != null)
             shape.Textures["metal"] = new AssetLocation($"game:block/metal/ingot/{metalVariant}");
 
+        var engravingMetal = stack.Attributes.GetString(StampAttributes.EngravingMetal) ?? "gold";
+        shape.Textures["engraving"] = new AssetLocation($"game:item/tool/material/{engravingMetal}");
+
         var design = ParseDesign(stack);
 
         var stamp = shape.GetElementByName("Stamp");
@@ -198,6 +201,7 @@ public class RenderStampEmblem : CollectibleBehavior, IContainedMeshSource
             return $"{itemstack.Collectible.Code.ToShortString()}";
         }
 
-        return $"{itemstack.Collectible.Code.ToShortString()}-{stampId}";
+        var engravingMetal = itemstack.Attributes.GetString(StampAttributes.EngravingMetal) ?? "gold";
+        return $"{itemstack.Collectible.Code.ToShortString()}-{stampId}-{engravingMetal}";
     }
 }
