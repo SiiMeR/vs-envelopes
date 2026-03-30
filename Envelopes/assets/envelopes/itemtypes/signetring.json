@@ -29,7 +29,52 @@
   },
   storageFlags: 128,
   attributes: {
-    clothescategory: "arm"
+    displaycaseable: true,
+    shelvable: true,
+    clothescategory: "hand",
+    onDisplayTransform: {
+      translation: {
+        x: 0.48,
+        y: 0.08,
+        z: 0.52
+      },
+      rotation: {
+        x: 4,
+        y: -180,
+        z: -66
+      },
+      origin: {
+        x: 0,
+        y: 0,
+        z: 0
+      },
+      scale: 1.09
+    },
+    groundStorageTransform: {
+      translation: {
+        x: 0.25,
+        y: -0.66,
+        z: -0.3
+      },
+      rotation: {
+        x: -43,
+        y: 90,
+        z: -33
+      },
+      scale: 0.53
+    },
+    onshelfTransform: {
+      translation: {
+        x: -0.4,
+        y: -0.8,
+        z: 0.7
+      },
+      rotation: {
+        x: 56,
+        y: -79,
+        z: -14
+      }
+    }
   },
   textures: {
     "seraph": {
@@ -43,9 +88,23 @@
     }
   },
   shape: {
-    base: "entity/humanoid/seraph/clothing/arm/signetring"
+    base: "item/signetring"
   },
   behaviors: [
+    {
+      name: "GroundStorable",
+      properties: {
+        layout: "Quadrants",
+        collisionBox: {
+          x1: 0,
+          y1: 0,
+          z1: 0,
+          x2: 1,
+          y2: 0.125,
+          z2: 1
+        }
+      }
+    },
     {
       name: "RenderStampEmblem",
       properties: {
@@ -55,41 +114,46 @@
   ],
   guiTransform: {
     translation: {
-      x: 90,
-      y: 89,
-      z: 0
-    },
-    scale: 12
-  },
-  tpHandTransform: {
-    translation: {
-      x: -0.7,
-      y: -0.8,
-      z: 0.2
+      x: 21,
+      y: -112,
+      z: 99
     },
     rotation: {
-      x: -180,
-      y: 19,
-      z: 14
-    },
-    scale: 2.8699
-  },
-  groundTransform: {
-    translation: {
-      x: 0,
-      y: 0.02,
-      z: 0
-    },
-    rotation: {
-      x: 102,
-      y: 0,
-      z: 0
+      x: 77,
+      y: -44,
+      z: -24
     },
     origin: {
       x: 0.5,
       y: 0.5,
       z: 0.5
     },
-    scale: 1.0
+    scale: 6
+  },
+  tpHandTransform: {
+    translation: {
+      x: -2.1,
+      y: -2.1,
+      z: -0.9
+    },
+    rotation: {
+      x: 79,
+      y: -164,
+      z: 87
+    },
+    scale: 0.34
+  },
+  groundTransform: {
+    translation: {
+      x: 0,
+      y: -0.14,
+      z: 0
+    },
+    rotation: {
+      x: 73,
+      y: -92,
+      z: 0
+    },
+    scale: 2.78
   }
 }

@@ -13,6 +13,7 @@ namespace Envelopes.Items;
 
 public class ItemWaxSealStamp : Item
 {
+    protected virtual bool ShouldOpenEditor => true;
     public override bool ConsumeCraftingIngredients(ItemSlot[] slots, ItemSlot outputSlot, GridRecipe matchingRecipe)
     {
         var code = outputSlot.Itemstack.Collectible.Code.Path;
@@ -38,7 +39,7 @@ public class ItemWaxSealStamp : Item
             return;
         }
 
-        if (firstEvent && !alreadyEngraved && !byEntity.Controls.ShiftKey && api.Side != EnumAppSide.Server)
+        if (firstEvent && !alreadyEngraved && !byEntity.Controls.ShiftKey && api.Side != EnumAppSide.Server && ShouldOpenEditor)
         {
             var dialog = new GuiSealStampDesigner(EnvelopesModSystem.Api as ICoreClientAPI);
             dialog.TryOpen(true);

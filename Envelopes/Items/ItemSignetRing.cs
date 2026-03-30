@@ -14,6 +14,8 @@ namespace Envelopes.Items;
 
 public class ItemSignetRing : ItemWaxSealStamp, IAttachableToEntity, IWearableShapeSupplier
 {
+    protected override bool ShouldOpenEditor => false;
+
     private static readonly AssetLocation EntityShapeLoc = new AssetLocation("envelopes:entity/humanoid/seraph/clothing/arm/signetring");
 
     int IAttachableToEntity.RequiresBehindSlots { get; set; }
@@ -99,6 +101,9 @@ public class ItemSignetRing : ItemWaxSealStamp, IAttachableToEntity, IWearableSh
             handling = EnumHandHandling.PreventDefault;
             return;
         }
+
+        base.OnHeldInteractStart(slot, byEntity, blockSel, entitySel, firstEvent, ref handling);
+        if (handling == EnumHandHandling.PreventDefault) return;
 
         if (!byEntity.Controls.ShiftKey && firstEvent)
         {
