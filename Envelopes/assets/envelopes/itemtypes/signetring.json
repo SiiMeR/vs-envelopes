@@ -65,15 +65,16 @@
     },
     onshelfTransform: {
       translation: {
-        x: -0.4,
-        y: -0.8,
-        z: 0.7
+        x: -0.2,
+        y: -0.6,
+        z: 0.3
       },
       rotation: {
         x: 56,
         y: -79,
         z: -14
-      }
+      },
+      scale: 0.34
     }
   },
   textures: {
