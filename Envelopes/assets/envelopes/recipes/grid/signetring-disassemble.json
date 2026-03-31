@@ -24,6 +24,7 @@
   width: 3,
   height: 3,
   shapeless: true,
+  recipeGroup: 2,
   copyAttributesFrom: "R",
   output: {
     type: "item",

@@ -49,6 +49,7 @@
   "parcel-sealedby": "Sealed by",
   "parcel-emblem": "Emblem",
   "item-signetring-*": "Signet ring",
+  "itemdesc-signetring-*": "Works just like a wax seal stamp, but can be worn on the hand.",
   "item-sealstamp-blank": "Wax seal stamp (blank)",
   "item-sealstamp-engraved": "Wax seal stamp",
   "stamp-metal": "Metal: {0}",

@@ -12,6 +12,7 @@
   },
   width: 2,
   height: 1,
+  recipeGroup: 1,
   copyAttributesFrom: "E",
   output: {
     type: "item",
