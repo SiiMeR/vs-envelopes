@@ -1,14 +1,6 @@
 {
-  ingredientPattern: "S_G,_H_,_C_",
+  ingredientPattern: "_H_,_C_,_S_",
   ingredients: {
-    "S": {
-      type: "item",
-      code: "game:stick"
-    },
-    "G": {
-      type: "item",
-      code: "game:ingot-*"
-    },
     "H": {
       type: "item",
       code: "game:hammer-*",
@@ -18,12 +10,16 @@
       type: "item",
       code: "game:chisel-*",
       isTool: true
+    },
+    "S": {
+      type: "item",
+      code: "envelopes:sealstamp-engraved"
     }
   },
   width: 3,
   height: 3,
   shapeless: true,
-  recipeGroup: 1,
+  recipeGroup: 2,
   output: {
     type: "item",
     code: "envelopes:sealstamp-blank",

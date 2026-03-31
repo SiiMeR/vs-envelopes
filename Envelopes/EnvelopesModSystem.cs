@@ -37,6 +37,7 @@ public class EnvelopesModSystem : ModSystem
         api.RegisterItemClass("ItemSealableParcel", typeof(ItemSealableParcel));
         api.RegisterItemClass("ItemWaxSealStamp", typeof(ItemWaxSealStamp));
         api.RegisterItemClass("ItemWaxStick", typeof(ItemWaxStick));
+        api.RegisterItemClass("ItemSignetRing", typeof(ItemSignetRing));
 
         api.Network.RegisterChannel("envelopes")
             .RegisterMessageType<OpenEnvelopePacket>()

@@ -6,6 +6,7 @@ using Envelopes.Messages;
 using Envelopes.Util;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
+using Vintagestory.API.Config;
 using Vintagestory.API.Util;
 using Vintagestory.GameContent;
 
@@ -13,13 +14,12 @@ namespace Envelopes.Items;
 
 public class ItemWaxSealStamp : Item
 {
+    protected virtual bool ShouldOpenEditor => true;
     public override bool ConsumeCraftingIngredients(ItemSlot[] slots, ItemSlot outputSlot, GridRecipe matchingRecipe)
     {
         var code = outputSlot.Itemstack.Collectible.Code.Path;
         if (code.Contains("sealstamp-engraved") && outputSlot.Itemstack.Attributes.TryGetInt("durability").HasValue)
-        {
             outputSlot.Itemstack.Attributes.SetInt("durability", 200);
-        }
 
         return base.ConsumeCraftingIngredients(slots, outputSlot, matchingRecipe);
     }
@@ -38,7 +38,7 @@ public class ItemWaxSealStamp : Item
             return;
         }
 
-        if (firstEvent && !alreadyEngraved && blockSel == null && api.Side != EnumAppSide.Server)
+        if (firstEvent && !alreadyEngraved && !byEntity.Controls.ShiftKey && api.Side != EnumAppSide.Server && ShouldOpenEditor)
         {
             var dialog = new GuiSealStampDesigner(EnvelopesModSystem.Api as ICoreClientAPI);
             dialog.TryOpen(true);
@@ -100,7 +100,7 @@ public class ItemWaxSealStamp : Item
         api.World.PlaySoundAt(new AssetLocation("game:sounds/held/bookclose*"), byEntity, null, true, 16f, 1f);
     }
 
-    private ItemSlot? GetUnsealedContainerSlot(BlockSelection blockSel)
+    protected ItemSlot? GetUnsealedContainerSlot(BlockSelection blockSel)
     {
         var be = api.World.BlockAccessor.GetBlockEntity<BlockEntityGroundStorage>(blockSel.Position);
         var slot = be?.GetSlotAt(blockSel);
@@ -157,11 +157,8 @@ public class ItemWaxSealStamp : Item
     {
         base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);
 
-        var attributes = inSlot.Itemstack.Attributes;
-        var stampId = attributes.TryGetLong(StampAttributes.StampId);
+        var stampId = inSlot.Itemstack.Attributes.TryGetLong(StampAttributes.StampId);
         if (stampId != null)
-        {
             dsc.AppendLine($"<font color=\"orange\">ID: {stampId}</font>");
-        }
     }
 }

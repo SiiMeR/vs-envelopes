@@ -5,6 +5,7 @@ using Envelopes.Gui;
 using Envelopes.Util;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
+using Vintagestory.API.Datastructures;
 using Vintagestory.API.MathTools;
 using Vintagestory.API.Util;
 using Vintagestory.GameContent;
@@ -45,8 +46,16 @@ public class RenderStampEmblem : CollectibleBehavior, IContainedMeshSource
         ObjectCacheUtil.Delete(api, MeshRefsCacheKey);
     }
 
+    private bool _faceUp;
+
     public RenderStampEmblem(CollectibleObject collObj) : base(collObj)
     {
+    }
+
+    public override void Initialize(JsonObject properties)
+    {
+        _faceUp = properties?["faceUp"].AsBool(false) ?? false;
+        base.Initialize(properties);
     }
 
     public MeshData? CreateMesh(ItemStack itemstack)
@@ -59,9 +68,8 @@ public class RenderStampEmblem : CollectibleBehavior, IContainedMeshSource
         var cacheKey = GetMeshCacheKey(itemstack);
         var shape = GenShape(capi, itemstack);
 
-        var tps = new ShapeTextureSource(capi, shape, "stampssealsource");
-        capi.Tesselator.TesselateShape(cacheKey, shape, out var meshdata,
-            tps);
+        var tps = new ShapeTextureSource(capi, shape, "stampssealsource", itemstack.Item.Textures, p => p);
+        capi.Tesselator.TesselateShape(cacheKey, shape, out var meshdata, tps);
 
         return meshdata;
     }
@@ -77,26 +85,36 @@ public class RenderStampEmblem : CollectibleBehavior, IContainedMeshSource
             return api.TesselatorManager.GetCachedShape(stack.Item.Shape.Base).Clone();
         }
 
+        var bodyMetal = stack.Collectible.Variant?["metal"]
+            ?? stack.Attributes.GetString(StampAttributes.StampBodyMetal)
+            ?? "steel";
+        shape.Textures["metal"] = new AssetLocation($"game:block/metal/ingot/{bodyMetal}");
+
+        var engravingMetal = stack.Attributes.GetString(StampAttributes.EngravingMetal) ?? "gold";
+        shape.Textures["engraving"] = ResolveEngravingTexture(_api, engravingMetal);
+
         var design = ParseDesign(stack);
 
         var stamp = shape.GetElementByName("Stamp");
         if (stamp == null) return shape;
 
-        var metal = new ShapeElementFace { Texture = "metal", Uv = new[] { 0f, 0f, 0.5f, 0.5f } };
+        var cellSizeX = (stamp.To[0] - stamp.From[0]) / Constants.GridDimensions;
+        var cellSizeZ = (stamp.To[2] - stamp.From[2]) / Constants.GridDimensions;
+        var cellUvSize = (float)cellSizeX;
+        double yBottom, yTop;
+        if (_faceUp)
+        {
+            var stampHeight = stamp.To[1] - stamp.From[1];
+            yBottom = stampHeight;
+            yTop = yBottom + cellSizeX;
+        }
+        else
+        {
+            yTop = 0.0;
+            yBottom = -cellSizeX;
+        }
 
-        var array = new ShapeElementFace[6];
-        array[0] = metal;
-        array[1] = metal;
-        array[2] = metal;
-        array[3] = metal;
-        // array[4] = metal; no need to render up face
-        array[5] = metal;
         var list = new List<ShapeElement>();
-
-        const double cellSize = 0.25;
-        const double yBottom = -0.25;
-        const double yTop = 0.00;
-
         for (var row = 0; row < Constants.GridDimensions; row++)
         {
             for (var col = 0; col < Constants.GridDimensions; col++)
@@ -104,14 +122,18 @@ public class RenderStampEmblem : CollectibleBehavior, IContainedMeshSource
                 var idx = row * Constants.GridDimensions + col;
                 if (design.Length == 0 || !design[idx])
                 {
-                    var shapeElement = new ShapeElement
+                    var uv = new[] { col * cellUvSize, row * cellUvSize, (col + 1) * cellUvSize, (row + 1) * cellUvSize };
+                    var face = new ShapeElementFace { Texture = "metal", Uv = uv };
+                    var faces = new ShapeElementFace[6];
+                    faces[0] = face; faces[1] = face; faces[2] = face; faces[3] = face;
+                    if (_faceUp) faces[4] = face; else faces[5] = face;
+                    list.Add(new ShapeElement
                     {
                         Name = "StampFace" + idx,
-                        From = new[] { row * cellSize, yBottom, col * cellSize },
-                        To = new[] { row * cellSize + cellSize, yTop, col * cellSize + cellSize },
-                        FacesResolved = array
-                    };
-                    list.Add(shapeElement);
+                        From = new[] { row * cellSizeX, yBottom, col * cellSizeZ },
+                        To = new[] { (row + 1) * cellSizeX, yTop, (col + 1) * cellSizeZ },
+                        FacesResolved = faces
+                    });
                 }
             }
         }
@@ -129,6 +151,7 @@ public class RenderStampEmblem : CollectibleBehavior, IContainedMeshSource
         if (!_meshRefs.TryGetValue(key, out var meshref))
         {
             var mesh = CreateMesh(itemstack);
+            if (mesh == null) return;
             meshref = capi.Render.UploadMultiTextureMesh(mesh);
             _meshRefs[key] = meshref;
         }
@@ -168,17 +191,28 @@ public class RenderStampEmblem : CollectibleBehavior, IContainedMeshSource
 
     public static string GetMeshCacheKeyFor(ItemStack itemstack)
     {
+        var bodyMetal = itemstack.Collectible.Variant?["metal"]
+            ?? itemstack.Attributes.GetString(StampAttributes.StampBodyMetal)
+            ?? "steel";
+
         if (itemstack.Collectible.Code.Path.EndsWith("blank"))
         {
-            return $"{itemstack.Collectible.Code.ToShortString()}";
+            return $"{itemstack.Collectible.Code.ToShortString()}-{bodyMetal}";
         }
 
+        var engravingMetal = itemstack.Attributes.GetString(StampAttributes.EngravingMetal) ?? "gold";
         var stampId = itemstack.Attributes.GetLong(StampAttributes.StampId);
         if (stampId == 0L)
-        {
-            return $"{itemstack.Collectible.Code.ToShortString()}";
-        }
+            return $"{itemstack.Collectible.Code.ToShortString()}-{bodyMetal}-{engravingMetal}";
 
-        return $"{itemstack.Collectible.Code.ToShortString()}-{stampId}";
+        return $"{itemstack.Collectible.Code.ToShortString()}-{stampId}-{bodyMetal}-{engravingMetal}";
+    }
+
+    internal static AssetLocation ResolveEngravingTexture(ICoreAPI api, string metal)
+    {
+        var toolPath = new AssetLocation($"game:textures/item/tool/material/{metal}.png");
+        return api.Assets.TryGet(toolPath) != null
+            ? new AssetLocation($"game:item/tool/material/{metal}")
+            : new AssetLocation($"game:block/metal/ingot/{metal}");
     }
 }

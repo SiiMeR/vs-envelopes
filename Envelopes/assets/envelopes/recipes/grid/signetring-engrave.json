@@ -1,13 +1,19 @@
 {
-  ingredientPattern: "S_G,_H_,_C_",
+  ingredientPattern: "BSG,_H_,_C_",
   ingredients: {
-    "S": {
+    "B": {
       type: "item",
-      code: "game:stick"
+      name: "metal",
+      code: "game:ingot-*"
     },
     "G": {
       type: "item",
+      name: "engraving",
       code: "game:ingot-*"
+    },
+    "S": {
+      type: "item",
+      code: "envelopes:sealstamp-engraved"
     },
     "H": {
       type: "item",
@@ -22,11 +28,9 @@
   },
   width: 3,
   height: 3,
-  shapeless: true,
-  recipeGroup: 1,
   output: {
     type: "item",
-    code: "envelopes:sealstamp-blank",
+    code: "envelopes:signetring-{metal}",
     quantity: 1
   }
 }

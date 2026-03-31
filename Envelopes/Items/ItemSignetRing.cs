@@ -1,0 +1,203 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Envelopes.Behaviors;
+using Envelopes.Gui;
+using Envelopes.Util;
+using Vintagestory.API.Client;
+using Vintagestory.API.Util;
+using Vintagestory.API.Common;
+using Vintagestory.API.Common.Entities;
+using Vintagestory.API.Config;
+using Vintagestory.GameContent;
+
+namespace Envelopes.Items;
+
+public class ItemSignetRing : ItemWaxSealStamp, IAttachableToEntity, IWearableShapeSupplier
+{
+    protected override bool ShouldOpenEditor => false;
+
+    private readonly AssetLocation _entityShapeLoc = new AssetLocation("envelopes:entity/humanoid/seraph/clothing/arm/signetring");
+
+    int IAttachableToEntity.RequiresBehindSlots { get; set; }
+
+    bool IAttachableToEntity.IsAttachable(Entity toEntity, ItemStack itemStack) => true;
+
+    string IAttachableToEntity.GetCategoryCode(ItemStack stack) => "arm";
+
+    CompositeShape IAttachableToEntity.GetAttachedShape(ItemStack stack, string slotCode) =>
+        new CompositeShape { Base = _entityShapeLoc };
+
+    string[] IAttachableToEntity.GetDisableElements(ItemStack stack) => null;
+
+    string[] IAttachableToEntity.GetKeepElements(ItemStack stack) => null;
+
+    string IAttachableToEntity.GetTexturePrefixCode(ItemStack stack) => null;
+
+    void IAttachableToEntity.CollectTextures(ItemStack stack, Shape shape, string texturePrefixCode,
+        Dictionary<string, CompositeTexture> intoDict)
+    {
+        var metal = stack.Collectible.Variant?["metal"];
+        if (metal != null)
+            shape.Textures["metal"] = new AssetLocation($"game:block/metal/ingot/{metal}");
+
+        var engravingMetal = stack.Attributes.GetString(StampAttributes.EngravingMetal) ?? "gold";
+        shape.Textures["engraving"] = RenderStampEmblem.ResolveEngravingTexture(api, engravingMetal);
+    }
+
+    Shape IWearableShapeSupplier.GetShape(ItemStack stack, Entity forEntity, string texturePrefixCode)
+    {
+        var shapeLoc = _entityShapeLoc.CopyWithPathPrefixAndAppendixOnce("shapes/", ".json");
+        var shape = forEntity.World.Api.Assets.TryGet(shapeLoc)?.ToObject<Shape>();
+        if (shape == null) return null;
+
+        shape.ResolveReferences(forEntity.World.Logger, _entityShapeLoc.ToString());
+
+        var metal = stack.Collectible.Variant?["metal"];
+        if (metal != null)
+            shape.Textures["metal"] = new AssetLocation($"game:block/metal/ingot/{metal}");
+
+        var engravingMetal = stack.Attributes.GetString(StampAttributes.EngravingMetal) ?? "gold";
+        shape.Textures["engraving"] = RenderStampEmblem.ResolveEngravingTexture(forEntity.World.Api, engravingMetal);
+
+        var stamp = shape.GetElementByName("Stamp");
+        if (stamp == null) return shape;
+
+        var designString = stack.Attributes.GetString(StampAttributes.StampDesign);
+        var design = string.IsNullOrEmpty(designString)
+            ? Array.Empty<bool>()
+            : designString.ToCharArray().Select(c => c == '1').ToArray();
+
+        var cellSizeX = (stamp.To[0] - stamp.From[0]) / Constants.GridDimensions;
+        var cellSizeZ = (stamp.To[2] - stamp.From[2]) / Constants.GridDimensions;
+        var cellUvSize = (float)cellSizeX;
+        var stampHeight = stamp.To[1] - stamp.From[1];
+        var yBottom = stampHeight;
+        var yTop = yBottom + cellSizeX;
+
+        var cells = new List<ShapeElement>();
+        for (var row = 0; row < Constants.GridDimensions; row++)
+        {
+            for (var col = 0; col < Constants.GridDimensions; col++)
+            {
+                var idx = row * Constants.GridDimensions + col;
+                if (design.Length == 0 || !design[idx])
+                {
+                    var uv = new[] { col * cellUvSize, row * cellUvSize, (col + 1) * cellUvSize, (row + 1) * cellUvSize };
+                    var face = new ShapeElementFace { Texture = "metal", Uv = uv };
+                    var faces = new ShapeElementFace[6];
+                    faces[0] = face; faces[1] = face; faces[2] = face; faces[3] = face;
+                    faces[4] = face;
+                    cells.Add(new ShapeElement
+                    {
+                        Name = "SF" + idx,
+                        From = new[] { row * cellSizeX, yBottom, col * cellSizeZ },
+                        To = new[] { (row + 1) * cellSizeX, yTop, (col + 1) * cellSizeZ },
+                        FacesResolved = faces
+                    });
+                }
+            }
+        }
+
+        stamp.Children = cells.ToArray();
+        return shape;
+    }
+
+    public override void GetHeldItemInfo(ItemSlot inSlot, System.Text.StringBuilder dsc, IWorldAccessor world, bool withDebugInfo)
+    {
+        base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);
+
+        var attributes = inSlot.Itemstack.Attributes;
+        var metal = inSlot.Itemstack.Collectible.Variant?["metal"]
+            ?? attributes.GetString(StampAttributes.StampBodyMetal)
+            ?? "steel";
+        dsc.AppendLine(Lang.Get("envelopes:stamp-metal", Lang.Get($"material-{metal}")));
+        var engravingMetal = attributes.GetString(StampAttributes.EngravingMetal) ?? "gold";
+        dsc.AppendLine(Lang.Get("envelopes:stamp-engravingmetal", Lang.Get($"material-{engravingMetal}")));
+    }
+
+    public override void OnHeldInteractStart(ItemSlot slot, EntityAgent byEntity, BlockSelection blockSel,
+        EntitySelection entitySel, bool firstEvent, ref EnumHandHandling handling)
+    {
+        if (firstEvent && byEntity.LeftHandItemSlot?.Itemstack?.Collectible?.Code?.Path?.StartsWith("waxstick") == true
+                       && blockSel != null && GetUnsealedContainerSlot(blockSel) != null)
+        {
+            handling = EnumHandHandling.PreventDefault;
+            return;
+        }
+
+        base.OnHeldInteractStart(slot, byEntity, blockSel, entitySel, firstEvent, ref handling);
+        if (handling == EnumHandHandling.PreventDefault) return;
+
+        if (!byEntity.Controls.ShiftKey && firstEvent)
+        {
+            var player = (byEntity as EntityPlayer)?.Player;
+            var inv = player?.InventoryManager.GetOwnInventory("character");
+            if (inv?[(int)EnumCharacterDressType.Hand].TryFlipWith(slot) == true)
+            {
+                handling = EnumHandHandling.PreventDefault;
+                return;
+            }
+        }
+    }
+
+    public override bool OnHeldInteractStep(float secondsUsed, ItemSlot slot, EntityAgent byEntity,
+        BlockSelection blockSel, EntitySelection entitySel)
+    {
+        if (byEntity.LeftHandItemSlot?.Itemstack?.Collectible?.Code?.Path?.StartsWith("waxstick") != true) return false;
+        if (blockSel == null) return false;
+        return GetUnsealedContainerSlot(blockSel) != null && secondsUsed < 0.5f;
+    }
+
+    public override WorldInteraction[] GetHeldInteractionHelp(ItemSlot inSlot)
+    {
+        var waxSticks = api.World.Items
+            .Where(i => i.Code?.Domain == "envelopes" && i.Code.Path.StartsWith("waxstick"))
+            .Select(i => new ItemStack(i))
+            .ToArray();
+
+        return new[]
+        {
+            new WorldInteraction
+            {
+                ActionLangCode = $"{EnvelopesModSystem.ModId}:heldhelp-sealinworld",
+                MouseButton = EnumMouseButton.Right,
+                Itemstacks = waxSticks
+            }
+        }.Append(base.GetHeldInteractionHelp(inSlot));
+    }
+
+    public override void OnCreatedByCrafting(ItemSlot[] allInputslots, ItemSlot outputSlot, GridRecipe byRecipe)
+    {
+        base.OnCreatedByCrafting(allInputslots, outputSlot, byRecipe);
+
+        foreach (var slot in allInputslots)
+        {
+            if (slot.Itemstack?.Collectible is ItemWaxSealStamp and not ItemSignetRing
+                && slot.Itemstack.Collectible.Code.Path.Contains("engraved"))
+            {
+                var attrs = slot.Itemstack.Attributes;
+                var stampId = attrs.TryGetLong(StampAttributes.StampId);
+                if (stampId.HasValue)
+                    outputSlot.Itemstack.Attributes.SetLong(StampAttributes.StampId, stampId.Value);
+                var title = attrs.GetString(StampAttributes.StampTitle);
+                if (title != null)
+                    outputSlot.Itemstack.Attributes.SetString(StampAttributes.StampTitle, title);
+                var design = attrs.GetString(StampAttributes.StampDesign);
+                if (design != null)
+                    outputSlot.Itemstack.Attributes.SetString(StampAttributes.StampDesign, design);
+                break;
+            }
+        }
+
+        var metalIdx = Array.FindIndex(byRecipe.resolvedIngredients, ig => ig?.PatternCode == "B");
+        var engravingIdx = Array.FindIndex(byRecipe.resolvedIngredients, ig => ig?.PatternCode == "G");
+        var bodyMetal = metalIdx >= 0 ? allInputslots[metalIdx]?.Itemstack?.Collectible?.Variant?["metal"] : null;
+        var engravingMetal = engravingIdx >= 0 ? allInputslots[engravingIdx]?.Itemstack?.Collectible?.Variant?["metal"] : null;
+        if (bodyMetal != null)
+            outputSlot.Itemstack.Attributes.SetString(StampAttributes.StampBodyMetal, bodyMetal);
+        if (engravingMetal != null)
+            outputSlot.Itemstack.Attributes.SetString(StampAttributes.EngravingMetal, engravingMetal);
+    }
+
+}
