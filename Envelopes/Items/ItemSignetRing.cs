@@ -8,6 +8,7 @@ using Vintagestory.API.Client;
 using Vintagestory.API.Util;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
+using Vintagestory.API.Config;
 using Vintagestory.GameContent;
 
 namespace Envelopes.Items;
@@ -102,6 +103,19 @@ public class ItemSignetRing : ItemWaxSealStamp, IAttachableToEntity, IWearableSh
         return shape;
     }
 
+    public override void GetHeldItemInfo(ItemSlot inSlot, System.Text.StringBuilder dsc, IWorldAccessor world, bool withDebugInfo)
+    {
+        base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);
+
+        var attributes = inSlot.Itemstack.Attributes;
+        var metal = inSlot.Itemstack.Collectible.Variant?["metal"]
+            ?? attributes.GetString(StampAttributes.StampBodyMetal)
+            ?? "steel";
+        dsc.AppendLine(Lang.Get("envelopes:stamp-metal", Lang.Get($"material-{metal}")));
+        var engravingMetal = attributes.GetString(StampAttributes.EngravingMetal) ?? "gold";
+        dsc.AppendLine(Lang.Get("envelopes:stamp-engravingmetal", Lang.Get($"material-{engravingMetal}")));
+    }
+
     public override void OnHeldInteractStart(ItemSlot slot, EntityAgent byEntity, BlockSelection blockSel,
         EntitySelection entitySel, bool firstEvent, ref EnumHandHandling handling)
     {
@@ -176,20 +190,14 @@ public class ItemSignetRing : ItemWaxSealStamp, IAttachableToEntity, IWearableSh
             }
         }
 
-        var outputMetal = outputSlot.Itemstack.Collectible.Variant?["metal"];
-        string engravingMetal = null, fallback = null;
-        foreach (var slot in allInputslots)
-        {
-            if (slot?.Itemstack?.Collectible.Code?.Domain != "game") continue;
-            if (!slot.Itemstack.Collectible.Code.Path.StartsWith("ingot-")) continue;
-            var metal = slot.Itemstack.Collectible.Variant?["metal"];
-            if (metal == null) continue;
-            fallback ??= metal;
-            if (metal != outputMetal) { engravingMetal = metal; break; }
-        }
-        var resolved = engravingMetal ?? fallback;
-        if (resolved != null)
-            outputSlot.Itemstack.Attributes.SetString(StampAttributes.EngravingMetal, resolved);
+        var metalIdx = Array.FindIndex(byRecipe.resolvedIngredients, ig => ig?.PatternCode == "B");
+        var engravingIdx = Array.FindIndex(byRecipe.resolvedIngredients, ig => ig?.PatternCode == "G");
+        var bodyMetal = metalIdx >= 0 ? allInputslots[metalIdx]?.Itemstack?.Collectible?.Variant?["metal"] : null;
+        var engravingMetal = engravingIdx >= 0 ? allInputslots[engravingIdx]?.Itemstack?.Collectible?.Variant?["metal"] : null;
+        if (bodyMetal != null)
+            outputSlot.Itemstack.Attributes.SetString(StampAttributes.StampBodyMetal, bodyMetal);
+        if (engravingMetal != null)
+            outputSlot.Itemstack.Attributes.SetString(StampAttributes.EngravingMetal, engravingMetal);
     }
 
 }

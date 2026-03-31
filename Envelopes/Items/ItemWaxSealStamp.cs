@@ -157,15 +157,7 @@ public class ItemWaxSealStamp : Item
     {
         base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);
 
-        var attributes = inSlot.Itemstack.Attributes;
-        var metal = inSlot.Itemstack.Collectible.Variant?["metal"]
-            ?? attributes.GetString(StampAttributes.StampBodyMetal)
-            ?? "steel";
-        dsc.AppendLine(Lang.Get("envelopes:stamp-metal", Lang.Get($"material-{metal}")));
-        var engravingMetal = attributes.GetString(StampAttributes.EngravingMetal) ?? "gold";
-        dsc.AppendLine(Lang.Get("envelopes:stamp-engravingmetal", Lang.Get($"material-{engravingMetal}")));
-
-        var stampId = attributes.TryGetLong(StampAttributes.StampId);
+        var stampId = inSlot.Itemstack.Attributes.TryGetLong(StampAttributes.StampId);
         if (stampId != null)
             dsc.AppendLine($"<font color=\"orange\">ID: {stampId}</font>");
     }

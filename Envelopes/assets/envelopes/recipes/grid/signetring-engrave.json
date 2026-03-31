@@ -28,7 +28,6 @@
   },
   width: 3,
   height: 3,
-  shapeless: true,
   output: {
     type: "item",
     code: "envelopes:signetring-{metal}",
