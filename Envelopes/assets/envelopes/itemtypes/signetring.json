@@ -33,7 +33,10 @@
     shelvable: true,
     clothescategory: "hand",
     handbook: {
-      groupBy: ["signetring-copper", "signetring-*"]
+      groupBy: [
+        "signetring-copper",
+        "signetring-*"
+      ]
     },
     onDisplayTransform: {
       translation: {
@@ -86,7 +89,7 @@
     },
     "metal": {
       base: "game:block/metal/ingot/{metal}"
-    },
+    }
   },
   shape: {
     base: "item/signetring"
@@ -116,7 +119,7 @@
   guiTransform: {
     translation: {
       x: 21,
-      y: -112,
+      y: -105.4,
       z: 99
     },
     rotation: {
