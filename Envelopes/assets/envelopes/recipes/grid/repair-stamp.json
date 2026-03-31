@@ -1,21 +1,21 @@
-﻿{
+{
   ingredientPattern: "EB",
   ingredients: {
     "E": {
       type: "item",
-      code: "sealstamp-engraved"
+      code: "envelopes:sealstamp-engraved"
     },
     "B": {
       type: "item",
-      code: "sealstamp-blank"
+      code: "envelopes:sealstamp-blank"
     }
   },
   width: 2,
   height: 1,
-  copyAttributesFrom: 'E',
+  copyAttributesFrom: "E",
   output: {
     type: "item",
-    code: "sealstamp-engraved",
+    code: "envelopes:sealstamp-engraved",
     quantity: 1
   }
 }

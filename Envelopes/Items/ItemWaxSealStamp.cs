@@ -19,25 +19,7 @@ public class ItemWaxSealStamp : Item
     {
         var code = outputSlot.Itemstack.Collectible.Code.Path;
         if (code.Contains("sealstamp-engraved") && outputSlot.Itemstack.Attributes.TryGetInt("durability").HasValue)
-        {
             outputSlot.Itemstack.Attributes.SetInt("durability", 200);
-        }
-
-        var engravingStack = matchingRecipe.GetInputStackForPatternCode("E", slots);
-        if (engravingStack != null)
-        {
-            var engravingMetal = engravingStack.Collectible.Variant?["metal"];
-            if (engravingMetal != null)
-                outputSlot.Itemstack.Attributes.SetString(StampAttributes.EngravingMetal, engravingMetal);
-        }
-
-        var stampStack = matchingRecipe.GetInputStackForPatternCode("S", slots);
-        if (stampStack?.Collectible is ItemWaxSealStamp)
-        {
-            var engravingMetal = stampStack.Attributes.GetString(StampAttributes.EngravingMetal);
-            if (engravingMetal != null)
-                outputSlot.Itemstack.Attributes.SetString(StampAttributes.EngravingMetal, engravingMetal);
-        }
 
         return base.ConsumeCraftingIngredients(slots, outputSlot, matchingRecipe);
     }
@@ -176,9 +158,12 @@ public class ItemWaxSealStamp : Item
         base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);
 
         var attributes = inSlot.Itemstack.Attributes;
-        var engravingMetal = attributes.GetString(StampAttributes.EngravingMetal);
-        if (engravingMetal != null)
-            dsc.AppendLine(Lang.Get($"envelopes:stamp-engravingmetal", Lang.Get($"material-{engravingMetal}")));
+        var metal = inSlot.Itemstack.Collectible.Variant?["metal"]
+            ?? attributes.GetString(StampAttributes.StampBodyMetal)
+            ?? "steel";
+        dsc.AppendLine(Lang.Get("envelopes:stamp-metal", Lang.Get($"material-{metal}")));
+        var engravingMetal = attributes.GetString(StampAttributes.EngravingMetal) ?? "gold";
+        dsc.AppendLine(Lang.Get("envelopes:stamp-engravingmetal", Lang.Get($"material-{engravingMetal}")));
 
         var stampId = attributes.TryGetLong(StampAttributes.StampId);
         if (stampId != null)

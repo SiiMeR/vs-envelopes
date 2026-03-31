@@ -1,14 +1,6 @@
 {
-  ingredientPattern: "S_G,_H_,_C_",
+  ingredientPattern: "_H_,_C_,_RS",
   ingredients: {
-    "S": {
-      type: "item",
-      code: "game:stick"
-    },
-    "G": {
-      type: "item",
-      code: "game:ingot-*"
-    },
     "H": {
       type: "item",
       code: "game:hammer-*",
@@ -18,14 +10,24 @@
       type: "item",
       code: "game:chisel-*",
       isTool: true
+    },
+    "R": {
+      type: "item",
+      name: "metal",
+      code: "envelopes:signetring-*"
+    },
+    "S": {
+      type: "item",
+      code: "game:stick"
     }
   },
   width: 3,
   height: 3,
   shapeless: true,
+  copyAttributesFrom: "R",
   output: {
     type: "item",
-    code: "envelopes:sealstamp-blank",
+    code: "envelopes:sealstamp-engraved",
     quantity: 1
   }
 }

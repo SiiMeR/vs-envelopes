@@ -1,13 +1,33 @@
 {
-  ingredientPattern: "IHCS",
+  ingredientPattern: "BSG,_H_,_C_",
   ingredients: {
-    "I": { type: "item", code: "game:ingot-*", name: "metal" },
-    "H": { type: "item", code: "game:hammer-*", isTool: true },
-    "C": { type: "item", code: "game:chisel-*", isTool: true },
-    "S": { type: "item", code: "envelopes:sealstamp-engraved" }
+    "B": {
+      type: "item",
+      name: "metal",
+      code: "game:ingot-*"
+    },
+    "G": {
+      type: "item",
+      name: "engraving",
+      code: "game:ingot-*"
+    },
+    "S": {
+      type: "item",
+      code: "envelopes:sealstamp-engraved"
+    },
+    "H": {
+      type: "item",
+      code: "game:hammer-*",
+      isTool: true
+    },
+    "C": {
+      type: "item",
+      code: "game:chisel-*",
+      isTool: true
+    }
   },
-  width: 2,
-  height: 2,
+  width: 3,
+  height: 3,
   shapeless: true,
   output: {
     type: "item",

@@ -85,12 +85,13 @@ public class RenderStampEmblem : CollectibleBehavior, IContainedMeshSource
             return api.TesselatorManager.GetCachedShape(stack.Item.Shape.Base).Clone();
         }
 
-        var metalVariant = stack.Collectible.Variant?["metal"];
-        if (metalVariant != null)
-            shape.Textures["metal"] = new AssetLocation($"game:block/metal/ingot/{metalVariant}");
+        var bodyMetal = stack.Collectible.Variant?["metal"]
+            ?? stack.Attributes.GetString(StampAttributes.StampBodyMetal)
+            ?? "steel";
+        shape.Textures["metal"] = new AssetLocation($"game:block/metal/ingot/{bodyMetal}");
 
         var engravingMetal = stack.Attributes.GetString(StampAttributes.EngravingMetal) ?? "gold";
-        shape.Textures["engraving"] = new AssetLocation($"game:item/tool/material/{engravingMetal}");
+        shape.Textures["engraving"] = ResolveEngravingTexture(_api, engravingMetal);
 
         var design = ParseDesign(stack);
 
@@ -99,7 +100,7 @@ public class RenderStampEmblem : CollectibleBehavior, IContainedMeshSource
 
         var cellSizeX = (stamp.To[0] - stamp.From[0]) / Constants.GridDimensions;
         var cellSizeZ = (stamp.To[2] - stamp.From[2]) / Constants.GridDimensions;
-        var cellUvSize = 16f / Constants.GridDimensions;
+        var cellUvSize = (float)cellSizeX;
         double yBottom, yTop;
         if (_faceUp)
         {
@@ -190,18 +191,28 @@ public class RenderStampEmblem : CollectibleBehavior, IContainedMeshSource
 
     public static string GetMeshCacheKeyFor(ItemStack itemstack)
     {
+        var bodyMetal = itemstack.Collectible.Variant?["metal"]
+            ?? itemstack.Attributes.GetString(StampAttributes.StampBodyMetal)
+            ?? "steel";
+
         if (itemstack.Collectible.Code.Path.EndsWith("blank"))
         {
-            return $"{itemstack.Collectible.Code.ToShortString()}";
-        }
-
-        var stampId = itemstack.Attributes.GetLong(StampAttributes.StampId);
-        if (stampId == 0L)
-        {
-            return $"{itemstack.Collectible.Code.ToShortString()}";
+            return $"{itemstack.Collectible.Code.ToShortString()}-{bodyMetal}";
         }
 
         var engravingMetal = itemstack.Attributes.GetString(StampAttributes.EngravingMetal) ?? "gold";
-        return $"{itemstack.Collectible.Code.ToShortString()}-{stampId}-{engravingMetal}";
+        var stampId = itemstack.Attributes.GetLong(StampAttributes.StampId);
+        if (stampId == 0L)
+            return $"{itemstack.Collectible.Code.ToShortString()}-{bodyMetal}-{engravingMetal}";
+
+        return $"{itemstack.Collectible.Code.ToShortString()}-{stampId}-{bodyMetal}-{engravingMetal}";
+    }
+
+    internal static AssetLocation ResolveEngravingTexture(ICoreAPI api, string metal)
+    {
+        var toolPath = new AssetLocation($"game:textures/item/tool/material/{metal}.png");
+        return api.Assets.TryGet(toolPath) != null
+            ? new AssetLocation($"game:item/tool/material/{metal}")
+            : new AssetLocation($"game:block/metal/ingot/{metal}");
     }
 }

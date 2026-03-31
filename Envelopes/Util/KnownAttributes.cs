@@ -17,4 +17,5 @@ public static class StampAttributes
     public const string StampTitle = "StampTitle";
     public const string StampDesign = "StampDesign";
     public const string EngravingMetal = "EngravingMetal";
+    public const string StampBodyMetal = "StampBodyMetal";
 }
