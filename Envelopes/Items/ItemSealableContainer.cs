@@ -195,7 +195,8 @@ public abstract class ItemSealableContainer : Item, IContainedInteractable
                 !slot.Itemstack.Collectible.Code.Path.Contains("sealstamp"));
 
             var stampSlot = slots.FirstOrDefault(slot =>
-                !slot.Empty && slot.Itemstack.Collectible.Code.Path.Contains("sealstamp-engraved"));
+                !slot.Empty && (slot.Itemstack.Collectible.Code.Path.Contains("sealstamp-engraved") ||
+                                slot.Itemstack.Collectible is ItemSignetRing));
 
             if (code.Contains("unsealed"))
             {
@@ -244,6 +245,22 @@ public abstract class ItemSealableContainer : Item, IContainedInteractable
             var waxColor = waxstickSlot.Itemstack.Collectible.Attributes["color"].AsString();
             outputSlot.Itemstack.Attributes.SetString(EnvelopeAttributes.WaxColor, waxColor);
             outputSlot.MarkDirty();
+        }
+
+        var stampSlot = allInputslots.Where(slot => !slot.Empty)
+            .FirstOrDefault(slot => (slot.Itemstack.Collectible.Code.Path.Contains("sealstamp-engraved") ||
+                                     slot.Itemstack.Collectible is ItemSignetRing));
+        if (stampSlot != null)
+        {
+            var attrs = stampSlot.Itemstack.Attributes;
+            var stampId = attrs.TryGetLong(StampAttributes.StampId);
+            if (stampId.HasValue) outputSlot.Itemstack.Attributes.SetLong(StampAttributes.StampId, stampId.Value);
+            var stampTitle = attrs.GetString(StampAttributes.StampTitle);
+            if (!string.IsNullOrEmpty(stampTitle))
+                outputSlot.Itemstack.Attributes.SetString(StampAttributes.StampTitle, stampTitle);
+            var stampDesign = attrs.GetString(StampAttributes.StampDesign);
+            if (!string.IsNullOrEmpty(stampDesign))
+                outputSlot.Itemstack.Attributes.SetString(StampAttributes.StampDesign, stampDesign);
         }
 
         base.OnCreatedByCrafting(allInputslots, outputSlot, byRecipe);

@@ -27,6 +27,7 @@
       "*"
     ]
   },
+  durability: 200,
   storageFlags: 128,
   attributes: {
     displaycaseable: true,

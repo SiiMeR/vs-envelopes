@@ -15,6 +15,7 @@ namespace Envelopes.Items;
 public class ItemWaxSealStamp : Item
 {
     protected virtual bool ShouldOpenEditor => true;
+
     public override bool ConsumeCraftingIngredients(ItemSlot[] slots, ItemSlot outputSlot, GridRecipe matchingRecipe)
     {
         var code = outputSlot.Itemstack.Collectible.Code.Path;
@@ -38,7 +39,8 @@ public class ItemWaxSealStamp : Item
             return;
         }
 
-        if (firstEvent && !alreadyEngraved && !byEntity.Controls.ShiftKey && api.Side != EnumAppSide.Server && ShouldOpenEditor)
+        if (firstEvent && !alreadyEngraved && !byEntity.Controls.ShiftKey && api.Side != EnumAppSide.Server &&
+            ShouldOpenEditor)
         {
             var dialog = new GuiSealStampDesigner(EnvelopesModSystem.Api as ICoreClientAPI);
             dialog.TryOpen(true);
@@ -105,8 +107,9 @@ public class ItemWaxSealStamp : Item
         var be = api.World.BlockAccessor.GetBlockEntity<BlockEntityGroundStorage>(blockSel.Position);
         var slot = be?.GetSlotAt(blockSel);
         return slot?.Itemstack?.Collectible is ItemSealableContainer
-            && slot.Itemstack.Collectible.Code?.Path?.Contains("-unsealed") == true
-            ? slot : null;
+               && slot.Itemstack.Collectible.Code?.Path?.Contains("-unsealed") == true
+            ? slot
+            : null;
     }
 
     public override WorldInteraction[] GetHeldInteractionHelp(ItemSlot inSlot)
@@ -126,7 +129,7 @@ public class ItemWaxSealStamp : Item
                 ActionLangCode = $"{EnvelopesModSystem.ModId}:heldhelp-sealinworld",
                 MouseButton = EnumMouseButton.Right,
                 Itemstacks = waxSticks,
-                HotKeyCodes = new[] { "shift" }
+                HotKeyCodes = new[] { "sneak" }
             }
         }.Append(base.GetHeldInteractionHelp(inSlot));
     }

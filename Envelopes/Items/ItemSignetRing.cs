@@ -17,7 +17,8 @@ public class ItemSignetRing : ItemWaxSealStamp, IAttachableToEntity, IWearableSh
 {
     protected override bool ShouldOpenEditor => false;
 
-    private readonly AssetLocation _entityShapeLoc = new AssetLocation("envelopes:entity/humanoid/seraph/clothing/arm/signetring");
+    private readonly AssetLocation _entityShapeLoc =
+        new AssetLocation("envelopes:entity/humanoid/seraph/clothing/arm/signetring");
 
     int IAttachableToEntity.RequiresBehindSlots { get; set; }
 
@@ -83,10 +84,14 @@ public class ItemSignetRing : ItemWaxSealStamp, IAttachableToEntity, IWearableSh
                 var idx = row * Constants.GridDimensions + col;
                 if (design.Length == 0 || !design[idx])
                 {
-                    var uv = new[] { col * cellUvSize, row * cellUvSize, (col + 1) * cellUvSize, (row + 1) * cellUvSize };
+                    var uv = new[]
+                        { col * cellUvSize, row * cellUvSize, (col + 1) * cellUvSize, (row + 1) * cellUvSize };
                     var face = new ShapeElementFace { Texture = "metal", Uv = uv };
                     var faces = new ShapeElementFace[6];
-                    faces[0] = face; faces[1] = face; faces[2] = face; faces[3] = face;
+                    faces[0] = face;
+                    faces[1] = face;
+                    faces[2] = face;
+                    faces[3] = face;
                     faces[4] = face;
                     cells.Add(new ShapeElement
                     {
@@ -103,14 +108,15 @@ public class ItemSignetRing : ItemWaxSealStamp, IAttachableToEntity, IWearableSh
         return shape;
     }
 
-    public override void GetHeldItemInfo(ItemSlot inSlot, System.Text.StringBuilder dsc, IWorldAccessor world, bool withDebugInfo)
+    public override void GetHeldItemInfo(ItemSlot inSlot, System.Text.StringBuilder dsc, IWorldAccessor world,
+        bool withDebugInfo)
     {
         base.GetHeldItemInfo(inSlot, dsc, world, withDebugInfo);
 
         var attributes = inSlot.Itemstack.Attributes;
         var metal = inSlot.Itemstack.Collectible.Variant?["metal"]
-            ?? attributes.GetString(StampAttributes.StampBodyMetal)
-            ?? "steel";
+                    ?? attributes.GetString(StampAttributes.StampBodyMetal)
+                    ?? "steel";
         dsc.AppendLine(Lang.Get("envelopes:stamp-metal", Lang.Get($"material-{metal}")));
         var engravingMetal = attributes.GetString(StampAttributes.EngravingMetal) ?? "gold";
         dsc.AppendLine(Lang.Get("envelopes:stamp-engravingmetal", Lang.Get($"material-{engravingMetal}")));
@@ -162,7 +168,8 @@ public class ItemSignetRing : ItemWaxSealStamp, IAttachableToEntity, IWearableSh
             {
                 ActionLangCode = $"{EnvelopesModSystem.ModId}:heldhelp-sealinworld",
                 MouseButton = EnumMouseButton.Right,
-                Itemstacks = waxSticks
+                Itemstacks = waxSticks,
+                HotKeyCodes = new[] { "sneak" }
             }
         }.Append(base.GetHeldInteractionHelp(inSlot));
     }
@@ -193,11 +200,12 @@ public class ItemSignetRing : ItemWaxSealStamp, IAttachableToEntity, IWearableSh
         var metalIdx = Array.FindIndex(byRecipe.resolvedIngredients, ig => ig?.PatternCode == "B");
         var engravingIdx = Array.FindIndex(byRecipe.resolvedIngredients, ig => ig?.PatternCode == "G");
         var bodyMetal = metalIdx >= 0 ? allInputslots[metalIdx]?.Itemstack?.Collectible?.Variant?["metal"] : null;
-        var engravingMetal = engravingIdx >= 0 ? allInputslots[engravingIdx]?.Itemstack?.Collectible?.Variant?["metal"] : null;
+        var engravingMetal = engravingIdx >= 0
+            ? allInputslots[engravingIdx]?.Itemstack?.Collectible?.Variant?["metal"]
+            : null;
         if (bodyMetal != null)
             outputSlot.Itemstack.Attributes.SetString(StampAttributes.StampBodyMetal, bodyMetal);
         if (engravingMetal != null)
             outputSlot.Itemstack.Attributes.SetString(StampAttributes.EngravingMetal, engravingMetal);
     }
-
 }
