@@ -4,7 +4,8 @@
     "B": {
       type: "item",
       name: "metal",
-      code: "game:ingot-*"
+      code: "game:ingot-*",
+      allowedVariants: ["copper", "tinbronze", "bismuthbronze", "blackbronze", "gold", "silver", "electrum", "iron", "steel", "meteoriciron"]
     },
     "G": {
       type: "item",
