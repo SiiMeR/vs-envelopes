@@ -178,7 +178,9 @@ public abstract class ItemSealableContainer : Item, IContainedInteractable
         if (!string.IsNullOrEmpty(waxColor)) to.Attributes.SetString(EnvelopeAttributes.WaxColor, waxColor);
     }
 
-    public override bool ConsumeCraftingIngredients(ItemSlot[] slots, ItemSlot outputSlot, GridRecipe matchingRecipe)
+    public WorldInteraction[] GetContainedInteractionHelp(BlockEntityContainer be, ItemSlot slot, IPlayer byPlayer, BlockSelection blockSel) => null;
+
+    public override bool ConsumeCraftingIngredients(ItemSlot[] slots, ItemSlot outputSlot, IRecipeBase matchingRecipe)
     {
         if (api.Side == EnumAppSide.Server)
         {
@@ -216,20 +218,19 @@ public abstract class ItemSealableContainer : Item, IContainedInteractable
         return base.ConsumeCraftingIngredients(slots, outputSlot, matchingRecipe);
     }
 
-    public override bool MatchesForCrafting(ItemStack inputStack, GridRecipe gridRecipe,
-        CraftingRecipeIngredient ingredient)
+    public override bool MatchesForCrafting(ItemStack inputStack, IRecipeBase recipe, IRecipeIngredient ingredient)
     {
-        if (gridRecipe.Output.ResolvedItemstack?.Collectible?.Code?.Path?.Contains("empty") == true
+        if (recipe.RecipeOutput.ResolvedItemStack?.Collectible?.Code?.Path?.Contains("empty") == true
             && (!string.IsNullOrEmpty(inputStack.Attributes.GetString(EnvelopeAttributes.ContentsId))
                 || inputStack.Attributes.GetBytes(EnvelopeAttributes.VisibleContent)?.Length > 0))
         {
             return false;
         }
 
-        return base.MatchesForCrafting(inputStack, gridRecipe, ingredient);
+        return base.MatchesForCrafting(inputStack, recipe, ingredient);
     }
 
-    public override void OnCreatedByCrafting(ItemSlot[] allInputslots, ItemSlot outputSlot, GridRecipe byRecipe)
+    public override void OnCreatedByCrafting(ItemSlot[] allInputslots, ItemSlot outputSlot, IRecipeBase byRecipe)
     {
         if (!outputSlot.Itemstack.Collectible.Code.Path.Contains("sealed") ||
             outputSlot.Itemstack.Collectible.Code.Path.Contains("unsealed"))
@@ -265,6 +266,7 @@ public abstract class ItemSealableContainer : Item, IContainedInteractable
 
         base.OnCreatedByCrafting(allInputslots, outputSlot, byRecipe);
     }
+
 
     public override void OnHeldInteractStart(ItemSlot slot, EntityAgent byEntity, BlockSelection blockSel,
         EntitySelection entitySel,

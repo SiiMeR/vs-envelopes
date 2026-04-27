@@ -90,7 +90,10 @@
     },
     "metal": {
       base: "game:block/metal/ingot/{metal}"
-    }
+    },
+//    "engraving": {
+//      base: "game:block/metal/ingot/gold"
+//    }
   },
   shape: {
     base: "item/signetring"

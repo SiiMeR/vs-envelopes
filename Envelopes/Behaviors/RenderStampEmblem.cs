@@ -65,7 +65,7 @@ public class RenderStampEmblem : CollectibleBehavior, IContainedMeshSource
             return null;
         }
 
-        var cacheKey = GetMeshCacheKey(itemstack);
+        var cacheKey = GetMeshCacheKeyFor(itemstack);
         var shape = GenShape(capi, itemstack);
 
         var tps = new ShapeTextureSource(capi, shape, "stampssealsource", itemstack.Item.Textures, p => p);
@@ -146,7 +146,7 @@ public class RenderStampEmblem : CollectibleBehavior, IContainedMeshSource
     public override void OnBeforeRender(ICoreClientAPI capi, ItemStack itemstack, EnumItemRenderTarget target,
         ref ItemRenderInfo renderinfo)
     {
-        var key = GetMeshCacheKey(itemstack);
+        var key = GetMeshCacheKeyFor(itemstack);
 
         if (!_meshRefs.TryGetValue(key, out var meshref))
         {
@@ -179,14 +179,14 @@ public class RenderStampEmblem : CollectibleBehavior, IContainedMeshSource
         }
     }
 
-    public MeshData? GenMesh(ItemStack itemstack, ITextureAtlasAPI targetAtlas, BlockPos atBlockPos)
+    public MeshData? GenMesh(ItemSlot slot, ITextureAtlasAPI targetAtlas, BlockPos atBlockPos)
     {
-        return CreateMesh(itemstack);
+        return slot.Itemstack != null ? CreateMesh(slot.Itemstack) : null;
     }
 
-    public string GetMeshCacheKey(ItemStack itemstack)
+    public string GetMeshCacheKey(ItemSlot slot)
     {
-        return GetMeshCacheKeyFor(itemstack);
+        return slot.Itemstack != null ? GetMeshCacheKeyFor(slot.Itemstack) : string.Empty;
     }
 
     public static string GetMeshCacheKeyFor(ItemStack itemstack)
@@ -208,11 +208,6 @@ public class RenderStampEmblem : CollectibleBehavior, IContainedMeshSource
         return $"{itemstack.Collectible.Code.ToShortString()}-{stampId}-{bodyMetal}-{engravingMetal}";
     }
 
-    internal static AssetLocation ResolveEngravingTexture(ICoreAPI api, string metal)
-    {
-        var toolPath = new AssetLocation($"game:textures/item/tool/material/{metal}.png");
-        return api.Assets.TryGet(toolPath) != null
-            ? new AssetLocation($"game:item/tool/material/{metal}")
-            : new AssetLocation($"game:block/metal/ingot/{metal}");
-    }
+    internal static AssetLocation ResolveEngravingTexture(ICoreAPI api, string metal) =>
+        new AssetLocation($"game:block/metal/ingot/{metal}");
 }

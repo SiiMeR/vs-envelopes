@@ -174,7 +174,7 @@ public class ItemSignetRing : ItemWaxSealStamp, IAttachableToEntity, IWearableSh
         }.Append(base.GetHeldInteractionHelp(inSlot));
     }
 
-    public override void OnCreatedByCrafting(ItemSlot[] allInputslots, ItemSlot outputSlot, GridRecipe byRecipe)
+    public override void OnCreatedByCrafting(ItemSlot[] allInputslots, ItemSlot outputSlot, IRecipeBase byRecipe)
     {
         base.OnCreatedByCrafting(allInputslots, outputSlot, byRecipe);
 
@@ -197,8 +197,10 @@ public class ItemSignetRing : ItemWaxSealStamp, IAttachableToEntity, IWearableSh
             }
         }
 
-        var metalIdx = Array.FindIndex(byRecipe.resolvedIngredients, ig => ig?.PatternCode == "B");
-        var engravingIdx = Array.FindIndex(byRecipe.resolvedIngredients, ig => ig?.PatternCode == "G");
+        var resolvedIngredients = (byRecipe as GridRecipe)?.ResolvedIngredients;
+        if (resolvedIngredients == null) return;
+        var metalIdx = Array.FindIndex(resolvedIngredients, ig => ig?.Id == "B");
+        var engravingIdx = Array.FindIndex(resolvedIngredients, ig => ig?.Id == "G");
         var bodyMetal = metalIdx >= 0 ? allInputslots[metalIdx]?.Itemstack?.Collectible?.Variant?["metal"] : null;
         var engravingMetal = engravingIdx >= 0
             ? allInputslots[engravingIdx]?.Itemstack?.Collectible?.Variant?["metal"]

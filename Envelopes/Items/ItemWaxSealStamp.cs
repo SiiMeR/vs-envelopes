@@ -16,7 +16,7 @@ public class ItemWaxSealStamp : Item
 {
     protected virtual bool ShouldOpenEditor => true;
 
-    public override bool ConsumeCraftingIngredients(ItemSlot[] slots, ItemSlot outputSlot, GridRecipe matchingRecipe)
+    public override bool ConsumeCraftingIngredients(ItemSlot[] slots, ItemSlot outputSlot, IRecipeBase matchingRecipe)
     {
         var code = outputSlot.Itemstack.Collectible.Code.Path;
         if (code.Contains("sealstamp-engraved") && outputSlot.Itemstack.Attributes.TryGetInt("durability").HasValue)

@@ -10,8 +10,8 @@
   },
   "textures": {
     "metal": "game:block/metal/plate/steel",
-    "engraving": "game:item/tool/material/gold",
-    "handle": "game:item/tool/material/handle",
+    "engraving": "game:block/metal/ingot/gold",
+    "handle": "game:item/tool/handle",
     "empty": "empty"
   },
   "elements": [

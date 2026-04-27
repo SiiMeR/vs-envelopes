@@ -155,7 +155,7 @@ public class ItemSealableParcel : ItemSealableContainer
         slot.MarkDirty();
     }
 
-    public override bool ConsumeCraftingIngredients(ItemSlot[] slots, ItemSlot outputSlot, GridRecipe matchingRecipe)
+    public override bool ConsumeCraftingIngredients(ItemSlot[] slots, ItemSlot outputSlot, IRecipeBase matchingRecipe)
     {
         if (api.Side == EnumAppSide.Server
             && outputSlot.Itemstack?.Collectible?.Code?.Path?.Contains("unsealed") == true)

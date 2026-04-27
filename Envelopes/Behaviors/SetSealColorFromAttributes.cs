@@ -130,6 +130,12 @@ public class SetSealColorFromAttributes : CollectibleBehavior, IContainedMeshSou
         base.OnBeforeRender(capi, itemstack, target, ref renderinfo);
     }
 
+    MeshData? IContainedMeshSource.GenMesh(ItemSlot slot, ITextureAtlasAPI targetAtlas, BlockPos atBlockPos)
+        => slot.Itemstack != null ? GenMesh(slot.Itemstack, targetAtlas, atBlockPos) : null;
+
+    string IContainedMeshSource.GetMeshCacheKey(ItemSlot slot)
+        => slot.Itemstack != null ? GetMeshCacheKey(slot.Itemstack) : string.Empty;
+
     public MeshData? GenMesh(ItemStack itemstack, ITextureAtlasAPI targetAtlas, BlockPos atBlockPos)
     {
         var mesh = CreateMesh(itemstack);
@@ -152,7 +158,7 @@ public class SetSealColorFromAttributes : CollectibleBehavior, IContainedMeshSou
                     var meshSource = item.CollectibleBehaviors?.OfType<IContainedMeshSource>().FirstOrDefault();
                     if (meshSource != null)
                     {
-                        contentMesh = meshSource.GenMesh(containedStack, targetAtlas, atBlockPos);
+                        contentMesh = meshSource.GenMesh(new DummySlot(containedStack), targetAtlas, atBlockPos);
                     }
                     else
                     {
